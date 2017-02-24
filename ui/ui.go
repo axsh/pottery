@@ -107,7 +107,9 @@ func (routerInitializer *routerInitializer) InitializeEarly(r *gin.Engine) error
 		fmt.Sprintf("%s/%s", templateBase, "index.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "navigation_bar.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "network.tmpl"),
+		fmt.Sprintf("%s/%s", templateBase, "requirement.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "template.tmpl"),
+		fmt.Sprintf("%s/%s", templateBase, "testscript.tmpl"),
 	}
 	htmlTemplate, err := loadTemplates(templateFileNames...)
 	if err != nil {
@@ -131,8 +133,14 @@ func (routerInitializer *routerInitializer) InitializeEarly(r *gin.Engine) error
 		ui.GET("/diagram", func(c *gin.Context) {
 			c.HTML(http.StatusOK, "diagram.tmpl", gin.H{"env": envMap, "category": "design"})
 		})
+		ui.GET("/requirement", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "requirement.tmpl", gin.H{"env": envMap, "category": "design"})
+		})
 		ui.GET("/template", func(c *gin.Context) {
 			c.HTML(http.StatusOK, "template.tmpl", gin.H{"env": envMap, "category": "process"})
+		})
+		ui.GET("/testscript", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "testscript.tmpl", gin.H{"env": envMap, "category": "process"})
 		})
 	}
 
