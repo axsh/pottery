@@ -1,0 +1,352 @@
+{{template "headerpart" .}}
+<!-- Left Column -->
+<div class="col-sm-4">
+
+	<div class="panel panel-default panel-custom" id="input_panel">
+		<div class="panel-heading">
+			<h1 class="panel-title"><span class="glyphicon glyphicon-resize-full"></span> Ports </h1>
+		</div>
+		<div class="panel-body">
+			<table class="table">
+				<tr>
+					<td width="20%">Form</td>
+					<td width="80%"><select class="form-control" id="edit_requirement_source"></select></td>
+				</tr>
+				<tr>
+					<td>To</td>
+					<td><select class="form-control" id="edit_requirement_destination"></select></td>
+				</tr>
+				<tr>
+					<td>Service</td>
+					<td><select class="form-control" id="edit_requirement_service"></select></td>
+				</tr>
+				<tr>
+					<td>Access</td>
+					<td>
+						<select class="form-control" id="edit_requirement_acccessibility">
+							<option value="true">
+								Allow
+							</option>
+							<option value="false">
+								Deny
+							</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+			<span style="float: right"><button class="btn btn-default" id="edit_add_requirement_btn" type="button"><span class="glyphicon glyphicon-ok"></span> Register</button></span>
+		</div>
+	</div>
+</div><!--/Left Column-->
+
+<!-- Right Column -->
+<div class="col-sm-8">
+	<div class="panel panel-default panel-custom" id="list_panel">
+		<div class="panel-heading">
+			<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Communication Requirements </h1>
+		</div>
+		<div class="panel-body">
+			<div id="list_panel">
+				<table class="table table-condensed table-striped" id="requirement_table" style="width:100%;">
+					<thead>
+						<tr>
+							<th>
+								No.
+							</th>
+							<th>
+								Source
+							</th>
+							<th>
+								Destination
+							</th>
+							<th>
+								Service
+							</th>
+							<th>
+								Allow/Deny
+							</th>
+							<th>
+								Delete
+							</th>
+						</tr>
+					</thead>
+					<tbody class="table table-bordered" id="requirement_table_body"></tbody>
+				</table>
+			</div>
+	</div>
+</div><!--/Right Column-->
+
+<script language="javascript">
+	(function($) {
+
+		const API_PREFIX = '/v1';
+
+		var nodes = null;
+		var nodesMap = null;
+		var ports = null;
+		var portsMap = null;
+		var services = null;
+		var servicesMap = null;
+
+		function loadNodes() {
+			nodes = $.parseJSON($.ajax({
+				type: 'GET',
+				url: API_PREFIX + '/nodes?preloads=NodePv,NodeType,Ports,NodeGroups',
+				dataType: 'json',
+				contentType: 'application/json',
+				async: false
+			}).responseText);
+			nodesMap = new Object();
+			nodesMap[0] = {
+				id: 0,
+				name: "Any"
+			}
+			for (var i = 0; i < nodes.length; i = i + 1) {
+				nodesMap[nodes[i].id] = nodes[i];
+			}
+		}
+
+		function loadPorts() {
+			ports = $.parseJSON($.ajax({
+				type: 'GET',
+				url: API_PREFIX + '/ports?preloads=Node',
+				dataType: 'json',
+				contentType: 'application/json',
+				async: false
+			}).responseText);
+			portsMap = new Object();
+			portsMap[0] = {
+				id: 0,
+				node_id: 0,
+				name: "Any",
+				mac_address: {
+				    String: "00:00:00:00:00:00",
+				    Valid: true
+				},
+				ipv4_address: {
+				    String: "0.0.0.0",
+				    Valid: true
+				},
+				ipv4_prefix: {
+				    Int64: 0,
+				    Valid: true
+				},
+			}
+			for (var i = 0; i < ports.length; i = i + 1) {
+				portsMap[ports[i].id] = ports[i];
+			}
+		}
+
+		function loadServices() {
+			services = $.parseJSON($.ajax({
+				type: 'GET',
+				url: API_PREFIX + '/services',
+				dataType: 'json',
+				contentType: 'application/json',
+				async: false
+			}).responseText);
+			servicesMap = new Object();
+			for (var i = 0; i < services.length; i = i + 1) {
+				servicesMap[services[i].id] = services[i];
+			}
+		}
+
+		function loadRequirements() {
+			requirements = $.parseJSON($.ajax({
+				type: 'GET',
+				url: API_PREFIX + '/requirements',
+				dataType: 'json',
+				contentType: 'application/json',
+				async: false
+			}).responseText);
+		}
+
+		function postRequirement(requirementObject) {
+			return $.ajax({
+				type: 'POST',
+				url: API_PREFIX + '/requirements',
+				dataType: 'json',
+				contentType: 'application/json',
+				data: JSON.stringify(requirementObject),
+				async: false
+			});
+		}
+
+		function deleteRequirement(requirementId) {
+			return $.ajax({
+				type: 'DELETE',
+				url: API_PREFIX + '/requirements/' + requirementId,
+				dataType: 'json',
+				contentType: 'application/json',
+				async: false
+			});
+		}
+
+		function convertAccessibiliry(accessibility) {
+			if (accessibility) {
+				return "Allow";
+			}
+			else {
+				return "Deny";
+			}
+		}
+
+		function parseBoolean(targetValue) {
+			if (!targetValue) {
+				return false;
+			}
+			return (targetValue.toLowerCase()) == "true";
+		}
+
+		function getEditRequirementObject() {
+			var result = {}
+			var validSource = true;
+			if ($('#edit_requirement_source').val() == 0) {
+				validSource = false;
+			}
+			var editRequirementSourcePortId = {
+				Int64: parseInt($('#edit_requirement_source').val()),
+				Valid: validSource
+			}
+			var validDestination = true;
+			if ($('#edit_requirement_destination').val() == 0) {
+				validDestination = false;
+			}
+			var editRequirementDestinationPortId = {
+				Int64: parseInt($('#edit_requirement_destination').val()),
+				Valid: validDestination
+			}
+			var editRequirementServiceId = $('#edit_requirement_service').val();
+			var editRequirementAccessibility = $('#edit_requirement_acccessibility').val();
+			result = {
+				source_port_id: editRequirementSourcePortId,
+				destination_port_id: editRequirementDestinationPortId,
+				service_id: parseInt(editRequirementServiceId),
+				accessibility: parseBoolean(editRequirementAccessibility)
+			}
+			return result;
+		}
+
+		function showRequirements() {
+			$("#edit_requirement_source").children().remove();
+			$("#edit_requirement_destination").children().remove();
+			$("#edit_requirement_service").children().remove();
+			$("#requirement_table_body").children().remove();
+			$("#requirement_table").dataTable();
+			$("#requirement_table").dataTable().fnClearTable();
+
+			$("#edit_requirement_source").append($('<option>').val(0).text('Any (0.0.0.0/0)'));
+			$("#edit_requirement_destination").append($('<option>').val(0).text('Any (0.0.0.0/0)'));
+			for (var i = 0; i < nodes.length; i = i + 1) {
+				node = nodes[i]
+				ports = node.ports
+				for (var j = 0; j < ports.length; j = j + 1) {
+					port = ports[j]
+					if (port.ipv4_prefix.Valid) {
+						$("#edit_requirement_source").append($('<option>').val(port.id).text(node.name + " - " + port.name + " (" + port.ipv4_address.String + "/" + port.ipv4_prefix.Int64 + ")"));
+						$("#edit_requirement_destination").append($('<option>').val(port.id).text(node.name + " - " + port.name + " (" + port.ipv4_address.String + "/" + port.ipv4_prefix.Int64 + ")"));
+					}
+				}
+			}
+
+			for (var i = 0; i < services.length; i = i + 1) {
+				service = services[i]
+				$("#edit_requirement_service").append($('<option>').val(service.id).text(service.name));
+			}
+
+			for (var i = 0; i < requirements.length; i = i + 1) {
+				requirement = requirements[i]
+				sourcePort = portsMap[requirement.source_port_id.Int64];
+				sourceNode = nodesMap[sourcePort.node_id];
+				destinationPort = portsMap[requirement.destination_port_id.Int64];
+				destinationNode = nodesMap[destinationPort.node_id];
+				service = servicesMap[requirement.service_id];
+				$("#requirement_table").dataTable().fnAddData([
+					i + 1,
+					sourceNode.name + " - " + sourcePort.name + " (" + sourcePort.ipv4_address.String + "/" + sourcePort.ipv4_prefix.Int64 + ")",
+					destinationNode.name + " - " + destinationPort.name + " (" + destinationPort.ipv4_address.String + "/" + destinationPort.ipv4_prefix.Int64 + ")",
+					service.name,
+					convertAccessibiliry(requirement.accessibility),
+					'<button name="del_requirement_btn" type="button" class="btn btn-default" value="' + requirement.id + '"><span class="glyphicon glyphicon-minus"></span></button>'
+				]);
+
+			}
+
+		}
+
+		function updateDiagramWindow() {
+			try {
+				physicalDiagramWindow.location.reload();
+			}
+			catch (err) {}
+			try {
+				logicalDiagramWindow.location.reload();
+			}
+			catch (err) {}
+		}
+
+		function onNodeChanged() {
+			showNode(false);
+		}
+
+		function onLoad() {
+			loadNodes();
+			loadPorts();
+			loadServices();
+			loadRequirements();
+			showRequirements();
+			$('#input_panel').fadeIn(150);
+			$('#list_panel').fadeIn(150);
+		}
+
+		$('#edit_add_requirement_btn').on('click', function() {
+			if (!confirm("Are you sure to register?")) {
+				return;
+			}
+
+			response = postRequirement(getEditRequirementObject());
+
+			if (response.status == 201) {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#information_message").text("The requirement has been registered successfully.")
+				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+				$("#edit_panel").children().remove();
+				loadRequirements();
+				showRequirements();
+			} else {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#error_message").text($.parseJSON(response.responseText).error)
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+			}
+		});
+
+		$('#requirement_table').on('click', 'button[name=del_requirement_btn]', function(selector) {
+			if (!confirm("Are you sure to delete?")) {
+				return;
+			}
+
+			response = deleteRequirement(selector.currentTarget.value);
+
+			if (response.status == 204) {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#information_message").text("The requirement has been deleted successfully.")
+				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+				$("#edit_panel").children().remove();
+				loadRequirements();
+				showRequirements();
+			} else {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#error_message").text($.parseJSON(response.responseText).error)
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+			}
+		});
+
+		$('.alert .close').on('click', function() {
+			$(this).parents('.alert').hide();
+		});
+
+		onLoad();
+
+	})(jQuery);
+</script>
+{{template "footerpart" .}}
