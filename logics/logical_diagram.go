@@ -45,6 +45,7 @@ func (logic *logicalDiagramLogic) GetSingle(db *gorm.DB, id string, _ url.Values
 		Preload("NodeExtraAttributes.NodeExtraAttributeField").
 		Preload("NodeExtraAttributes.ValueNodeExtraAttributeOption").
 		Preload("Ports").
+		Preload("Ports.Vlans").
 		Select(queryFields).Find(&nodes).Error; err != nil {
 		return nil, err
 	}
