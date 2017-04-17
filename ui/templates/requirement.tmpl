@@ -9,12 +9,18 @@
 		<div class="panel-body">
 			<table class="table">
 				<tr>
-					<td width="20%">Form</td>
-					<td width="80%"><select class="form-control" id="edit_requirement_source"></select></td>
+					<td rowspan=2 width="20%">Form</td>
+					<td width="80%"><select class="form-control" id="edit_requirement_source_node"></select></td>
 				</tr>
 				<tr>
-					<td>To</td>
-					<td><select class="form-control" id="edit_requirement_destination"></select></td>
+					<td width="80%"><select class="form-control" id="edit_requirement_source_port"></select></td>
+				</tr>
+				<tr>
+					<td rowspan=2>To</td>
+					<td><select class="form-control" id="edit_requirement_destination_node"></select></td>
+				</tr>
+				<tr>
+					<td><select class="form-control" id="edit_requirement_destination_port"></select></td>
 				</tr>
 				<tr>
 					<td>Service</td>
@@ -43,7 +49,7 @@
 <div class="col-sm-8">
 	<div class="panel panel-default panel-custom" id="list_panel">
 		<div class="panel-heading">
-			<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Communication Requirements </h1>
+			<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Communication Requirements</h1>
 		</div>
 		<div class="panel-body">
 			<div id="list_panel">
@@ -79,46 +85,26 @@
 <script language="javascript">
 	(function($) {
 
-		const API_PREFIX = '/v1';
+		{{template "functions" .}}
 
 		var nodes = null;
-		var nodesMap = null;
+		var nodeMap = null;
 		var ports = null;
-		var portsMap = null;
+		var portMap = null;
 		var services = null;
-		var servicesMap = null;
+		var serviceMap = null;
+		var requirements = null;
 
-		function loadNodes() {
-			nodes = $.parseJSON($.ajax({
-				type: 'GET',
-				url: API_PREFIX + '/nodes?preloads=NodePv,NodeType,Ports,NodeGroups',
-				dataType: 'json',
-				contentType: 'application/json',
-				async: false
-			}).responseText);
-			nodesMap = new Object();
-			nodesMap[0] = {
-				id: 0,
-				name: "Any"
-			}
-			for (var i = 0; i < nodes.length; i = i + 1) {
-				nodesMap[nodes[i].id] = nodes[i];
-			}
-		}
-
-		function loadPorts() {
-			ports = $.parseJSON($.ajax({
-				type: 'GET',
-				url: API_PREFIX + '/ports?preloads=Node',
-				dataType: 'json',
-				contentType: 'application/json',
-				async: false
-			}).responseText);
-			portsMap = new Object();
-			portsMap[0] = {
+		function loadResources() {
+			nodes = getResources('nodes', 'preloads=NodeType').resources;
+			nodeMap = buildResouceMapFromResourceArray(nodes);
+			nodeMap[0] = {id: 0, name: "Internet"};
+			ports = getResources('ports', 'preloads=Node&q[layer]=3').resources;
+			portMap = buildResouceMapFromResourceArray(ports);
+			portMap[0] = {
 				id: 0,
 				node_id: 0,
-				name: "Any",
+				name: "Internet",
 				mac_address: {
 				    String: "00:00:00:00:00:00",
 				    Valid: true
@@ -133,53 +119,16 @@
 				},
 			}
 			for (var i = 0; i < ports.length; i = i + 1) {
-				portsMap[ports[i].id] = ports[i];
+				var port = ports[i];
+				var node = nodeMap[port.node_id];
+				if (node.ports == null) {
+					node.ports = [];
+				}
+				node.ports.push(port);
 			}
-		}
-
-		function loadServices() {
-			services = $.parseJSON($.ajax({
-				type: 'GET',
-				url: API_PREFIX + '/services',
-				dataType: 'json',
-				contentType: 'application/json',
-				async: false
-			}).responseText);
-			servicesMap = new Object();
-			for (var i = 0; i < services.length; i = i + 1) {
-				servicesMap[services[i].id] = services[i];
-			}
-		}
-
-		function loadRequirements() {
-			requirements = $.parseJSON($.ajax({
-				type: 'GET',
-				url: API_PREFIX + '/requirements',
-				dataType: 'json',
-				contentType: 'application/json',
-				async: false
-			}).responseText);
-		}
-
-		function postRequirement(requirementObject) {
-			return $.ajax({
-				type: 'POST',
-				url: API_PREFIX + '/requirements',
-				dataType: 'json',
-				contentType: 'application/json',
-				data: JSON.stringify(requirementObject),
-				async: false
-			});
-		}
-
-		function deleteRequirement(requirementId) {
-			return $.ajax({
-				type: 'DELETE',
-				url: API_PREFIX + '/requirements/' + requirementId,
-				dataType: 'json',
-				contentType: 'application/json',
-				async: false
-			});
+			services = getResources('services', '').resources;
+			servicesMap = buildResouceMapFromResourceArray(services);
+			requirements = getResources('requirements', '').resources;
 		}
 
 		function convertAccessibiliry(accessibility) {
@@ -189,13 +138,6 @@
 			else {
 				return "Deny";
 			}
-		}
-
-		function parseBoolean(targetValue) {
-			if (!targetValue) {
-				return false;
-			}
-			return (targetValue.toLowerCase()) == "true";
 		}
 
 		function getEditRequirementObject() {
@@ -222,7 +164,7 @@
 				source_port_id: editRequirementSourcePortId,
 				destination_port_id: editRequirementDestinationPortId,
 				service_id: parseInt(editRequirementServiceId),
-				accessibility: parseBoolean(editRequirementAccessibility)
+				accessibility: convertStringToBoolean(editRequirementAccessibility)
 			}
 			return result;
 		}
@@ -235,17 +177,16 @@
 			$("#requirement_table").dataTable();
 			$("#requirement_table").dataTable().fnClearTable();
 
-			$("#edit_requirement_source").append($('<option>').val(0).text('Any (0.0.0.0/0)'));
-			$("#edit_requirement_destination").append($('<option>').val(0).text('Any (0.0.0.0/0)'));
+			$("#edit_requirement_source_node").append($('<option>').val(0).text('Internet'));
+			$("#edit_requirement_destination_node").append($('<option>').val(0).text('Internet'));
+			$("#edit_requirement_source_port").append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
+			$("#edit_requirement_destination_port").append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
+
 			for (var i = 0; i < nodes.length; i = i + 1) {
-				node = nodes[i]
-				ports = node.ports
-				for (var j = 0; j < ports.length; j = j + 1) {
-					port = ports[j]
-					if (port.ipv4_prefix.Valid) {
-						$("#edit_requirement_source").append($('<option>').val(port.id).text(node.name + " - " + port.name + " (" + port.ipv4_address.String + "/" + port.ipv4_prefix.Int64 + ")"));
-						$("#edit_requirement_destination").append($('<option>').val(port.id).text(node.name + " - " + port.name + " (" + port.ipv4_address.String + "/" + port.ipv4_prefix.Int64 + ")"));
-					}
+				var node = nodes[i];
+				if (node.ports != null) {
+					$("#edit_requirement_source_node").append($('<option>').val(node.id).text(node.name));
+					$("#edit_requirement_destination_node").append($('<option>').val(node.id).text(node.name));
 				}
 			}
 
@@ -269,31 +210,57 @@
 					convertAccessibiliry(requirement.accessibility),
 					'<button name="del_requirement_btn" type="button" class="btn btn-default" value="' + requirement.id + '"><span class="glyphicon glyphicon-minus"></span></button>'
 				]);
-
 			}
-
 		}
 
-		function updateDiagramWindow() {
-			try {
-				physicalDiagramWindow.location.reload();
+		function onEditRequirementSourceNodeChanged(selector) {
+			var editRequirementSourceNodeID = $(selector.currentTarget).val();
+
+			$('#edit_requirement_source_port').children().remove();
+
+			if (editRequirementSourceNodeID == 0) {
+				$('#edit_requirement_source_port').append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
+			} else {
+				var node = nodeMap[editRequirementSourceNodeID];
+				var ports = node.ports;
+				for (var i = 0; i < ports.length; i = i + 1) {
+					var port = portMap[ports[i].id];
+					if (port.layer == 3) {
+						$('#edit_requirement_source_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
+					}
+				}
 			}
-			catch (err) {}
-			try {
-				logicalDiagramWindow.location.reload();
-			}
-			catch (err) {}
 		}
 
-		function onNodeChanged() {
-			showNode(false);
+		function onEditRequirementDestinationNodeChanged(selector) {
+			var editRequirementDestinationNodeID = $(selector.currentTarget).val();
+
+			$('#edit_requirement_destination_port').children().remove();
+
+			if (editRequirementDestinationNodeID == 0) {
+				$('#edit_requirement_destination_port').append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
+			} else {
+				var node = nodeMap[editRequirementDestinationNodeID];
+				var ports = node.ports;
+				for (var i = 0; i < ports.length; i = i + 1) {
+					var port = portMap[ports[i].id];
+					if (port.layer == 3) {
+						$('#edit_requirement_destination_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
+					}
+				}
+			}
 		}
+
+		$('#edit_requirement_source_node').on('change', function(selector) {
+			onEditRequirementSourceNodeChanged(selector);
+		});
+
+		$('#edit_requirement_destination_node').on('change', function(selector) {
+			onEditRequirementDestinationNodeChanged(selector);
+		});
 
 		function onLoad() {
-			loadNodes();
-			loadPorts();
-			loadServices();
-			loadRequirements();
+			loadResources();
 			showRequirements();
 			$('#input_panel').fadeIn(150);
 			$('#list_panel').fadeIn(150);
@@ -339,10 +306,6 @@
 				$("#error_message").text($.parseJSON(response.responseText).error)
 				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
 			}
-		});
-
-		$('.alert .close').on('click', function() {
-			$(this).parents('.alert').hide();
 		});
 
 		onLoad();
