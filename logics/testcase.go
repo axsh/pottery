@@ -5,7 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/jinzhu/gorm"
-	"github.com/qb0C80aE/clay/extension"
+	"github.com/qb0C80aE/clay/extensions"
+	clayLogics "github.com/qb0C80aE/clay/logics"
 	clayModels "github.com/qb0C80aE/clay/models"
 	"github.com/qb0C80aE/clay/utils/mapstruct"
 	loamModels "github.com/qb0C80aE/loam/models"
@@ -14,16 +15,40 @@ import (
 	tplpkg "text/template"
 )
 
-type TestCommandLogic struct {
+type testCommandLogic struct {
+	*clayLogics.BaseLogic
 }
 
-type TestPatternLogic struct {
+type testPatternLogic struct {
+	*clayLogics.BaseLogic
 }
 
-type TestCaseLogic struct {
+type testCaseLogic struct {
+	*clayLogics.BaseLogic
 }
 
-func (_ *TestCommandLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func newTestCommandLogic() *testCommandLogic {
+	logic := &testCommandLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newTestPatternLogic() *testPatternLogic {
+	logic := &testPatternLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newTestCaseLogic() *testCaseLogic {
+	logic := &testCaseLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func (logic *testCommandLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
 
 	testCommand := &models.TestCommand{}
 
@@ -35,7 +60,7 @@ func (_ *TestCommandLogic) GetSingle(db *gorm.DB, id string, queryFields string)
 
 }
 
-func (_ *TestCommandLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}, error) {
+func (logic *testCommandLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
 
 	testCommands := []*models.TestCommand{}
 
@@ -52,7 +77,7 @@ func (_ *TestCommandLogic) GetMulti(db *gorm.DB, queryFields string) ([]interfac
 
 }
 
-func (_ *TestCommandLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *testCommandLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
 
 	testCommand := data.(*models.TestCommand)
 
@@ -63,7 +88,7 @@ func (_ *TestCommandLogic) Create(db *gorm.DB, data interface{}) (interface{}, e
 	return testCommand, nil
 }
 
-func (_ *TestCommandLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *testCommandLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
 
 	testCommand := data.(*models.TestCommand)
 	testCommand.ID, _ = strconv.Atoi(id)
@@ -75,7 +100,7 @@ func (_ *TestCommandLogic) Update(db *gorm.DB, id string, data interface{}) (int
 	return testCommand, nil
 }
 
-func (_ *TestCommandLogic) Delete(db *gorm.DB, id string) error {
+func (logic *testCommandLogic) Delete(db *gorm.DB, id string) error {
 
 	testCommand := &models.TestCommand{}
 
@@ -91,15 +116,7 @@ func (_ *TestCommandLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (_ *TestCommandLogic) Patch(_ *gorm.DB, _ string, _ string) (interface{}, error) {
-	return nil, nil
-}
-
-func (_ *TestCommandLogic) Options(_ *gorm.DB) error {
-	return nil
-}
-
-func (_ *TestCommandLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+func (logic *testCommandLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
 	testCommands := []*models.TestCommand{}
 	if err := db.Select("*").Find(&testCommands).Error; err != nil {
 		return "", nil, err
@@ -107,11 +124,11 @@ func (_ *TestCommandLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, 
 	return "test_commands", testCommands, nil
 }
 
-func (_ *TestCommandLogic) DeleteFromDesign(db *gorm.DB) error {
+func (logic *testCommandLogic) DeleteFromDesign(db *gorm.DB) error {
 	return db.Exec("delete from test_commands;").Error
 }
 
-func (_ *TestCommandLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+func (logic *testCommandLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.TestCommand{}
 	design := data.(*clayModels.Design)
 	if value, exists := design.Content["test_commands"]; exists {
@@ -127,7 +144,15 @@ func (_ *TestCommandLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	return nil
 }
 
-func (_ *TestPatternLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *testCommandLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
+	testCommands := []*models.TestCommand{}
+	if err := db.Select("*").Find(&testCommands).Error; err != nil {
+		return "", nil, err
+	}
+	return "TestCommands", testCommands, nil
+}
+
+func (logic *testPatternLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
 
 	testPattern := &models.TestPattern{}
 
@@ -139,7 +164,7 @@ func (_ *TestPatternLogic) GetSingle(db *gorm.DB, id string, queryFields string)
 
 }
 
-func (_ *TestPatternLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}, error) {
+func (logic *testPatternLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
 
 	testPatterns := []*models.TestPattern{}
 
@@ -156,7 +181,7 @@ func (_ *TestPatternLogic) GetMulti(db *gorm.DB, queryFields string) ([]interfac
 
 }
 
-func (_ *TestPatternLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *testPatternLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
 
 	testPattern := data.(*models.TestPattern)
 
@@ -167,7 +192,7 @@ func (_ *TestPatternLogic) Create(db *gorm.DB, data interface{}) (interface{}, e
 	return testPattern, nil
 }
 
-func (_ *TestPatternLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *testPatternLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
 
 	testPattern := data.(*models.TestPattern)
 	testPattern.ID, _ = strconv.Atoi(id)
@@ -179,7 +204,7 @@ func (_ *TestPatternLogic) Update(db *gorm.DB, id string, data interface{}) (int
 	return testPattern, nil
 }
 
-func (_ *TestPatternLogic) Delete(db *gorm.DB, id string) error {
+func (logic *testPatternLogic) Delete(db *gorm.DB, id string) error {
 
 	testPattern := &models.TestPattern{}
 
@@ -195,15 +220,7 @@ func (_ *TestPatternLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (_ *TestPatternLogic) Patch(_ *gorm.DB, _ string, _ string) (interface{}, error) {
-	return nil, nil
-}
-
-func (_ *TestPatternLogic) Options(_ *gorm.DB) error {
-	return nil
-}
-
-func (_ *TestPatternLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+func (logic *testPatternLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
 	testPatterns := []*models.TestPattern{}
 	if err := db.Select("*").Find(&testPatterns).Error; err != nil {
 		return "", nil, err
@@ -211,11 +228,11 @@ func (_ *TestPatternLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, 
 	return "test_patterns", testPatterns, nil
 }
 
-func (_ *TestPatternLogic) DeleteFromDesign(db *gorm.DB) error {
+func (logic *testPatternLogic) DeleteFromDesign(db *gorm.DB) error {
 	return db.Exec("delete from test_patterns;").Error
 }
 
-func (_ *TestPatternLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+func (logic *testPatternLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.TestPattern{}
 	design := data.(*clayModels.Design)
 	if value, exists := design.Content["test_patterns"]; exists {
@@ -231,7 +248,15 @@ func (_ *TestPatternLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	return nil
 }
 
-func (_ *TestCaseLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *testPatternLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
+	testPatterns := []*models.TestPattern{}
+	if err := db.Select("*").Find(&testPatterns).Error; err != nil {
+		return "", nil, err
+	}
+	return "TestPatterns", testPatterns, nil
+}
+
+func (logic *testCaseLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
 
 	testCase := &models.TestCase{}
 
@@ -243,7 +268,7 @@ func (_ *TestCaseLogic) GetSingle(db *gorm.DB, id string, queryFields string) (i
 
 }
 
-func (_ *TestCaseLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}, error) {
+func (logic *testCaseLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
 
 	testCases := []*models.TestCase{}
 
@@ -260,7 +285,7 @@ func (_ *TestCaseLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}
 
 }
 
-func (_ *TestCaseLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *testCaseLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
 
 	testCase := data.(*models.TestCase)
 
@@ -271,7 +296,7 @@ func (_ *TestCaseLogic) Create(db *gorm.DB, data interface{}) (interface{}, erro
 	return testCase, nil
 }
 
-func (_ *TestCaseLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *testCaseLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
 
 	testCase := data.(*models.TestCase)
 	testCase.ID, _ = strconv.Atoi(id)
@@ -283,7 +308,7 @@ func (_ *TestCaseLogic) Update(db *gorm.DB, id string, data interface{}) (interf
 	return testCase, nil
 }
 
-func (_ *TestCaseLogic) Delete(db *gorm.DB, id string) error {
+func (logic *testCaseLogic) Delete(db *gorm.DB, id string) error {
 
 	testCase := &models.TestCase{}
 
@@ -299,7 +324,7 @@ func (_ *TestCaseLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (_ *TestCaseLogic) Patch(db *gorm.DB, id string, _ string) (interface{}, error) {
+func (logic *testCaseLogic) Patch(db *gorm.DB, id string) (interface{}, error) {
 	testRunnerScript, testCommands, err := generateTestScripts(db, id)
 	if err != nil {
 		return "", err
@@ -321,11 +346,7 @@ func (_ *TestCaseLogic) Patch(db *gorm.DB, id string, _ string) (interface{}, er
 	return c.String(), nil
 }
 
-func (_ *TestCaseLogic) Options(_ *gorm.DB) error {
-	return nil
-}
-
-func (_ *TestCaseLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+func (logic *testCaseLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
 	testCases := []*models.TestCase{}
 	if err := db.Select("*").Find(&testCases).Error; err != nil {
 		return "", nil, err
@@ -333,11 +354,11 @@ func (_ *TestCaseLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, err
 	return "test_cases", testCases, nil
 }
 
-func (_ *TestCaseLogic) DeleteFromDesign(db *gorm.DB) error {
+func (logic *testCaseLogic) DeleteFromDesign(db *gorm.DB) error {
 	return db.Exec("delete from test_cases;").Error
 }
 
-func (_ *TestCaseLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+func (logic *testCaseLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.TestCase{}
 	design := data.(*clayModels.Design)
 	if value, exists := design.Content["test_cases"]; exists {
@@ -351,6 +372,14 @@ func (_ *TestCaseLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 		}
 	}
 	return nil
+}
+
+func (logic *testCaseLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
+	testCases := []*models.TestCase{}
+	if err := db.Select("*").Find(&testCases).Error; err != nil {
+		return "", nil, err
+	}
+	return "TestCases", testCases, nil
 }
 
 func convertAccessibility(accessibility bool) string {
@@ -412,7 +441,7 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestCommand,
 	}
 	anyNode.Ports = []*loamModels.Port{anyPort}
 
-	templateFuncMaps := extension.GetTemplateFuncMaps()
+	templateFuncMaps := extensions.RegisteredTemplateFuncMaps()
 
 	for _, requirement := range requirements {
 		if !requirement.SourcePortID.Valid {
@@ -468,12 +497,27 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestCommand,
 
 }
 
-var TestCommandLogicInstance = &TestCommandLogic{}
-var TestPatternLogicInstance = &TestPatternLogic{}
-var TestCaseLogicInstance = &TestCaseLogic{}
+var uniqueTestCommandLogic = newTestCommandLogic()
+var uniqueTestPatternLogic = newTestPatternLogic()
+var uniqueTestCaseLogic = newTestCaseLogic()
+
+func UniqueTestCommandLogic() extensions.Logic {
+	return uniqueTestCommandLogic
+}
+
+func UniqueTestPatternLogic() extensions.Logic {
+	return uniqueTestPatternLogic
+}
+
+func UniqueTestCaseLogic() extensions.Logic {
+	return uniqueTestCaseLogic
+}
 
 func init() {
-	extension.RegisterDesignAccessor(TestCommandLogicInstance)
-	extension.RegisterDesignAccessor(TestPatternLogicInstance)
-	extension.RegisterDesignAccessor(TestCaseLogicInstance)
+	extensions.RegisterDesignAccessor(uniqueTestCommandLogic)
+	extensions.RegisterDesignAccessor(uniqueTestPatternLogic)
+	extensions.RegisterDesignAccessor(uniqueTestCaseLogic)
+	extensions.RegisterTemplateParameterGenerator(uniqueTestCommandLogic)
+	extensions.RegisterTemplateParameterGenerator(uniqueTestPatternLogic)
+	extensions.RegisterTemplateParameterGenerator(uniqueTestCaseLogic)
 }

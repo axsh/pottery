@@ -3,138 +3,139 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	clayControllers "github.com/qb0C80aE/clay/controllers"
-	"github.com/qb0C80aE/clay/extension"
+	"github.com/qb0C80aE/clay/extensions"
 	"github.com/qb0C80aE/pottery/logics"
 	"github.com/qb0C80aE/pottery/models"
 )
 
-type TestCommandController struct {
-	clayControllers.BaseController
+type testCommandController struct {
+	*clayControllers.BaseController
 }
 
-type TestPatternController struct {
-	clayControllers.BaseController
+type testPatternController struct {
+	*clayControllers.BaseController
 }
 
-type TestCaseController struct {
-	clayControllers.BaseController
+type testCaseController struct {
+	*clayControllers.BaseController
 }
 
-func init() {
-	extension.RegisterController(NewTestCommandController())
-	extension.RegisterController(NewTestPatternController())
-	extension.RegisterController(NewTestCaseController())
-}
-
-func NewTestCommandController() *TestCommandController {
-	controller := &TestCommandController{}
-	controller.Initialize()
+func newTestCommandController() extensions.Controller {
+	controller := &testCommandController{
+		BaseController: clayControllers.NewBaseController(
+			"test_command",
+			models.SharedTestCommandModel(),
+			logics.UniqueTestCommandLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
 	return controller
 }
 
-func NewTestPatternController() *TestPatternController {
-	controller := &TestPatternController{}
-	controller.Initialize()
+func newTestPatternController() extensions.Controller {
+	controller := &testPatternController{
+		BaseController: clayControllers.NewBaseController(
+			"test_pattern",
+			models.SharedTestPatternModel(),
+			logics.UniqueTestPatternLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
 	return controller
 }
 
-func NewTestCaseController() *TestCaseController {
-	controller := &TestCaseController{}
-	controller.Initialize()
+func newTestCaseController() extensions.Controller {
+	controller := &testCaseController{
+		BaseController: clayControllers.NewBaseController(
+			"test_case",
+			models.SharedTestCaseModel(),
+			logics.UniqueTestCaseLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
 	return controller
 }
 
-func (this *TestCommandController) Initialize() {
-	this.ResourceName = "test_command"
-	this.Model = models.TestCommandModel
-	this.Logic = logics.TestCommandLogicInstance
-	this.Outputter = this
-}
-
-func (this *TestPatternController) Initialize() {
-	this.ResourceName = "test_pattern"
-	this.Model = models.TestPatternModel
-	this.Logic = logics.TestPatternLogicInstance
-	this.Outputter = this
-}
-
-func (this *TestCaseController) Initialize() {
-	this.ResourceName = "test_case"
-	this.Model = models.TestCaseModel
-	this.Logic = logics.TestCaseLogicInstance
-	this.Outputter = this
-}
-
-func (this *TestCommandController) GetRouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleUrl := extension.GetResourceSingleUrl(this.ResourceName)
-	resourceMultiUrl := extension.GetResourceMultiUrl(this.ResourceName)
+func (controller *testCommandController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
+	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
-		extension.MethodGet: {
-			resourceSingleUrl: this.GetSingle,
-			resourceMultiUrl:  this.GetMulti,
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
 		},
-		extension.MethodPost: {
-			resourceMultiUrl: this.Create,
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
 		},
-		extension.MethodPut: {
-			resourceSingleUrl: this.Update,
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
 		},
-		extension.MethodDelete: {
-			resourceSingleUrl: this.Delete,
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
 		},
 	}
 	return routeMap
 }
 
-func (this *TestPatternController) GetRouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleUrl := extension.GetResourceSingleUrl(this.ResourceName)
-	resourceMultiUrl := extension.GetResourceMultiUrl(this.ResourceName)
+func (controller *testPatternController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
+	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
-		extension.MethodGet: {
-			resourceSingleUrl: this.GetSingle,
-			resourceMultiUrl:  this.GetMulti,
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
 		},
-		extension.MethodPost: {
-			resourceMultiUrl: this.Create,
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
 		},
-		extension.MethodPut: {
-			resourceSingleUrl: this.Update,
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
 		},
-		extension.MethodDelete: {
-			resourceSingleUrl: this.Delete,
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
 		},
 	}
 	return routeMap
 }
 
-func (this *TestCaseController) GetRouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleUrl := extension.GetResourceSingleUrl(this.ResourceName)
-	resourceMultiUrl := extension.GetResourceMultiUrl(this.ResourceName)
+func (controller *testCaseController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
+	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
-		extension.MethodGet: {
-			resourceSingleUrl: this.GetSingle,
-			resourceMultiUrl:  this.GetMulti,
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
 		},
-		extension.MethodPost: {
-			resourceMultiUrl: this.Create,
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
 		},
-		extension.MethodPut: {
-			resourceSingleUrl: this.Update,
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
 		},
-		extension.MethodDelete: {
-			resourceSingleUrl: this.Delete,
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
 		},
-		extension.MethodPatch: {
-			resourceSingleUrl: this.Patch,
+		extensions.MethodPatch: {
+			resourceSingleURL: controller.Patch,
 		},
 	}
 	return routeMap
 }
 
-func (this *TestCaseController) OutputPatch(c *gin.Context, code int, result interface{}) {
+func (controller *testCaseController) OutputPatch(c *gin.Context, code int, result interface{}) {
 	text := result.(string)
 	c.String(code, text)
+}
+
+var uniqueTestCommandController = newTestCommandController()
+var uniqueTestPatternController = newTestPatternController()
+var uniqueTestCaseController = newTestCaseController()
+
+func init() {
+	extensions.RegisterController(uniqueTestCommandController)
+	extensions.RegisterController(uniqueTestPatternController)
+	extensions.RegisterController(uniqueTestCaseController)
 }

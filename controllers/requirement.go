@@ -3,170 +3,171 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	clayControllers "github.com/qb0C80aE/clay/controllers"
-	"github.com/qb0C80aE/clay/extension"
+	"github.com/qb0C80aE/clay/extensions"
 	"github.com/qb0C80aE/pottery/logics"
 	"github.com/qb0C80aE/pottery/models"
 )
 
-type ProtocolController struct {
-	clayControllers.BaseController
+type protocolController struct {
+	*clayControllers.BaseController
 }
 
-type ServiceController struct {
-	clayControllers.BaseController
+type serviceController struct {
+	*clayControllers.BaseController
 }
 
-type ConnectionController struct {
-	clayControllers.BaseController
+type connectionController struct {
+	*clayControllers.BaseController
 }
 
-type RequirementController struct {
-	clayControllers.BaseController
+type requirementController struct {
+	*clayControllers.BaseController
 }
+
+func newProtocolController() extensions.Controller {
+	controller := &protocolController{
+		BaseController: clayControllers.NewBaseController(
+			"protocol",
+			models.SharedProtocolModel(),
+			logics.UniqueProtocolLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
+	return controller
+}
+
+func newServiceController() extensions.Controller {
+	controller := &serviceController{
+		BaseController: clayControllers.NewBaseController(
+			"service",
+			models.SharedServiceModel(),
+			logics.UniqueServiceLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
+	return controller
+}
+
+func newConnectionController() extensions.Controller {
+	controller := &connectionController{
+		BaseController: clayControllers.NewBaseController(
+			"connection",
+			models.SharedConnectionModel(),
+			logics.UniqueConnectionLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
+	return controller
+}
+
+func newRequirementController() extensions.Controller {
+	controller := &requirementController{
+		BaseController: clayControllers.NewBaseController(
+			"requirement",
+			models.SharedRequirementModel(),
+			logics.UniqueRequirementLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
+	return controller
+}
+
+func (controller *protocolController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
+	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+
+	routeMap := map[int]map[string]gin.HandlerFunc{
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
+		},
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
+		},
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
+		},
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
+		},
+	}
+	return routeMap
+}
+
+func (controller *serviceController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
+	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+
+	routeMap := map[int]map[string]gin.HandlerFunc{
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
+		},
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
+		},
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
+		},
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
+		},
+	}
+	return routeMap
+}
+
+func (controller *connectionController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
+	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+
+	routeMap := map[int]map[string]gin.HandlerFunc{
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
+		},
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
+		},
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
+		},
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
+		},
+	}
+	return routeMap
+}
+
+func (controller *requirementController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
+	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+
+	routeMap := map[int]map[string]gin.HandlerFunc{
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
+		},
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
+		},
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
+		},
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
+		},
+	}
+	return routeMap
+}
+
+var uniqueProtocolController = newProtocolController()
+var uniqueServiceController = newServiceController()
+var uniqueConnectionController = newConnectionController()
+var uniqueRequirementController = newRequirementController()
 
 func init() {
-	extension.RegisterController(NewProtocolController())
-	extension.RegisterController(NewServiceController())
-	extension.RegisterController(NewConnectionController())
-	extension.RegisterController(NewRequirementController())
-}
-
-func NewProtocolController() *ProtocolController {
-	controller := &ProtocolController{}
-	controller.Initialize()
-	return controller
-}
-
-func NewServiceController() *ServiceController {
-	controller := &ServiceController{}
-	controller.Initialize()
-	return controller
-}
-
-func NewConnectionController() *ConnectionController {
-	controller := &ConnectionController{}
-	controller.Initialize()
-	return controller
-}
-
-func NewRequirementController() *RequirementController {
-	controller := &RequirementController{}
-	controller.Initialize()
-	return controller
-}
-
-func (this *ProtocolController) Initialize() {
-	this.ResourceName = "protocol"
-	this.Model = models.ProtocolModel
-	this.Logic = logics.ProtocolLogicInstance
-	this.Outputter = this
-}
-
-func (this *ServiceController) Initialize() {
-	this.ResourceName = "service"
-	this.Model = models.ServiceModel
-	this.Logic = logics.ServiceLogicInstance
-	this.Outputter = this
-}
-
-func (this *ConnectionController) Initialize() {
-	this.ResourceName = "connection"
-	this.Model = models.ConnectionModel
-	this.Logic = logics.ConnectionLogicInstance
-	this.Outputter = this
-}
-
-func (this *RequirementController) Initialize() {
-	this.ResourceName = "requirement"
-	this.Model = models.RequirementModel
-	this.Logic = logics.RequirementLogicInstance
-	this.Outputter = this
-}
-
-func (this *ProtocolController) GetRouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleUrl := extension.GetResourceSingleUrl(this.ResourceName)
-	resourceMultiUrl := extension.GetResourceMultiUrl(this.ResourceName)
-
-	routeMap := map[int]map[string]gin.HandlerFunc{
-		extension.MethodGet: {
-			resourceSingleUrl: this.GetSingle,
-			resourceMultiUrl:  this.GetMulti,
-		},
-		extension.MethodPost: {
-			resourceMultiUrl: this.Create,
-		},
-		extension.MethodPut: {
-			resourceSingleUrl: this.Update,
-		},
-		extension.MethodDelete: {
-			resourceSingleUrl: this.Delete,
-		},
-	}
-	return routeMap
-}
-
-func (this *ServiceController) GetRouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleUrl := extension.GetResourceSingleUrl(this.ResourceName)
-	resourceMultiUrl := extension.GetResourceMultiUrl(this.ResourceName)
-
-	routeMap := map[int]map[string]gin.HandlerFunc{
-		extension.MethodGet: {
-			resourceSingleUrl: this.GetSingle,
-			resourceMultiUrl:  this.GetMulti,
-		},
-		extension.MethodPost: {
-			resourceMultiUrl: this.Create,
-		},
-		extension.MethodPut: {
-			resourceSingleUrl: this.Update,
-		},
-		extension.MethodDelete: {
-			resourceSingleUrl: this.Delete,
-		},
-	}
-	return routeMap
-}
-
-func (this *ConnectionController) GetRouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleUrl := extension.GetResourceSingleUrl(this.ResourceName)
-	resourceMultiUrl := extension.GetResourceMultiUrl(this.ResourceName)
-
-	routeMap := map[int]map[string]gin.HandlerFunc{
-		extension.MethodGet: {
-			resourceSingleUrl: this.GetSingle,
-			resourceMultiUrl:  this.GetMulti,
-		},
-		extension.MethodPost: {
-			resourceMultiUrl: this.Create,
-		},
-		extension.MethodPut: {
-			resourceSingleUrl: this.Update,
-		},
-		extension.MethodDelete: {
-			resourceSingleUrl: this.Delete,
-		},
-	}
-	return routeMap
-}
-
-func (this *RequirementController) GetRouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleUrl := extension.GetResourceSingleUrl(this.ResourceName)
-	resourceMultiUrl := extension.GetResourceMultiUrl(this.ResourceName)
-
-	routeMap := map[int]map[string]gin.HandlerFunc{
-		extension.MethodGet: {
-			resourceSingleUrl: this.GetSingle,
-			resourceMultiUrl:  this.GetMulti,
-		},
-		extension.MethodPost: {
-			resourceMultiUrl: this.Create,
-		},
-		extension.MethodPut: {
-			resourceSingleUrl: this.Update,
-		},
-		extension.MethodDelete: {
-			resourceSingleUrl: this.Delete,
-		},
-	}
-	return routeMap
+	extensions.RegisterController(uniqueProtocolController)
+	extensions.RegisterController(uniqueServiceController)
+	extensions.RegisterController(uniqueConnectionController)
+	extensions.RegisterController(uniqueRequirementController)
 }

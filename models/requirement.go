@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-	"github.com/qb0C80aE/clay/extension"
+	"github.com/qb0C80aE/clay/extensions"
 	loamModels "github.com/qb0C80aE/loam/models"
 )
 
@@ -36,14 +36,46 @@ type Requirement struct {
 	Accessibility     bool             `json:"accessibility"`
 }
 
-var ProtocolModel = &Protocol{}
-var ServiceModel = &Service{}
-var ConnectionModel = &Connection{}
-var RequirementModel = &Requirement{}
+func NewProtocolModel() *Protocol {
+	return &Protocol{}
+}
+
+func NewServiceModel() *Service {
+	return &Service{}
+}
+
+func NewConnectionModel() *Connection {
+	return &Connection{}
+}
+
+func NewRequirementModel() *Requirement {
+	return &Requirement{}
+}
+
+var sharedProtocolModel = NewProtocolModel()
+var sharedServiceModel = NewServiceModel()
+var sharedConnectionModel = NewConnectionModel()
+var sharedRequirementModel = NewRequirementModel()
+
+func SharedProtocolModel() *Protocol {
+	return sharedProtocolModel
+}
+
+func SharedServiceModel() *Service {
+	return sharedServiceModel
+}
+
+func SharedConnectionModel() *Connection {
+	return sharedConnectionModel
+}
+
+func SharedRequirementModel() *Requirement {
+	return sharedRequirementModel
+}
 
 func init() {
-	extension.RegisterModelType(Protocol{})
-	extension.RegisterModelType(Service{})
-	extension.RegisterModelType(Connection{})
-	extension.RegisterModelType(Requirement{})
+	extensions.RegisterModel(sharedProtocolModel)
+	extensions.RegisterModel(sharedServiceModel)
+	extensions.RegisterModel(sharedConnectionModel)
+	extensions.RegisterModel(sharedRequirementModel)
 }

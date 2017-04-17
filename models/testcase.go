@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/qb0C80aE/clay/extension"
+	"github.com/qb0C80aE/clay/extensions"
 )
 
 type TestCommand struct {
@@ -25,12 +25,36 @@ type TestCase struct {
 	TestRunnerScriptTemplate string         `json:"test_runner_script_template" form:"test_runner_script_template"`
 }
 
-var TestCommandModel = &TestCommand{}
-var TestPatternModel = &TestPattern{}
-var TestCaseModel = &TestCase{}
+func NewTestCommandModel() *TestCommand {
+	return &TestCommand{}
+}
+
+func NewTestPatternModel() *TestPattern {
+	return &TestPattern{}
+}
+
+func NewTestCaseModel() *TestCase {
+	return &TestCase{}
+}
+
+var sharedTestCommandModel = NewTestCommandModel()
+var sharedTestPatternModel = NewTestPatternModel()
+var sharedTestCaseModel = NewTestCaseModel()
+
+func SharedTestCommandModel() *TestCommand {
+	return sharedTestCommandModel
+}
+
+func SharedTestPatternModel() *TestPattern {
+	return sharedTestPatternModel
+}
+
+func SharedTestCaseModel() *TestCase {
+	return sharedTestCaseModel
+}
 
 func init() {
-	extension.RegisterModelType(TestCommand{})
-	extension.RegisterModelType(TestPattern{})
-	extension.RegisterModelType(TestCase{})
+	extensions.RegisterModel(sharedTestCommandModel)
+	extensions.RegisterModel(sharedTestPatternModel)
+	extensions.RegisterModel(sharedTestCaseModel)
 }

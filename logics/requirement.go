@@ -2,26 +2,59 @@ package logics
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/qb0C80aE/clay/extension"
+	"github.com/qb0C80aE/clay/extensions"
+	clayLogics "github.com/qb0C80aE/clay/logics"
 	clayModels "github.com/qb0C80aE/clay/models"
 	"github.com/qb0C80aE/clay/utils/mapstruct"
 	"github.com/qb0C80aE/pottery/models"
 	"strconv"
 )
 
-type ProtocolLogic struct {
+type protocolLogic struct {
+	*clayLogics.BaseLogic
 }
 
-type ServiceLogic struct {
+type serviceLogic struct {
+	*clayLogics.BaseLogic
 }
 
-type ConnectionLogic struct {
+type connectionLogic struct {
+	*clayLogics.BaseLogic
 }
 
-type RequirementLogic struct {
+type requirementLogic struct {
+	*clayLogics.BaseLogic
 }
 
-func (_ *ProtocolLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func newProtocolLogic() *protocolLogic {
+	logic := &protocolLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newServiceLogic() *serviceLogic {
+	logic := &serviceLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newConnectionLogic() *connectionLogic {
+	logic := &connectionLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newRequirementLogic() *requirementLogic {
+	logic := &requirementLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func (logic *protocolLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
 
 	protocol := &models.Protocol{}
 
@@ -33,7 +66,7 @@ func (_ *ProtocolLogic) GetSingle(db *gorm.DB, id string, queryFields string) (i
 
 }
 
-func (_ *ProtocolLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}, error) {
+func (logic *protocolLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
 
 	protocols := []*models.Protocol{}
 
@@ -50,7 +83,7 @@ func (_ *ProtocolLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}
 
 }
 
-func (_ *ProtocolLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *protocolLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
 
 	protocol := data.(*models.Protocol)
 
@@ -61,7 +94,7 @@ func (_ *ProtocolLogic) Create(db *gorm.DB, data interface{}) (interface{}, erro
 	return protocol, nil
 }
 
-func (_ *ProtocolLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *protocolLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
 
 	protocol := data.(*models.Protocol)
 	protocol.ID, _ = strconv.Atoi(id)
@@ -73,7 +106,7 @@ func (_ *ProtocolLogic) Update(db *gorm.DB, id string, data interface{}) (interf
 	return protocol, nil
 }
 
-func (_ *ProtocolLogic) Delete(db *gorm.DB, id string) error {
+func (logic *protocolLogic) Delete(db *gorm.DB, id string) error {
 
 	protocol := &models.Protocol{}
 
@@ -89,15 +122,7 @@ func (_ *ProtocolLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (_ *ProtocolLogic) Patch(_ *gorm.DB, _ string, _ string) (interface{}, error) {
-	return nil, nil
-}
-
-func (_ *ProtocolLogic) Options(_ *gorm.DB) error {
-	return nil
-}
-
-func (_ *ProtocolLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+func (logic *protocolLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
 	protocols := []*models.Protocol{}
 	if err := db.Select("*").Find(&protocols).Error; err != nil {
 		return "", nil, err
@@ -105,11 +130,11 @@ func (_ *ProtocolLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, err
 	return "protocols", protocols, nil
 }
 
-func (_ *ProtocolLogic) DeleteFromDesign(db *gorm.DB) error {
+func (logic *protocolLogic) DeleteFromDesign(db *gorm.DB) error {
 	return db.Exec("delete from protocols;").Error
 }
 
-func (_ *ProtocolLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+func (logic *protocolLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Protocol{}
 	design := data.(*clayModels.Design)
 	if value, exists := design.Content["protocols"]; exists {
@@ -125,7 +150,15 @@ func (_ *ProtocolLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	return nil
 }
 
-func (_ *ServiceLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *protocolLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
+	protocols := []*models.Protocol{}
+	if err := db.Select("*").Find(&protocols).Error; err != nil {
+		return "", nil, err
+	}
+	return "Protocols", protocols, nil
+}
+
+func (logic *serviceLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
 
 	service := &models.Service{}
 
@@ -137,7 +170,7 @@ func (_ *ServiceLogic) GetSingle(db *gorm.DB, id string, queryFields string) (in
 
 }
 
-func (_ *ServiceLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}, error) {
+func (logic *serviceLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
 
 	services := []*models.Service{}
 
@@ -154,7 +187,7 @@ func (_ *ServiceLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{},
 
 }
 
-func (_ *ServiceLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *serviceLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
 
 	service := data.(*models.Service)
 
@@ -165,7 +198,7 @@ func (_ *ServiceLogic) Create(db *gorm.DB, data interface{}) (interface{}, error
 	return service, nil
 }
 
-func (_ *ServiceLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *serviceLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
 
 	service := data.(*models.Service)
 	service.ID, _ = strconv.Atoi(id)
@@ -177,7 +210,7 @@ func (_ *ServiceLogic) Update(db *gorm.DB, id string, data interface{}) (interfa
 	return service, nil
 }
 
-func (_ *ServiceLogic) Delete(db *gorm.DB, id string) error {
+func (logic *serviceLogic) Delete(db *gorm.DB, id string) error {
 
 	service := &models.Service{}
 
@@ -193,15 +226,7 @@ func (_ *ServiceLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (_ *ServiceLogic) Patch(_ *gorm.DB, _ string, _ string) (interface{}, error) {
-	return nil, nil
-}
-
-func (_ *ServiceLogic) Options(_ *gorm.DB) error {
-	return nil
-}
-
-func (_ *ServiceLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+func (logic *serviceLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
 	services := []*models.Service{}
 	if err := db.Select("*").Find(&services).Error; err != nil {
 		return "", nil, err
@@ -209,11 +234,11 @@ func (_ *ServiceLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, erro
 	return "services", services, nil
 }
 
-func (_ *ServiceLogic) DeleteFromDesign(db *gorm.DB) error {
+func (logic *serviceLogic) DeleteFromDesign(db *gorm.DB) error {
 	return db.Exec("delete from services;").Error
 }
 
-func (_ *ServiceLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+func (logic *serviceLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Service{}
 	design := data.(*clayModels.Design)
 	if value, exists := design.Content["services"]; exists {
@@ -229,7 +254,15 @@ func (_ *ServiceLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	return nil
 }
 
-func (_ *ConnectionLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *serviceLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
+	services := []*models.Service{}
+	if err := db.Select("*").Find(&services).Error; err != nil {
+		return "", nil, err
+	}
+	return "Services", services, nil
+}
+
+func (logic *connectionLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
 
 	connection := &models.Connection{}
 
@@ -241,7 +274,7 @@ func (_ *ConnectionLogic) GetSingle(db *gorm.DB, id string, queryFields string) 
 
 }
 
-func (_ *ConnectionLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}, error) {
+func (logic *connectionLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
 
 	connections := []*models.Connection{}
 
@@ -258,7 +291,7 @@ func (_ *ConnectionLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface
 
 }
 
-func (_ *ConnectionLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *connectionLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
 
 	connection := data.(*models.Connection)
 
@@ -269,7 +302,7 @@ func (_ *ConnectionLogic) Create(db *gorm.DB, data interface{}) (interface{}, er
 	return connection, nil
 }
 
-func (_ *ConnectionLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *connectionLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
 
 	connection := data.(*models.Connection)
 	connection.ID, _ = strconv.Atoi(id)
@@ -281,7 +314,7 @@ func (_ *ConnectionLogic) Update(db *gorm.DB, id string, data interface{}) (inte
 	return connection, nil
 }
 
-func (_ *ConnectionLogic) Delete(db *gorm.DB, id string) error {
+func (logic *connectionLogic) Delete(db *gorm.DB, id string) error {
 
 	connection := &models.Connection{}
 
@@ -297,15 +330,7 @@ func (_ *ConnectionLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (_ *ConnectionLogic) Patch(_ *gorm.DB, _ string, _ string) (interface{}, error) {
-	return nil, nil
-}
-
-func (_ *ConnectionLogic) Options(_ *gorm.DB) error {
-	return nil
-}
-
-func (_ *ConnectionLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+func (logic *connectionLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
 	connections := []*models.Connection{}
 	if err := db.Select("*").Find(&connections).Error; err != nil {
 		return "", nil, err
@@ -313,11 +338,11 @@ func (_ *ConnectionLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, e
 	return "connections", connections, nil
 }
 
-func (_ *ConnectionLogic) DeleteFromDesign(db *gorm.DB) error {
+func (logic *connectionLogic) DeleteFromDesign(db *gorm.DB) error {
 	return db.Exec("delete from connections;").Error
 }
 
-func (_ *ConnectionLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+func (logic *connectionLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Connection{}
 	design := data.(*clayModels.Design)
 	if value, exists := design.Content["connections"]; exists {
@@ -333,7 +358,15 @@ func (_ *ConnectionLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	return nil
 }
 
-func (_ *RequirementLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *connectionLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
+	connections := []*models.Connection{}
+	if err := db.Select("*").Find(&connections).Error; err != nil {
+		return "", nil, err
+	}
+	return "Connections", connections, nil
+}
+
+func (logic *requirementLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
 
 	requirement := &models.Requirement{}
 
@@ -345,7 +378,7 @@ func (_ *RequirementLogic) GetSingle(db *gorm.DB, id string, queryFields string)
 
 }
 
-func (_ *RequirementLogic) GetMulti(db *gorm.DB, queryFields string) ([]interface{}, error) {
+func (logic *requirementLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
 
 	requirements := []*models.Requirement{}
 
@@ -362,7 +395,7 @@ func (_ *RequirementLogic) GetMulti(db *gorm.DB, queryFields string) ([]interfac
 
 }
 
-func (_ *RequirementLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *requirementLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
 
 	requirement := data.(*models.Requirement)
 
@@ -373,7 +406,7 @@ func (_ *RequirementLogic) Create(db *gorm.DB, data interface{}) (interface{}, e
 	return requirement, nil
 }
 
-func (_ *RequirementLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *requirementLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
 
 	requirement := data.(*models.Requirement)
 	requirement.ID, _ = strconv.Atoi(id)
@@ -385,7 +418,7 @@ func (_ *RequirementLogic) Update(db *gorm.DB, id string, data interface{}) (int
 	return requirement, nil
 }
 
-func (_ *RequirementLogic) Delete(db *gorm.DB, id string) error {
+func (logic *requirementLogic) Delete(db *gorm.DB, id string) error {
 
 	requirement := &models.Requirement{}
 
@@ -401,15 +434,7 @@ func (_ *RequirementLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (_ *RequirementLogic) Patch(_ *gorm.DB, _ string, _ string) (interface{}, error) {
-	return nil, nil
-}
-
-func (_ *RequirementLogic) Options(_ *gorm.DB) error {
-	return nil
-}
-
-func (_ *RequirementLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+func (logic *requirementLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
 	requirements := []*models.Requirement{}
 	if err := db.Select("*").Find(&requirements).Error; err != nil {
 		return "", nil, err
@@ -417,11 +442,11 @@ func (_ *RequirementLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, 
 	return "requirements", requirements, nil
 }
 
-func (_ *RequirementLogic) DeleteFromDesign(db *gorm.DB) error {
+func (logic *requirementLogic) DeleteFromDesign(db *gorm.DB) error {
 	return db.Exec("delete from requirements;").Error
 }
 
-func (_ *RequirementLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+func (logic *requirementLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Requirement{}
 	design := data.(*clayModels.Design)
 	if value, exists := design.Content["requirements"]; exists {
@@ -437,14 +462,42 @@ func (_ *RequirementLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	return nil
 }
 
-var ProtocolLogicInstance = &ProtocolLogic{}
-var ServiceLogicInstance = &ServiceLogic{}
-var ConnectionLogicInstance = &ConnectionLogic{}
-var RequirementLogicInstance = &RequirementLogic{}
+func (logic *requirementLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
+	requirements := []*models.Requirement{}
+	if err := db.Select("*").Find(&requirements).Error; err != nil {
+		return "", nil, err
+	}
+	return "Requirements", requirements, nil
+}
+
+var uniqueProtocolLogic = newProtocolLogic()
+var uniqueServiceLogic = newServiceLogic()
+var uniqueConnectionLogic = newConnectionLogic()
+var uniqueRequirementLogic = newRequirementLogic()
+
+func UniqueProtocolLogic() extensions.Logic {
+	return uniqueProtocolLogic
+}
+
+func UniqueServiceLogic() extensions.Logic {
+	return uniqueServiceLogic
+}
+
+func UniqueConnectionLogic() extensions.Logic {
+	return uniqueConnectionLogic
+}
+
+func UniqueRequirementLogic() extensions.Logic {
+	return uniqueRequirementLogic
+}
 
 func init() {
-	extension.RegisterDesignAccessor(ProtocolLogicInstance)
-	extension.RegisterDesignAccessor(ServiceLogicInstance)
-	extension.RegisterDesignAccessor(ConnectionLogicInstance)
-	extension.RegisterDesignAccessor(RequirementLogicInstance)
+	extensions.RegisterDesignAccessor(uniqueProtocolLogic)
+	extensions.RegisterDesignAccessor(uniqueServiceLogic)
+	extensions.RegisterDesignAccessor(uniqueConnectionLogic)
+	extensions.RegisterDesignAccessor(uniqueRequirementLogic)
+	extensions.RegisterTemplateParameterGenerator(uniqueProtocolLogic)
+	extensions.RegisterTemplateParameterGenerator(uniqueServiceLogic)
+	extensions.RegisterTemplateParameterGenerator(uniqueConnectionLogic)
+	extensions.RegisterTemplateParameterGenerator(uniqueRequirementLogic)
 }
