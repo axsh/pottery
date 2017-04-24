@@ -57,7 +57,7 @@ func SharedTestCaseModel() *TestCase {
 }
 
 func init() {
-	extensions.RegisterModel(sharedTestCommandModel)
-	extensions.RegisterModel(sharedTestPatternModel)
-	extensions.RegisterModel(sharedTestCaseModel)
+	extensions.RegisterModel("TestCommand", sharedTestCommandModel)
+	extensions.RegisterModel("TestPattern", sharedTestPatternModel)
+	extensions.RegisterModel("TestCase", sharedTestCaseModel)
 }

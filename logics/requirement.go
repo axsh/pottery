@@ -496,8 +496,8 @@ func init() {
 	extensions.RegisterDesignAccessor(uniqueServiceLogic)
 	extensions.RegisterDesignAccessor(uniqueConnectionLogic)
 	extensions.RegisterDesignAccessor(uniqueRequirementLogic)
-	extensions.RegisterTemplateParameterGenerator(uniqueProtocolLogic)
-	extensions.RegisterTemplateParameterGenerator(uniqueServiceLogic)
-	extensions.RegisterTemplateParameterGenerator(uniqueConnectionLogic)
-	extensions.RegisterTemplateParameterGenerator(uniqueRequirementLogic)
+	extensions.RegisterTemplateParameterGenerator("Protocol", uniqueProtocolLogic)
+	extensions.RegisterTemplateParameterGenerator("Service", uniqueServiceLogic)
+	extensions.RegisterTemplateParameterGenerator("Connection", uniqueConnectionLogic)
+	extensions.RegisterTemplateParameterGenerator("Requirement", uniqueRequirementLogic)
 }

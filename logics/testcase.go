@@ -493,7 +493,7 @@ func init() {
 	extensions.RegisterDesignAccessor(uniqueTestCommandLogic)
 	extensions.RegisterDesignAccessor(uniqueTestPatternLogic)
 	extensions.RegisterDesignAccessor(uniqueTestCaseLogic)
-	extensions.RegisterTemplateParameterGenerator(uniqueTestCommandLogic)
-	extensions.RegisterTemplateParameterGenerator(uniqueTestPatternLogic)
-	extensions.RegisterTemplateParameterGenerator(uniqueTestCaseLogic)
+	extensions.RegisterTemplateParameterGenerator("TestCommand", uniqueTestCommandLogic)
+	extensions.RegisterTemplateParameterGenerator("TestPattern", uniqueTestPatternLogic)
+	extensions.RegisterTemplateParameterGenerator("TestCase", uniqueTestCaseLogic)
 }
