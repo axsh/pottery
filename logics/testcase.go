@@ -12,7 +12,6 @@ import (
 	loamModels "github.com/qb0C80aE/loam/models"
 	"github.com/qb0C80aE/pottery/models"
 	"strconv"
-	tplpkg "text/template"
 )
 
 type testCommandLogic struct {
@@ -338,7 +337,7 @@ func (logic *testCaseLogic) Patch(db *gorm.DB, id string) (interface{}, error) {
 		c.WriteString("#--------------------------------------\n")
 		c.WriteString(fmt.Sprintf("# %s\n", b.ServiceName))
 		c.WriteString("# --- server script ---\n")
-		c.WriteString(fmt.Sprintf("%s\n", b.SerevrScriptTemplate))
+		c.WriteString(fmt.Sprintf("%s\n", b.ServerScriptTemplate))
 		c.WriteString("# --- client script ---\n")
 		c.WriteString(fmt.Sprintf("%s\n", b.ClientScriptTemplate))
 		c.WriteString("#--------------------------------------\n")
@@ -415,17 +414,17 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestCommand,
 		return "", result, err
 	}
 
-	anyNode := &loamModels.Node{
+	internetNode := &loamModels.Node{
 		ID:   0,
-		Name: "Any",
+		Name: "Internet",
 	}
-	anyPort := &loamModels.Port{
+	internetPort := &loamModels.Port{
 		ID:     0,
 		Number: 0,
 		Layer:  3,
-		Name:   "Any",
-		NodeID: anyNode.ID,
-		Node:   anyNode,
+		Name:   "Internet",
+		NodeID: internetNode.ID,
+		Node:   internetNode,
 		MacAddress: sql.NullString{
 			String: "00:00:00:00:00:00",
 			Valid:  true,
@@ -439,56 +438,33 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestCommand,
 			Valid: true,
 		},
 	}
-	anyNode.Ports = []*loamModels.Port{anyPort}
-
-	templateFuncMaps := extensions.RegisteredTemplateFuncMaps()
+	internetNode.Ports = []*loamModels.Port{internetPort}
 
 	for _, requirement := range requirements {
 		if !requirement.SourcePortID.Valid {
-			requirement.SourcePort = anyPort
+			requirement.SourcePort = internetPort
 		}
 		if !requirement.DestinationPortID.Valid {
-			requirement.DestinationPort = anyPort
+			requirement.DestinationPort = internetPort
 		}
 
 		testCommand := testCommandMap[requirement.Service.Name]
-		serverScript := testCommand.SerevrScriptTemplate
-		clientScript := testCommand.ClientScriptTemplate
+		script, err := clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testCommand.ServerScriptTemplateID))
+		if err != nil {
+			return "", nil, err
+		}
+		serverScriptTemplate := script.(*clayModels.Template)
 
-		var docServerScript bytes.Buffer
-		tplServerScript := tplpkg.New("template_server_script")
-		for _, templateFuncMap := range templateFuncMaps {
-			tplServerScript = tplServerScript.Funcs(templateFuncMap)
-		}
-		tplServerScript, err := tplServerScript.Parse(serverScript)
+		script, err = clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testCommand.ClientScriptTemplateID))
 		if err != nil {
 			return "", nil, err
 		}
-		err = tplServerScript.Execute(&docServerScript, requirement)
-		if err != nil {
-			return "", nil, err
-		}
-		serverScript = docServerScript.String()
-
-		var docClientScript bytes.Buffer
-		tplClientScript := tplpkg.New("template_server_script")
-		for _, templateFuncMap := range templateFuncMaps {
-			tplClientScript = tplClientScript.Funcs(templateFuncMap)
-		}
-		tplClientScript, err = tplClientScript.Parse(clientScript)
-		if err != nil {
-			return "", nil, err
-		}
-		err = tplClientScript.Execute(&docClientScript, requirement)
-		if err != nil {
-			return "", nil, err
-		}
-		clientScript = docClientScript.String()
+		clientScriptTemplate := script.(*clayModels.Template)
 
 		newTestCommand := &models.TestCommand{
 			ServiceName:          fmt.Sprintf("%s_to_%s_%s_%s", requirement.SourcePort.Node.Name, requirement.DestinationPort.Node.Name, requirement.Service.Name, convertAccessibility(requirement.Accessibility)),
-			SerevrScriptTemplate: serverScript,
-			ClientScriptTemplate: clientScript,
+			ServerScriptTemplate: serverScriptTemplate,
+			ClientScriptTemplate: clientScriptTemplate,
 		}
 		result = append(result, newTestCommand)
 	}

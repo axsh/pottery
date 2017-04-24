@@ -1,86 +1,299 @@
 {{template "headerpart" .}}
-<!-- Left Column -->
-<div class="col-sm-4">
 
-	<div class="panel panel-default panel-custom" id="input_panel">
+<div class="col-sm-12">
+	<div class="panel panel-default panel-custom" id="communication_requirement_panel">
 		<div class="panel-heading">
-			<h1 class="panel-title"><span class="glyphicon glyphicon-resize-full"></span> Ports </h1>
+			<h1 class="panel-title">
+				<span class="glyphicon glyphicon-wrench"></span> Communication Requirements
+			</h1>
 		</div>
 		<div class="panel-body">
-			<table class="table">
-				<tr>
-					<td rowspan=2 width="20%">Form</td>
-					<td width="80%"><select class="form-control" id="edit_requirement_source_node"></select></td>
-				</tr>
-				<tr>
-					<td width="80%"><select class="form-control" id="edit_requirement_source_port"></select></td>
-				</tr>
-				<tr>
-					<td rowspan=2>To</td>
-					<td><select class="form-control" id="edit_requirement_destination_node"></select></td>
-				</tr>
-				<tr>
-					<td><select class="form-control" id="edit_requirement_destination_port"></select></td>
-				</tr>
-				<tr>
-					<td>Service</td>
-					<td><select class="form-control" id="edit_requirement_service"></select></td>
-				</tr>
-				<tr>
-					<td>Access</td>
-					<td>
-						<select class="form-control" id="edit_requirement_acccessibility">
-							<option value="true">
-								Allow
-							</option>
-							<option value="false">
-								Deny
-							</option>
-						</select>
-					</td>
-				</tr>
-			</table>
-			<span style="float: right"><button class="btn btn-default" id="edit_add_requirement_btn" type="button"><span class="glyphicon glyphicon-ok"></span> Register</button></span>
-		</div>
-	</div>
-</div><!--/Left Column-->
-
-<!-- Right Column -->
-<div class="col-sm-8">
-	<div class="panel panel-default panel-custom" id="list_panel">
-		<div class="panel-heading">
-			<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Communication Requirements</h1>
-		</div>
-		<div class="panel-body">
-			<div id="list_panel">
-				<table class="table table-condensed table-striped" id="requirement_table" style="width:100%;">
-					<thead>
-						<tr>
-							<th>
-								No.
-							</th>
-							<th>
-								Source
-							</th>
-							<th>
-								Destination
-							</th>
-							<th>
-								Service
-							</th>
-							<th>
-								Allow/Deny
-							</th>
-							<th>
-								Delete
-							</th>
-						</tr>
-					</thead>
-					<tbody class="table table-bordered" id="requirement_table_body"></tbody>
-				</table>
+			<div class="row">
+				<div class="col-xs-9">
+					<ul class="nav nav-pills">
+						<li class="active">
+							<a href="#requirement_tab" data-toggle="tab"> Communication Requirements</a>
+						</li>
+						<li>
+							<a href="#service_tab" data-toggle="tab"> Services</a>
+						</li>
+						<li>
+							<a href="#protocol_tab" data-toggle="tab"> Protocols</a>
+						</li>
+					</ul>
+				</div>
 			</div>
+			<div class="tab-content clearfix">
+
+				<div class="tab-pane active" id="requirement_tab">
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="col-sm-4">
+						<div class="panel panel-default" id="edit_requirement_panel">
+							<div class="panel-heading">
+								<h1 class="panel-title"><span class="glyphicon glyphicon-resize-full"></span> Ports </h1>
+							</div>
+							<div class="panel-body">
+								<table class="table">
+									<tr>
+										<td rowspan=2 width="20%">Form</td>
+										<td width="80%"><select class="form-control" id="edit_requirement_source_node"></select></td>
+									</tr>
+									<tr>
+										<td width="80%"><select class="form-control" id="edit_requirement_source_port"></select></td>
+									</tr>
+									<tr>
+										<td rowspan=2>To</td>
+										<td><select class="form-control" id="edit_requirement_destination_node"></select></td>
+									</tr>
+									<tr>
+										<td><select class="form-control" id="edit_requirement_destination_port"></select></td>
+									</tr>
+									<tr>
+										<td>Service</td>
+										<td><select class="form-control" id="edit_requirement_service"></select></td>
+									</tr>
+									<tr>
+										<td>Access</td>
+										<td>
+											<select class="form-control" id="edit_requirement_acccessibility">
+												<option value="true">
+													Allow
+												</option>
+												<option value="false">
+													Deny
+												</option>
+											</select>
+										</td>
+									</tr>
+								</table>
+								<span style="float: right"><button class="btn btn-default" id="edit_add_requirement_btn" type="button"><span class="glyphicon glyphicon-ok"></span> Register</button></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-8">
+						<div class="panel panel-default" id="edit_requirment_list_panel">
+							<div class="panel-heading">
+								<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Communication Requirements</h1>
+							</div>
+							<div class="panel-body">
+								<div id="edit_requirment_list_panel">
+									<table class="table table-condensed table-striped" id="edit_requirements_table" style="width:100%;">
+										<thead>
+											<tr>
+												<th>&nbsp;</th>
+												<th>Source</th>
+												<th>Destination</th>
+												<th>Access</th>
+											</tr>
+										</thead>
+										<tbody class="table table-bordered" id="edit_requirements_table_body"></tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="tab-pane" id="service_tab">
+					<div class="row">
+						<div class="col-xs-12">
+								&nbsp;
+						</div>
+					</div>
+
+					<div class="panel panel-default" id="edit_service_panel">
+						<div class="panel-heading">
+							<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Services</h1>
+						</div>
+						<div class="panel-body">
+
+							<!-- Left Column -->
+							<div class="col-sm-4">
+								<!-- Service Information Panel -->
+								<div class="panel panel-default" id="services_panel">
+									<!-- Service Information Panel Title -->
+									<div class="panel-heading">
+										<h1 class="panel-title">
+											<span class="glyphicon glyphicon-file"></span> Services
+										</h1>
+									</div><!-- /Service Information Panel Title -->
+									<!-- Service Information Panel Body -->
+									<div class="panel-body">
+										<!-- Service Selection -->
+										<div class="input-group text-left">
+											<select class="form-control" id="services"></select>
+											<span class="input-group-btn">
+												<button class="btn btn-default" id="edit_service_btn" type="button">
+													<span class="glyphicon glyphicon-edit"></span>
+												</button>
+												<button class="btn btn-default" id="new_service_btn" type="button">
+													<span class="glyphicon glyphicon-plus"></span>
+												</button>
+												<button class="btn btn-default" id="delete_service_btn" type="button">
+													<span class="glyphicon glyphicon-minus"></span>
+												</button>
+											</span>
+										</div><!-- /Service Selection -->
+										<br>
+										<!-- Service Properties -->
+										<table class="table">
+											<tr>
+												<th width="50%">
+													<span class="glyphicon glyphicon-file"></span> Property
+												</th>
+												<th width="50%">
+													<span class="glyphicon glyphicon-pencil"></span> Value
+												</th>
+											</tr>
+											<tr>
+												<td>Service Name</td>
+												<td>
+													<span id="service_name"></span>
+												</td>
+											</tr>
+										</table><!-- /Service Properties -->
+										<!-- Service Connection Panel -->
+										<div class="panel panel-default">
+											<div class="panel-heading">
+												<h1 class="panel-title">
+													<span class="glyphicon glyphicon-list-alt"></span> Connections
+												</h1>
+											</div>
+											<div class="panel-body">
+												<div class="pre-scrollable" id="connections"></div>
+											</div>
+										</div><!-- /Service Connection Panel -->
+									</div><!-- /Service Information Panel Body -->
+								</div><!-- /Service Information Panel -->
+							</div><!--/Left Column-->
+							<!-- Right Column -->
+							<div class="col-sm-8">
+								<!-- Service Edit Panel -->
+								<div class="panel panel-default" id="edit_service_panel">
+									<!-- Edit-Service Panel -->
+									<div class="panel-heading">
+										<h3 class="panel-title">
+											<span class="glyphicon glyphicon-edit"></span>
+											<span id="register_or_update_service_panel_title"></span>
+										</h3>
+									</div>
+									<div class="panel-body">
+										<table class="table">
+											<tr>
+												<th width="15%">
+													<span class="glyphicon glyphicon-file"></span> Property
+												</th>
+												<th width="85%">
+													<span class="glyphicon glyphicon-pencil"></span> Value
+												</th>
+											</tr>
+											<tr>
+												<td width="15%">Name</td>
+												<td width="85%">
+													<input type="hidden" id="edit_service_id">
+													<input id="edit_service_name" type="text" name="edit_service_name" placeholder="service name like ssh, http, https" class="form-control">
+												</td>
+											</tr>
+										</table>
+										<!-- Service Connection Panel -->
+										<div class="panel panel-default">
+											<div class="panel-heading">
+												<h1 class="panel-title">
+													<span class="glyphicon glyphicon-list-alt"></span> Connections
+												</h1>
+											</div>
+											<div class="panel-body">
+												<table class="table table-condensed table-striped" id="edit_connections_table">
+													<thead>
+														<tr>
+															<th>&nbsp;</th>
+															<th>Protocol</th>
+															<th>Port Number</th>
+														</tr>
+													</thead>
+													<tbody></tbody>
+												</table>
+											</div>
+											<div style="margin-left:10px;margin-bottom:10px;">
+												<span class="input-group-btn">
+													<button id="edit_delete_connection_btn" type="button" class="btn btn-default">
+														<span class="glyphicon glyphicon-minus"></span>
+													</button>
+													<button id="edit_add_connection_btn" type="button" class="btn btn-default">
+														<span class="glyphicon glyphicon-plus"></span>
+													</button>
+													<button id="register_or_update_connection_btn" type="button" class="btn btn-default">
+														<span class="glyphicon glyphicon-ok"></span>
+													</button>
+													<button id="cancel_register_or_update_connection_btn" type="button" class="btn btn-default">
+														<span class="glyphicon glyphicon-remove"></span>
+													</button>
+												</span>
+											</div>
+										</div><!-- /Service Connection Panel -->
+									</div>
+								</div><!-- /Edit-Service Panel -->
+							</div><!--/Right Column-->
+
+						</div>
+					</div>
+
+				</div>
+
+
+				<div class="tab-pane" id="protocol_tab">
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+
+					<div class="panel panel-default" id="edit_protocol_panel">
+						<div class="panel-heading">
+							<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Protocols</h1>
+						</div>
+						<div class="panel-body">
+							<table class="table table-condensed table-striped" id="edit_protocols_table">
+								<thead>
+									<tr>
+										<th>&nbsp;</th>
+										<th>Name</th>
+									</tr>
+								</thead>
+								<tbody></tbody>
+							</table>
+							<div style="margin-left:10px;margin-bottom:10px;">
+								<span class="input-group-btn">
+									<button id="edit_delete_protocol_btn" type="button" class="btn btn-default">
+										<span class="glyphicon glyphicon-minus"></span>
+									</button>
+									<button id="edit_add_protocol_btn" type="button" class="btn btn-default">
+										<span class="glyphicon glyphicon-plus"></span>
+									</button>
+									<button id="register_or_update_protocol_btn" type="button" class="btn btn-default">
+										<span class="glyphicon glyphicon-ok"></span>
+									</button>
+									<button id="cancel_register_or_update_protocol_btn" type="button" class="btn btn-default">
+										<span class="glyphicon glyphicon-remove"></span>
+									</button>
+								</span>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
 	</div>
-</div><!--/Right Column-->
+</div>
+
+
 
 <script language="javascript">
 	(function($) {
@@ -91,9 +304,15 @@
 		var nodeMap = null;
 		var ports = null;
 		var portMap = null;
+		var protocols = null;
+		var protocolMap = null;
 		var services = null;
 		var serviceMap = null;
 		var requirements = null;
+		var requirementMap = null;
+		var editRequirementsTable = null;
+		var editConnectionsTable = null;
+		var editProtocolsTable = null;
 
 		function loadResources() {
 			nodes = getResources('nodes', 'preloads=NodeType').resources;
@@ -126,8 +345,10 @@
 				}
 				node.ports.push(port);
 			}
-			services = getResources('services', '').resources;
-			servicesMap = buildResouceMapFromResourceArray(services);
+			protocols = getResources('protocols', '').resources;
+			protocolMap = buildResouceMapFromResourceArray(protocols);
+			services = getResources('services', 'preloads=Connections,Connections.Protocol').resources;
+			serviceMap = buildResouceMapFromResourceArray(services);
 			requirements = getResources('requirements', '').resources;
 		}
 
@@ -173,9 +394,9 @@
 			$("#edit_requirement_source").children().remove();
 			$("#edit_requirement_destination").children().remove();
 			$("#edit_requirement_service").children().remove();
-			$("#requirement_table_body").children().remove();
-			$("#requirement_table").dataTable();
-			$("#requirement_table").dataTable().fnClearTable();
+			$("#edit_requirements_table_body").children().remove();
+			$("#edit_requirements_table").dataTable();
+			$("#edit_requirements_table").dataTable().fnClearTable();
 
 			$("#edit_requirement_source_node").append($('<option>').val(0).text('Internet'));
 			$("#edit_requirement_destination_node").append($('<option>').val(0).text('Internet'));
@@ -202,7 +423,7 @@
 				destinationPort = portsMap[requirement.destination_port_id.Int64];
 				destinationNode = nodesMap[destinationPort.node_id];
 				service = servicesMap[requirement.service_id];
-				$("#requirement_table").dataTable().fnAddData([
+				$("#edit_requirements_table").dataTable().fnAddData([
 					i + 1,
 					sourceNode.name + " - " + sourcePort.name + " (" + sourcePort.ipv4_address.String + "/" + sourcePort.ipv4_prefix.Int64 + ")",
 					destinationNode.name + " - " + destinationPort.name + " (" + destinationPort.ipv4_address.String + "/" + destinationPort.ipv4_prefix.Int64 + ")",
@@ -260,10 +481,54 @@
 		});
 
 		function onLoad() {
+			$.fn.dataTable.ext.order['dom-text'] = function  ( settings, col )
+			{
+					return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+							return $('input', td).val();
+					} );
+			}
+			$.fn.dataTable.ext.order['dom-select'] = function  ( settings, col )
+			{
+					return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+							return $('select', td).val();
+					} );
+			}
+			editProtocolsTable = $('#edit_protocols_table').dataTable({
+				scrollX: true,
+				scrollY: 250,
+				searching: false,
+				columns: [
+					null,
+					{ orderDataType: 'dom-select' }
+				]
+			});
+			editConnectionsTable = $('#edit_connections_table').dataTable({
+				scrollX: true,
+				scrollY: 250,
+				searching: false,
+				columns: [
+					null,
+					{ orderDataType: 'dom-select' },
+					{ orderDataType: 'dom-text', type: 'string' }
+				]
+			});
+			editRequirementsTable = $('#edit_requirements_table').dataTable({
+				scrollX: true,
+				scrollY: 250,
+				searching: false,
+				columns: [
+					null,
+					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-text', type: 'string' }
+				]
+			});
+
 			loadResources();
-			showRequirements();
-			$('#input_panel').fadeIn(150);
-			$('#list_panel').fadeIn(150);
+			//showRequirements();
+			//showServices();
+			//showProtocols();
+			$('#communication_requirement_panel').fadeIn(150);
 		}
 
 		$('#edit_add_requirement_btn').on('click', function() {
@@ -287,7 +552,7 @@
 			}
 		});
 
-		$('#requirement_table').on('click', 'button[name=del_requirement_btn]', function(selector) {
+		$('#edit_requirements_table').on('click', 'button[name=del_requirement_btn]', function(selector) {
 			if (!confirm("Are you sure to delete?")) {
 				return;
 			}

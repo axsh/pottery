@@ -2,13 +2,16 @@ package models
 
 import (
 	"github.com/qb0C80aE/clay/extensions"
+	clayModels "github.com/qb0C80aE/clay/models"
 )
 
 type TestCommand struct {
-	ID                   int    `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
-	ServiceName          string `json:"service_name" form:"service_name" gorm:"not null;unique"`
-	SerevrScriptTemplate string `json:"server_script_template" form:"server_script_template"`
-	ClientScriptTemplate string `json:"client_script_template" form:"client_script_template"`
+	ID                     int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
+	ServiceName            string               `json:"service_name" form:"service_name" gorm:"not null;unique"`
+	ServerScriptTemplateID int                  `json:"server_script_template_id"`
+	ServerScriptTemplate   *clayModels.Template `json:"client_script_template"`
+	ClientScriptTemplateID int                  `json:"client_script_template_id"`
+	ClientScriptTemplate   *clayModels.Template `json:"client_script_template"`
 }
 
 type TestPattern struct {
