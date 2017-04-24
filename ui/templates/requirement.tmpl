@@ -59,7 +59,7 @@
 									<tr>
 										<td>Access</td>
 										<td>
-											<select class="form-control" id="edit_requirement_acccessibility">
+											<select class="form-control" id="edit_requirement_access">
 												<option value="true">
 													Allow
 												</option>
@@ -87,12 +87,14 @@
 												<th>&nbsp;</th>
 												<th>Source</th>
 												<th>Destination</th>
+												<th>Service</th>
 												<th>Access</th>
 											</tr>
 										</thead>
 										<tbody class="table table-bordered" id="edit_requirements_table_body"></tbody>
 									</table>
 								</div>
+								<span style="float: left"><button class="btn btn-default" id="edit_delete_requirement_btn" type="button"><span class="glyphicon glyphicon-ok"></span> Delete</button></span>
 							</div>
 						</div>
 					</div>
@@ -352,8 +354,8 @@
 			requirements = getResources('requirements', '').resources;
 		}
 
-		function convertAccessibiliry(accessibility) {
-			if (accessibility) {
+		function convertAccess(access) {
+			if (access) {
 				return "Allow";
 			}
 			else {
@@ -361,42 +363,88 @@
 			}
 		}
 
-		function getEditRequirementObject() {
+		function createCheckboxElement(name) {
+			var checkBox = $('<input>').prop('name', name).prop('style', 'transform:scale(1.5);').prop('type', 'checkbox');
+			return checkBox[0];
+		}
+
+		function createAlignedCheckboxElement(name) {
+			var checkBox = $('<input>').prop('name', name).prop('style', 'transform:scale(1.5);position:relative;top:7px;').prop('type', 'checkbox');
+			return checkBox[0];
+		}
+
+		function createTextElement(name, style, placeholder, value) {
+			var input = $('<input>').prop('name', name).prop('class', 'form-control').prop('type', 'text').prop('style', style).prop('placeholder', placeholder).val(value).attr('value', value)[0];
+			return input;
+		}
+
+		function createHiddenElement(name, value) {
+			var input = $('<input>').prop('name', name).prop('type', 'hidden').val(value).attr('value', value)[0];
+			return input;
+		}
+
+		function createRequiermentModelFromPanel() {
 			var result = {}
 			var validSource = true;
-			if ($('#edit_requirement_source').val() == 0) {
+			if ($('#edit_requirement_source_port').val() == 0) {
 				validSource = false;
 			}
-			var editRequirementSourcePortId = {
-				Int64: parseInt($('#edit_requirement_source').val()),
+			var editRequirementSourcePortID = {
+				Int64: parseInt($('#edit_requirement_source_port').val()),
 				Valid: validSource
 			}
 			var validDestination = true;
-			if ($('#edit_requirement_destination').val() == 0) {
+			if ($('#edit_requirement_destination_port').val() == 0) {
 				validDestination = false;
 			}
-			var editRequirementDestinationPortId = {
-				Int64: parseInt($('#edit_requirement_destination').val()),
+			var editRequirementDestinationPortID = {
+				Int64: parseInt($('#edit_requirement_destination_port').val()),
 				Valid: validDestination
 			}
-			var editRequirementServiceId = $('#edit_requirement_service').val();
-			var editRequirementAccessibility = $('#edit_requirement_acccessibility').val();
+			var editRequirementServiceID = $('#edit_requirement_service').val();
+			var editRequirementAccess = $('#edit_requirement_access').val();
 			result = {
-				source_port_id: editRequirementSourcePortId,
-				destination_port_id: editRequirementDestinationPortId,
-				service_id: parseInt(editRequirementServiceId),
-				accessibility: convertStringToBoolean(editRequirementAccessibility)
+				source_port_id: editRequirementSourcePortID,
+				destination_port_id: editRequirementDestinationPortID,
+				service_id: parseInt(editRequirementServiceID),
+				access: convertStringToBoolean(editRequirementAccess)
 			}
 			return result;
 		}
 
+		function onRequirementModified(result, successCode, successMessage, ignoreSuccess) {
+			if (result.status == successCode) {
+				if (!ignoreSuccess) {
+					$('html,body').animate({
+						scrollTop: 0
+					}, 'slow');
+					$('#information_message').text(successMessage);
+					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+					$('#edit_panel').fadeOut(150);
+					loadResources();
+					showRequirements();
+				}
+				return true;
+			}
+			else {
+				$('html,body').animate({
+					scrollTop: 0
+				}, 'slow');
+				$('#error_message').text(result.resource.error);
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+				return false;
+			}
+		}
+
 		function showRequirements() {
-			$("#edit_requirement_source").children().remove();
-			$("#edit_requirement_destination").children().remove();
+			$("#edit_requirement_source_node").children().remove();
+			$("#edit_requirement_destination_node").children().remove();
+			$("#edit_requirement_source_port").children().remove();
+			$("#edit_requirement_destination_port").children().remove();
 			$("#edit_requirement_service").children().remove();
+			$("#edit_requirement_access").val('true');
 			$("#edit_requirements_table_body").children().remove();
-			$("#edit_requirements_table").dataTable();
-			$("#edit_requirements_table").dataTable().fnClearTable();
+			editRequirementsTable.fnClearTable();
 
 			$("#edit_requirement_source_node").append($('<option>').val(0).text('Internet'));
 			$("#edit_requirement_destination_node").append($('<option>').val(0).text('Internet'));
@@ -412,24 +460,23 @@
 			}
 
 			for (var i = 0; i < services.length; i = i + 1) {
-				service = services[i]
+				var service = services[i]
 				$("#edit_requirement_service").append($('<option>').val(service.id).text(service.name));
 			}
 
 			for (var i = 0; i < requirements.length; i = i + 1) {
-				requirement = requirements[i]
-				sourcePort = portsMap[requirement.source_port_id.Int64];
-				sourceNode = nodesMap[sourcePort.node_id];
-				destinationPort = portsMap[requirement.destination_port_id.Int64];
-				destinationNode = nodesMap[destinationPort.node_id];
-				service = servicesMap[requirement.service_id];
-				$("#edit_requirements_table").dataTable().fnAddData([
-					i + 1,
+				var requirement = requirements[i]
+				var sourcePort = portMap[requirement.source_port_id.Int64];
+				var sourceNode = nodeMap[sourcePort.node_id];
+				var destinationPort = portMap[requirement.destination_port_id.Int64];
+				var destinationNode = nodeMap[destinationPort.node_id];
+				var service = serviceMap[requirement.service_id];
+				editRequirementsTable.fnAddData([
+					createCheckboxElement('edit_requirement_check').outerHTML + createHiddenElement('edit_requirement_id', requirement.id).outerHTML,
 					sourceNode.name + " - " + sourcePort.name + " (" + sourcePort.ipv4_address.String + "/" + sourcePort.ipv4_prefix.Int64 + ")",
 					destinationNode.name + " - " + destinationPort.name + " (" + destinationPort.ipv4_address.String + "/" + destinationPort.ipv4_prefix.Int64 + ")",
 					service.name,
-					convertAccessibiliry(requirement.accessibility),
-					'<button name="del_requirement_btn" type="button" class="btn btn-default" value="' + requirement.id + '"><span class="glyphicon glyphicon-minus"></span></button>'
+					convertAccess(requirement.access)
 				]);
 			}
 		}
@@ -515,20 +562,12 @@
 			editRequirementsTable = $('#edit_requirements_table').dataTable({
 				scrollX: true,
 				scrollY: 250,
-				searching: false,
-				columns: [
-					null,
-					{ orderDataType: 'dom-text', type: 'string' },
-					{ orderDataType: 'dom-text', type: 'string' },
-					{ orderDataType: 'dom-text', type: 'string' }
-				]
+				searching: true
 			});
 
 			loadResources();
-			//showRequirements();
-			//showServices();
-			//showProtocols();
 			$('#communication_requirement_panel').fadeIn(150);
+			showRequirements();
 		}
 
 		$('#edit_add_requirement_btn').on('click', function() {
@@ -536,41 +575,43 @@
 				return;
 			}
 
-			response = postRequirement(getEditRequirementObject());
-
-			if (response.status == 201) {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#information_message").text("The requirement has been registered successfully.")
-				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-				$("#edit_panel").children().remove();
-				loadRequirements();
-				showRequirements();
-			} else {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#error_message").text($.parseJSON(response.responseText).error)
-				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
-			}
+			var requirementForRegistration = createRequiermentModelFromPanel();
+			var result = postResource('requirements', requirementForRegistration);
+			onRequirementModified(result, 201, 'The requirement has been registered successfully', false);
 		});
 
-		$('#edit_requirements_table').on('click', 'button[name=del_requirement_btn]', function(selector) {
-			if (!confirm("Are you sure to delete?")) {
+		$('#edit_delete_requirement_btn').on('click', function(selector) {
+			var rows = editRequirementsTable.fnGetNodes();
+			var rowCount = rows.length;
+
+			var selectedRowCount = 0;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_requirement_check]').prop('checked')) {
+					selectedRowCount = selectedRowCount + 1;
+				}
+			}
+
+			if (selectedRowCount == 0) {
+				alert('Check the requirements what you want to delete first');
 				return;
 			}
 
-			response = deleteRequirement(selector.currentTarget.value);
-
-			if (response.status == 204) {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#information_message").text("The requirement has been deleted successfully.")
-				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-				$("#edit_panel").children().remove();
-				loadRequirements();
-				showRequirements();
-			} else {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#error_message").text($.parseJSON(response.responseText).error)
-				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+			if (!confirm('Are you sure to delete selected requirements?')) {
+				return;
 			}
+
+			for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_requirement_check]').prop('checked')) {
+					var deletedRequirementID = parseInt($(row).find('input[name=edit_requirement_id]').val(), 0);
+					var result = deleteResource('requirements', deletedRequirementID);
+					if (!onRequirementModified(result, 204, null, true)) {
+						return;
+					}
+				}
+			}
+			onRequirementModified({status: 204}, 204, "The requirements has been deleted successfully", false);
 		});
 
 		onLoad();

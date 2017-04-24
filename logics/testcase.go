@@ -462,7 +462,7 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestCommand,
 		clientScriptTemplate := script.(*clayModels.Template)
 
 		newTestCommand := &models.TestCommand{
-			ServiceName:          fmt.Sprintf("%s_to_%s_%s_%s", requirement.SourcePort.Node.Name, requirement.DestinationPort.Node.Name, requirement.Service.Name, convertAccessibility(requirement.Accessibility)),
+			ServiceName:          fmt.Sprintf("%s_to_%s_%s_%s", requirement.SourcePort.Node.Name, requirement.DestinationPort.Node.Name, requirement.Service.Name, convertAccessibility(requirement.Access)),
 			ServerScriptTemplate: serverScriptTemplate,
 			ClientScriptTemplate: clientScriptTemplate,
 		}

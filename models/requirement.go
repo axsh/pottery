@@ -33,7 +33,7 @@ type Requirement struct {
 	DestinationPort   *loamModels.Port `json:"destination_port"`
 	ServiceID         int              `json:"service_id" gorm:"not null" sql:"type:integer references services(id) on delete cascade"`
 	Service           *Service         `json:"service"`
-	Accessibility     bool             `json:"accessibility"`
+	Access            bool             `json:"access"`
 }
 
 func NewProtocolModel() *Protocol {

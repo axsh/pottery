@@ -66,7 +66,7 @@ $ curl -X POST "localhost:8080/v1/connections" -H "Content-Type: application/jso
 $ curl -X POST "localhost:8080/v1/connections" -H "Content-Type: application/json" -d '{"service_id": 5, "protocol_id": 2, "port_number": 53}'
 $ curl -X POST "localhost:8080/v1/connections" -H "Content-Type: application/json" -d '{"service_id": 5, "protocol_id": 3, "port_number": 53}'
 $ # register communication requirements
-$ curl -X POST "localhost:8080/v1/requirements" -H "Content-Type: application/json" -d '{"source_port_id": 1, "destination_port_id": 2, "service_id": 1, "accessibility": true}'
+$ curl -X POST "localhost:8080/v1/requirements" -H "Content-Type: application/json" -d '{"source_port_id": {"Int64": 1, "Valid": true}, "destination_port_id": {"Int64": 2, "Valid": true}, "service_id": 1, "access": true}'
 ```
 
 # Example test_case
