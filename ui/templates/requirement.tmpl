@@ -94,7 +94,7 @@
 										<tbody class="table table-bordered" id="edit_requirements_table_body"></tbody>
 									</table>
 								</div>
-								<span style="float: left"><button class="btn btn-default" id="edit_delete_requirement_btn" type="button"><span class="glyphicon glyphicon-ok"></span> Delete</button></span>
+								<span style="float: left"><button class="btn btn-default" id="edit_delete_requirement_btn" type="button"><span class="glyphicon glyphicon-minus"></span> Delete</button></span>
 							</div>
 						</div>
 					</div>
@@ -176,7 +176,7 @@
 							<!-- Right Column -->
 							<div class="col-sm-8">
 								<!-- Service Edit Panel -->
-								<div class="panel panel-default" id="edit_service_panel">
+								<div class="panel panel-default panel-custom" id="edit_service_panel_right">
 									<!-- Edit-Service Panel -->
 									<div class="panel-heading">
 										<h3 class="panel-title">
@@ -229,10 +229,10 @@
 													<button id="edit_add_connection_btn" type="button" class="btn btn-default">
 														<span class="glyphicon glyphicon-plus"></span>
 													</button>
-													<button id="register_or_update_connection_btn" type="button" class="btn btn-default">
+													<button id="register_or_update_service_btn" type="button" class="btn btn-default">
 														<span class="glyphicon glyphicon-ok"></span>
 													</button>
-													<button id="cancel_register_or_update_connection_btn" type="button" class="btn btn-default">
+													<button id="cancel_register_or_update_service_btn" type="button" class="btn btn-default">
 														<span class="glyphicon glyphicon-remove"></span>
 													</button>
 												</span>
@@ -267,7 +267,7 @@
 										<th>Name</th>
 									</tr>
 								</thead>
-								<tbody></tbody>
+								<tbody id="edit_protocols_table_body"></tbody>
 							</table>
 							<div style="margin-left:10px;margin-bottom:10px;">
 								<span class="input-group-btn">
@@ -315,6 +315,8 @@
 		var editRequirementsTable = null;
 		var editConnectionsTable = null;
 		var editProtocolsTable = null;
+		var editServiceMode = null;
+		var editingService = null;
 
 		function loadResources() {
 			nodes = getResources('nodes', 'preloads=NodeType').resources;
@@ -383,6 +385,40 @@
 			return input;
 		}
 
+		function createSelectElement(name, style, options, value) {
+			var select =  $('<select>').prop('name', name).prop('class', 'form-control').prop('style', style);
+			var editSelectOptionsElement = createSelectOptionsElement(options);
+			for (var i = 0; i < editSelectOptionsElement.length; i = i + 1) {
+				if ((value == null) && (i == 0)) {
+						select.append(editSelectOptionsElement[i].attr('selected', 'selected'));
+				} else {
+					if (value == editSelectOptionsElement[i].val()) {
+						select.append(editSelectOptionsElement[i].attr('selected', 'selected'));
+					} else {
+						select.append(editSelectOptionsElement[i]);
+					}
+				}
+			}
+			return select[0];
+		}
+
+		function createSelectOptionsElement(options) {
+			var result = [];
+			for (var i = 0; i < options.length; i = i + 1) {
+				result.push($('<option>').val(options[i].value).text(options[i].text));
+			}
+			return result;
+		}
+
+		function createConnectionProtocolOptionList() {
+			var result = [];
+			for (var i = 0; i < protocols.length; i = i + 1) {
+				var protocol = protocols[i];
+				result.push({value: protocol.id, text: protocol.name});
+			}
+			return result;
+		}
+
 		function createRequiermentModelFromPanel() {
 			var result = {}
 			var validSource = true;
@@ -436,6 +472,56 @@
 			}
 		}
 
+		function onServiceModified(result, successCode, successMessage, ignoreSuccess) {
+			if (result.status == successCode) {
+				if (!ignoreSuccess) {
+					$('html,body').animate({
+						scrollTop: 0
+					}, 'slow');
+					$('#information_message').text(successMessage);
+					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+					$('#edit_service_panel_right').fadeOut(150);
+					loadResources();
+					showRequirements();
+					showServices(true);
+				}
+				return true;
+			}
+			else {
+				$('html,body').animate({
+					scrollTop: 0
+				}, 'slow');
+				$('#error_message').text(result.resource.error);
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+				return false;
+			}
+		}
+
+		function onProtocolModified(result, successCode, successMessage, ignoreSuccess) {
+			if (result.status == successCode) {
+				if (!ignoreSuccess) {
+					$('html,body').animate({
+						scrollTop: 0
+					}, 'slow');
+					$('#information_message').text(successMessage);
+					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+					$('#edit_service_panel_right').fadeOut(150);
+					loadResources();
+					showRequirements();
+					showServices(true);
+				}
+				return true;
+			}
+			else {
+				$('html,body').animate({
+					scrollTop: 0
+				}, 'slow');
+				$('#error_message').text(result.resource.error);
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+				return false;
+			}
+		}
+
 		function showRequirements() {
 			$("#edit_requirement_source_node").children().remove();
 			$("#edit_requirement_destination_node").children().remove();
@@ -443,7 +529,6 @@
 			$("#edit_requirement_destination_port").children().remove();
 			$("#edit_requirement_service").children().remove();
 			$("#edit_requirement_access").val('true');
-			$("#edit_requirements_table_body").children().remove();
 			editRequirementsTable.fnClearTable();
 
 			$("#edit_requirement_source_node").append($('<option>').val(0).text('Internet'));
@@ -465,7 +550,7 @@
 			}
 
 			for (var i = 0; i < requirements.length; i = i + 1) {
-				var requirement = requirements[i]
+				var requirement = requirements[i];
 				var sourcePort = portMap[requirement.source_port_id.Int64];
 				var sourceNode = nodeMap[sourcePort.node_id];
 				var destinationPort = portMap[requirement.destination_port_id.Int64];
@@ -479,6 +564,159 @@
 					convertAccess(requirement.access)
 				]);
 			}
+			editRequirementsTable.fnDraw();
+		}
+
+		function showServices(initializeServiceSelection) {
+			if (initializeServiceSelection) {
+				$("#services").children().remove();
+				for (var i = 0; i < services.length; i = i + 1) {
+					var service = services[i];
+					$("#services").append($('<option>').val(service.id).text(service.name));
+				}
+			}
+			$('#service_name').text('');
+			$('#connections').children().remove();
+
+			var service = serviceMap[$('#services').val()];
+			if (service != null) {
+				$('#service_name').append(service.name);
+				for (var i = 0; i < service.connections.length; i = i + 1) {
+					var connection = service.connections[i];
+					var connectionsTable = $('<div>').append(
+						$('<table>').prop('class', 'table table-bordered').append(
+							$('<tr>').append(
+								$('<table>').prop('class', 'table table-condensed table-striped').append(
+									$('<tr>').append(
+										$('<th>').prop('width', '50%').append(
+											'Protocol'
+										)
+									).append(
+										$('<th>').prop('width', '50%').append(
+											'Port Number'
+										)
+									)
+								).append(
+									$('<tr>').append(
+										$('<td>').prop('width', '50%').append(
+											connection.protocol.name
+										)
+									).append(
+										$('<td>').prop('width', '50%').append(
+											connection.port_number
+										)
+									)
+								)
+							)
+						)
+					).append(
+						$('<hr>')
+					);
+					$('#connections').append(connectionsTable);
+				}
+			}
+		}
+
+		function createServiceModel(id, name) {
+			var result = {
+				id: id,
+				name: name,
+				connections: []
+			}
+			return result;
+		}
+
+		function createServiceModelFromPanel() {
+			var editServiceID = $('#edit_service_id').val();
+			var editServiceName = $('#edit_service_name').val();
+			var result = {
+				id: parseInt(editServiceID),
+				name: editServiceName,
+				connections: createConnectionModelFromPanel(editServiceID)
+			}
+			return result;
+		}
+
+		function createConnectionModelFromPanel(editServiceID) {
+			var result = [];
+			var rows = editConnectionsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				var editConnectionID = $(row).find('input[name=edit_connection_id]').val();
+				var editProtocolID = $(row).find('select[name=edit_connection_protocol_id]').val();
+				var editConnectionPortNumber = $(row).find('input[name=edit_connection_port_number]').val();
+				var editConnectionModel = {
+					id: parseInt(editConnectionID),
+					protocol_id: parseInt(editProtocolID),
+					port_number: parseInt(editConnectionPortNumber),
+					service_id: parseInt(editServiceID)
+				};
+				result.push(editConnectionModel);
+			}
+			return result;
+		}
+
+		function getDeletedConnectionMap() {
+			var deletedConnectionMap = {};
+			var editingServiceConnections = editingService.connections;
+			for (var i = 0; i < editingServiceConnections.length; i = i + 1) {
+				var editingServiceConnection = editingServiceConnections[i];
+				deletedConnectionMap[editingServiceConnection.id] = editingServiceConnection;
+			}
+			var rows = editConnectionsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				var deletedConnectionId = parseInt($(row).find('input[name=edit_connection_id]').val(), 0);
+				delete(deletedConnectionMap[deletedConnectionId]);
+			}
+			return deletedConnectionMap;
+		}
+
+		function createProtocolModelFromPanel() {
+			var result = [];
+			var rows = editProtocolsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				var editProtocolID = $(row).find('input[name=edit_protocol_id]').val();
+				var editProtocolName = $(row).find('input[name=edit_protocol_name]').val();
+				var editProtocolModel = {
+					id: parseInt(editProtocolID),
+					name: editProtocolName,
+				};
+				result.push(editProtocolModel);
+			}
+			return result;
+		}
+
+		function getDeletedProtocolMap() {
+			var deletedProtocolMap = {};
+			for (var i = 0; i < protocols.length; i = i + 1) {
+				var editingProtocol = protocols[i];
+				deletedProtocolMap[editingProtocol.id] = editingProtocol;
+			}
+			var rows = editProtocolsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				var deletedProtocolID = parseInt($(row).find('input[name=edit_protocol_id]').val(), 0);
+				delete(deletedProtocolMap[deletedProtocolID]);
+			}
+			return deletedProtocolMap;
+		}
+
+		function showProtocols() {
+			editProtocolsTable.fnClearTable();
+			for (var i = 0; i < protocols.length; i = i + 1) {
+				var protocol = protocols[i];
+				editProtocolsTable.fnAddData([
+					createAlignedCheckboxElement('edit_protocol_check').outerHTML + createHiddenElement('edit_protocol_id', protocol.id).outerHTML,
+					createTextElement('edit_protocol_name', 'width:800px', 'name like icmp, tch, udp and gre', protocol.name).outerHTML,
+				]);
+			}
+			editProtocolsTable.fnDraw();
 		}
 
 		function onEditRequirementSourceNodeChanged(selector) {
@@ -519,6 +757,261 @@
 			}
 		}
 
+		function onEditService() {
+			if ($('#services').val() == null) {
+				alert('Add a service first.');
+				return;
+			}
+
+			$('#edit_service_panel_right').fadeOut(150, function() {
+				// Set edit mode to Update
+				editServiceMode = 'Update';
+				$('#register_or_update_service_panel_title').children().remove();
+				$('#register_or_update_service_panel_title').append($('<span>').text('Service update'));
+
+				// Save the editing service
+				editingService = serviceMap[$('#services').val()];
+
+				// Initialize service properties
+				$('#edit_service_id').val(editingService.id);
+				$('#edit_service_name').val(editingService.name);
+
+				// Initialize connections properties
+				var rows = editConnectionsTable.fnGetNodes();
+				var rowCount = rows.length;
+				for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+					editConnectionsTable.fnDeleteRow(i, null, false);
+				}
+
+				for (var i = 0; i < editingService.connections.length; i = i + 1) {
+					var connection = editingService.connections[i];
+					editConnectionsTable.fnAddData([
+						createAlignedCheckboxElement('edit_connection_check').outerHTML + createHiddenElement('edit_connection_id', connection.id).outerHTML,
+						createSelectElement('edit_connection_protocol_id', 'width:335px', createConnectionProtocolOptionList(), connection.protocol.id).outerHTML,
+						createTextElement('edit_connection_port_number', 'width:335px', 'value like 0xdad1c001', connection.port_number).outerHTML,
+					]);
+				}
+
+				$('#edit_service_panel_right').fadeIn(150, function() {
+					editConnectionsTable.fnDraw(true);
+				});
+			});
+		}
+
+		function onNewService() {
+			// Set edit mode to Register
+			editServiceMode = 'Register';
+			$('#register_or_update_service_panel_title').children().remove();
+			$('#register_or_update_service_panel_title').append($('<span>').text('Service registration'));
+
+			// Clear the editing service
+			editingService = createServiceModel(null, '');
+
+			// Initialize service properties
+			$('#edit_service_id').val(0);
+			$('#edit_service_name').val('');
+
+			// Initialize connections properties
+			var rows = editConnectionsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+				editConnectionsTable.fnDeleteRow(i, null, false);
+			}
+
+			$('#edit_service_panel_right').fadeIn(150, function() {
+				editConnectionsTable.fnDraw(true);
+			});
+		}
+
+		function onAddConnection() {
+			editConnectionsTable.fnAddData([
+				createAlignedCheckboxElement('edit_connection_check').outerHTML + createHiddenElement('edit_connection_id', 0).outerHTML,
+				createSelectElement('edit_connection_protocol_id', 'width:335px', createConnectionProtocolOptionList(), 0).outerHTML,
+				createTextElement('edit_connection_port_number', 'width:335px', 'name like 80', '').outerHTML,
+			]);
+			editConnectionsTable.fnDraw(true);
+		}
+
+		function onDeleteConnection() {
+			var rows = editConnectionsTable.fnGetNodes();
+			var rowCount = rows.length;
+
+			var selectedRowCount = 0;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_connection_check]').prop('checked')) {
+					selectedRowCount = selectedRowCount + 1;
+				}
+			}
+
+			if (selectedRowCount == 0) {
+				alert('Check the connections what you want to delete first');
+				return;
+			}
+
+			if (!confirm('Are you sure to delete selected connections?')) {
+				return;
+			}
+
+			for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_connection_check]').prop('checked')) {
+					editConnectionsTable.fnDeleteRow(row, null, false);
+				}
+			}
+			editConnectionsTable.fnDraw();
+		}
+
+		function onRegisterOrUpdateService() {
+			if (editServiceMode == 'Register') {
+				if (!confirm('Are you sure to register?')) {
+					return;
+				}
+			} else {
+				if (!confirm('Are you sure to update?')) {
+					return;
+				}
+			}
+
+			var connectionMapForDeletion = getDeletedConnectionMap();
+			var serviceForRegistrationOrUpdate = createServiceModelFromPanel();
+
+			for (key in connectionMapForDeletion){
+				var result = deleteResource('connections', key);
+				if (!onServiceModified(result, 204, null, true)) {
+					return;
+				}
+			}
+			if (editServiceMode == 'Register') {
+				var result = postResource('services', serviceForRegistrationOrUpdate);
+				onServiceModified(result, 201, 'The service has been registered successfully', false);
+			} else {
+				var result = putResource('services', serviceForRegistrationOrUpdate.id, serviceForRegistrationOrUpdate);
+				onServiceModified(result, 200, 'The service has been updated successfully', false);
+			}
+		}
+
+		function onDeleteService() {
+			if ($('#services').val() == null) {
+				alert('Add a service first.');
+				return;
+			}
+
+			if (!confirm('Are you sure to delete?')) {
+				return;
+			}
+
+			var serviceID = $('#services').val();
+
+			var result = deleteResource('services', serviceID);
+			onServiceModified(result, 204, 'The service was deleted successfully', false);
+		}
+
+		function onCancelRegisterOrUpdateService() {
+			if (!confirm('Are you sure to cancel?')) {
+				return;
+			}
+
+			$('html,body').animate({scrollTop:0},'slow');
+			$('#edit_service_panel_right').fadeOut(150);
+		}
+
+		function onAddProtocol() {
+			editProtocolsTable.fnAddData([
+				createAlignedCheckboxElement('edit_protocol_check').outerHTML + createHiddenElement('edit_protocol_id', 0).outerHTML,
+				createTextElement('edit_protocol_name', 'width:800px', 'name like icmp, tch, udp and gre', '').outerHTML,
+			]);
+			editProtocolsTable.fnDraw(true);
+		}
+
+		function onDeleteProtocol() {
+			var rows = editProtocolsTable.fnGetNodes();
+			var rowCount = rows.length;
+
+			var selectedRowCount = 0;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_protocol_check]').prop('checked')) {
+					selectedRowCount = selectedRowCount + 1;
+				}
+			}
+
+			if (selectedRowCount == 0) {
+				alert('Check the protocols what you want to delete first');
+				return;
+			}
+
+			if (!confirm('Are you sure to delete selected protocols?')) {
+				return;
+			}
+
+			for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_protocol_check]').prop('checked')) {
+					editProtocolsTable.fnDeleteRow(row, null, false);
+				}
+			}
+			editProtocolsTable.fnDraw();
+		}
+
+		function onUpdateProtocol() {
+			if (!confirm('Are you sure to update?')) {
+				return;
+			}
+
+			var protocolMapForDeletion = getDeletedProtocolMap();
+			var protocolsForUpdate = createProtocolModelFromPanel();
+
+			for (key in protocolMapForDeletion){
+				var result = deleteResource('protocols', key);
+				if (!onProtocolModified(result, 204, null, true)) {
+					return;
+				}
+			}
+
+			for (var i = 0; i < protocolsForUpdate.length; i = i + 1) {
+				var protocol = protocolsForUpdate[i];
+				var result = null;
+				if (protocol.id == 0) {
+					result = postResource('protocols', protocol);
+					onProtocolModified(result, 201, null, true);
+				} else {
+					result = putResource('protocols', protocol.id, protocol);
+					onProtocolModified(result, 200, null, true);
+				}
+			}
+			onProtocolModified({status: 200}, 200, "The protocols have been updated successfully", false);
+		}
+
+		function onCancelDeleteProtocol() {
+			if (!confirm('Are you sure to cancel?')) {
+				return;
+			}
+
+			$('html,body').animate({scrollTop:0},'slow');
+			showProtocols();
+		}
+
+		$('#edit_service_btn').on('click', function() {
+			onEditService();
+		});
+
+		$('#new_service_btn').on('click', function() {
+			onNewService();
+		});
+
+		$('#register_or_update_service_btn').on('click', function() {
+			onRegisterOrUpdateService();
+		});
+
+		$('#delete_service_btn').on('click', function() {
+			onDeleteService();
+		});
+
+		$('#cancel_register_or_update_service_btn').on('click', function() {
+			onCancelRegisterOrUpdateService();
+		});
+
 		$('#edit_requirement_source_node').on('change', function(selector) {
 			onEditRequirementSourceNodeChanged(selector);
 		});
@@ -526,6 +1019,10 @@
 		$('#edit_requirement_destination_node').on('change', function(selector) {
 			onEditRequirementDestinationNodeChanged(selector);
 		});
+
+		function onServiceChanged() {
+			showServices(false);
+		}
 
 		function onLoad() {
 			$.fn.dataTable.ext.order['dom-text'] = function  ( settings, col )
@@ -546,12 +1043,12 @@
 				searching: false,
 				columns: [
 					null,
-					{ orderDataType: 'dom-select' }
+					{ orderDataType: 'dom-text', type: 'string' }
 				]
 			});
 			editConnectionsTable = $('#edit_connections_table').dataTable({
 				scrollX: true,
-				scrollY: 250,
+				scrollY: 150,
 				searching: false,
 				columns: [
 					null,
@@ -561,13 +1058,15 @@
 			});
 			editRequirementsTable = $('#edit_requirements_table').dataTable({
 				scrollX: true,
-				scrollY: 250,
+				scrollY: 360,
 				searching: true
 			});
 
 			loadResources();
 			$('#communication_requirement_panel').fadeIn(150);
 			showRequirements();
+			showServices(true);
+			showProtocols();
 		}
 
 		$('#edit_add_requirement_btn').on('click', function() {
@@ -611,7 +1110,35 @@
 					}
 				}
 			}
-			onRequirementModified({status: 204}, 204, "The requirements has been deleted successfully", false);
+			onRequirementModified({status: 204}, 204, "The requirements have been deleted successfully", false);
+		});
+
+		$('#services').on('change', function() {
+			onServiceChanged();
+		});
+
+		$('#edit_add_connection_btn').on('click', function() {
+			onAddConnection();
+		});
+
+		$('#edit_delete_connection_btn').on('click', function() {
+			onDeleteConnection();
+		});
+
+		$('#edit_add_protocol_btn').on('click', function() {
+			onAddProtocol();
+		});
+
+		$('#edit_delete_protocol_btn').on('click', function() {
+			onDeleteProtocol();
+		});
+
+		$('#register_or_update_protocol_btn').on('click', function() {
+			onUpdateProtocol();
+		});
+
+		$('#cancel_register_or_update_protocol_btn').on('click', function() {
+			onCancelDeleteProtocol();
 		});
 
 		onLoad();
