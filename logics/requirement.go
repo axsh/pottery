@@ -1,11 +1,13 @@
 package logics
 
 import (
+	"database/sql"
 	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayLogics "github.com/qb0C80aE/clay/logics"
 	clayModels "github.com/qb0C80aE/clay/models"
 	"github.com/qb0C80aE/clay/utils/mapstruct"
+	loamModels "github.com/qb0C80aE/loam/models"
 	"github.com/qb0C80aE/pottery/models"
 	"net/url"
 	"strconv"
@@ -24,6 +26,18 @@ type connectionLogic struct {
 }
 
 type requirementLogic struct {
+	*clayLogics.BaseLogic
+}
+
+type testServerScriptGenerationLogic struct {
+	*clayLogics.BaseLogic
+}
+
+type testClientScriptGenerationLogic struct {
+	*clayLogics.BaseLogic
+}
+
+type testProgramLogic struct {
 	*clayLogics.BaseLogic
 }
 
@@ -50,6 +64,27 @@ func newConnectionLogic() *connectionLogic {
 
 func newRequirementLogic() *requirementLogic {
 	logic := &requirementLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newTestServerScriptGenerationLogic() *testServerScriptGenerationLogic {
+	logic := &testServerScriptGenerationLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newTestClientScriptGenerationLogic() *testClientScriptGenerationLogic {
+	logic := &testClientScriptGenerationLogic{
+		BaseLogic: &clayLogics.BaseLogic{},
+	}
+	return logic
+}
+
+func newTestProgramLogic() *testProgramLogic {
+	logic := &testProgramLogic{
 		BaseLogic: &clayLogics.BaseLogic{},
 	}
 	return logic
@@ -204,6 +239,22 @@ func (logic *serviceLogic) Update(db *gorm.DB, id string, _ url.Values, data int
 }
 
 func (logic *serviceLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
+
+	testProgram := &models.TestProgram{}
+
+	// Template cannot be deleted as cascade mode, it has to be handled manually.
+	if err := db.First(&testProgram, "service_id = ?", id).Error; err == nil {
+		if testProgram.ClientScriptTemplateID != 0 {
+			if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ClientScriptTemplateID), nil); err != nil {
+				return err
+			}
+		}
+		if testProgram.ServerScriptTemplateID != 0 {
+			if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ServerScriptTemplateID), nil); err != nil {
+				return err
+			}
+		}
+	}
 
 	service := &models.Service{}
 
@@ -439,10 +490,217 @@ func (logic *requirementLogic) LoadToDesign(db *gorm.DB, data interface{}) error
 	return nil
 }
 
+func getTestProgram(db *gorm.DB, id string) (*models.TestProgram, map[string]interface{}, error) {
+
+	internetNode := &loamModels.Node{
+		ID:   0,
+		Name: "Internet",
+	}
+	internetPort := &loamModels.Port{
+		ID:     0,
+		Number: 0,
+		Layer:  3,
+		Name:   "Internet",
+		NodeID: internetNode.ID,
+		Node:   internetNode,
+		MacAddress: sql.NullString{
+			String: "00:00:00:00:00:00",
+			Valid:  true,
+		},
+		Ipv4Address: sql.NullString{
+			String: "0.0.0.0",
+			Valid:  true,
+		},
+		Ipv4Prefix: sql.NullInt64{
+			Int64: 0,
+			Valid: true,
+		},
+	}
+	internetNode.Ports = []*loamModels.Port{internetPort}
+
+	requirement := &models.Requirement{}
+	if err := db.Preload("Service").
+		Preload("Service.Connections").
+		Preload("SourcePort").
+		Preload("SourcePort.Node").
+		Preload("DestinationPort").
+		Preload("DestinationPort.Node").Select("*").First(requirement, id).Error; err != nil {
+		return nil, nil, err
+	}
+
+	if !requirement.SourcePortID.Valid {
+		requirement.SourcePort = internetPort
+	}
+
+	if !requirement.DestinationPortID.Valid {
+		requirement.DestinationPort = internetPort
+	}
+
+	testProgram := &models.TestProgram{}
+	if err := db.Preload("Service").
+		Preload("ServerScriptTemplate").
+		Preload("ClientScriptTemplate").Select("*").First(testProgram, id).Error; err != nil {
+		return nil, nil, err
+	}
+
+	templateParameterMap := map[string]interface{}{
+		"SourcePort":      requirement.SourcePort,
+		"DestinationPort": requirement.DestinationPort,
+	}
+
+	return testProgram, templateParameterMap, nil
+}
+
+func GenerateTestServerScript(db *gorm.DB, id string) (interface{}, error) {
+	testProgram, templateParameterMap, err := getTestProgram(db, id)
+	if err != nil {
+		return "", err
+	}
+
+	script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ServerScriptTemplateID), templateParameterMap)
+	if err != nil {
+		return "", err
+	}
+
+	return script, nil
+}
+
+func GenerateTestClientScript(db *gorm.DB, id string) (interface{}, error) {
+	testProgram, templateParameterMap, err := getTestProgram(db, id)
+	if err != nil {
+		return "", err
+	}
+
+	script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ClientScriptTemplateID), templateParameterMap)
+	if err != nil {
+		return "", err
+	}
+
+	return script, nil
+}
+
+func (logic *testServerScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
+	return GenerateTestServerScript(db, id)
+}
+
+func (logic *testClientScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
+	return GenerateTestClientScript(db, id)
+}
+
+func (logic *testProgramLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
+
+	testProgram := &models.TestProgram{}
+
+	if err := db.Select(queryFields).First(testProgram, id).Error; err != nil {
+		return nil, err
+	}
+
+	return testProgram, nil
+
+}
+
+func (logic *testProgramLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
+
+	testPrograms := []*models.TestProgram{}
+
+	if err := db.Select(queryFields).Find(&testPrograms).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]interface{}, len(testPrograms))
+	for i, data := range testPrograms {
+		result[i] = data
+	}
+
+	return result, nil
+
+}
+
+func (logic *testProgramLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
+
+	testProgram := data.(*models.TestProgram)
+
+	if err := db.Create(&testProgram).Error; err != nil {
+		return nil, err
+	}
+
+	return testProgram, nil
+}
+
+func (logic *testProgramLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
+
+	testProgram := data.(*models.TestProgram)
+	testProgram.ID, _ = strconv.Atoi(id)
+
+	if err := db.Save(testProgram).Error; err != nil {
+		return nil, err
+	}
+
+	return testProgram, nil
+}
+
+func (logic *testProgramLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
+
+	testProgram := &models.TestProgram{}
+
+	if err := db.First(&testProgram, id).Error; err != nil {
+		return err
+	}
+
+	if err := db.Delete(&testProgram).Error; err != nil {
+		return err
+	}
+
+	// Template cannot be deleted as cascade mode, it has to be handled manually.
+	if testProgram.ClientScriptTemplateID != 0 {
+		if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ClientScriptTemplateID), nil); err != nil {
+			return err
+		}
+	}
+	if testProgram.ServerScriptTemplateID != 0 {
+		if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ServerScriptTemplateID), nil); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (logic *testProgramLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+	testPrograms := []*models.TestProgram{}
+	if err := db.Select("*").Find(&testPrograms).Error; err != nil {
+		return "", nil, err
+	}
+	return extensions.RegisteredResourceName(models.SharedTestProgramModel()), testPrograms, nil
+}
+
+func (logic *testProgramLogic) DeleteFromDesign(db *gorm.DB) error {
+	return db.Delete(models.SharedTestProgramModel()).Error
+}
+
+func (logic *testProgramLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+	container := []*models.TestProgram{}
+	design := data.(*clayModels.Design)
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedTestProgramModel())]; exists {
+		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
+			return err
+		}
+		for _, testProgram := range container {
+			if err := db.Create(testProgram).Error; err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 var uniqueProtocolLogic = newProtocolLogic()
 var uniqueServiceLogic = newServiceLogic()
 var uniqueConnectionLogic = newConnectionLogic()
 var uniqueRequirementLogic = newRequirementLogic()
+var uniqueTestServerScriptGenerationLogic = newTestServerScriptGenerationLogic()
+var uniqueTestClientScriptGenerationLogic = newTestClientScriptGenerationLogic()
+var uniqueTestProgramLogic = newTestProgramLogic()
 
 func UniqueProtocolLogic() extensions.Logic {
 	return uniqueProtocolLogic
@@ -460,13 +718,27 @@ func UniqueRequirementLogic() extensions.Logic {
 	return uniqueRequirementLogic
 }
 
+func UniqueTestServerScriptGenerationLogic() extensions.Logic {
+	return uniqueTestServerScriptGenerationLogic
+}
+
+func UniqueTestClientScriptGenerationLogic() extensions.Logic {
+	return uniqueTestClientScriptGenerationLogic
+}
+
+func UniqueTestProgramLogic() extensions.Logic {
+	return uniqueTestProgramLogic
+}
+
 func init() {
 	extensions.RegisterDesignAccessor(uniqueProtocolLogic)
 	extensions.RegisterDesignAccessor(uniqueServiceLogic)
 	extensions.RegisterDesignAccessor(uniqueConnectionLogic)
 	extensions.RegisterDesignAccessor(uniqueRequirementLogic)
+	extensions.RegisterDesignAccessor(uniqueTestProgramLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedProtocolModel(), uniqueProtocolLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedServiceModel(), uniqueServiceLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedConnectionModel(), uniqueConnectionLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedRequirementModel(), uniqueRequirementLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedTestProgramModel(), uniqueTestProgramLogic)
 }

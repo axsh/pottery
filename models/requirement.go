@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"github.com/qb0C80aE/clay/extensions"
+	clayModels "github.com/qb0C80aE/clay/models"
 	loamModels "github.com/qb0C80aE/loam/models"
 )
 
@@ -15,6 +16,7 @@ type Service struct {
 	ID          int           `json:"id" gorm:"primary_key;AUTO_INCREMENT"`
 	Name        string        `json:"name" gorm:"not null;unique"`
 	Connections []*Connection `json:"connections"`
+	TestProgram *TestProgram  `json:"test_program"`
 }
 
 type Connection struct {
@@ -36,6 +38,17 @@ type Requirement struct {
 	Access            bool             `json:"access"`
 }
 
+type TestProgram struct {
+	ID                     int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
+	Name                   string               `json:"name" gorm:"not null;unique"`
+	ServiceID              int                  `json:"service_id" gorm:"not null;unique" sql:"type:integer references services(id) on delete cascade"`
+	Service                *Service             `json:"service"`
+	ServerScriptTemplateID int                  `json:"server_script_template_id" gorm:"not null;unique" sql:"type:integer references templates(id) on delete cascade"`
+	ServerScriptTemplate   *clayModels.Template `json:"server_script_template"`
+	ClientScriptTemplateID int                  `json:"client_script_template_id" gorm:"not null;unique" sql:"type:integer references templates(id) on delete cascade"`
+	ClientScriptTemplate   *clayModels.Template `json:"client_script_template"`
+}
+
 func NewProtocolModel() *Protocol {
 	return &Protocol{}
 }
@@ -52,10 +65,15 @@ func NewRequirementModel() *Requirement {
 	return &Requirement{}
 }
 
+func NewTestProgramModel() *TestProgram {
+	return &TestProgram{}
+}
+
 var sharedProtocolModel = NewProtocolModel()
 var sharedServiceModel = NewServiceModel()
 var sharedConnectionModel = NewConnectionModel()
 var sharedRequirementModel = NewRequirementModel()
+var sharedTestProgramModel = NewTestProgramModel()
 
 func SharedProtocolModel() *Protocol {
 	return sharedProtocolModel
@@ -73,9 +91,14 @@ func SharedRequirementModel() *Requirement {
 	return sharedRequirementModel
 }
 
+func SharedTestProgramModel() *TestProgram {
+	return sharedTestProgramModel
+}
+
 func init() {
 	extensions.RegisterModel(sharedProtocolModel)
 	extensions.RegisterModel(sharedServiceModel)
 	extensions.RegisterModel(sharedConnectionModel)
 	extensions.RegisterModel(sharedRequirementModel)
+	extensions.RegisterModel(sharedTestProgramModel)
 }
