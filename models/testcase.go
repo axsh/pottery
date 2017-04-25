@@ -9,7 +9,7 @@ type TestCommand struct {
 	ID                     int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
 	ServiceName            string               `json:"service_name" form:"service_name" gorm:"not null;unique"`
 	ServerScriptTemplateID int                  `json:"server_script_template_id"`
-	ServerScriptTemplate   *clayModels.Template `json:"client_script_template"`
+	ServerScriptTemplate   *clayModels.Template `json:"server_script_template"`
 	ClientScriptTemplateID int                  `json:"client_script_template_id"`
 	ClientScriptTemplate   *clayModels.Template `json:"client_script_template"`
 }
