@@ -4,7 +4,7 @@
 	<div class="panel panel-default panel-custom" id="communication_requirement_panel">
 		<div class="panel-heading">
 			<h1 class="panel-title">
-				<span class="glyphicon glyphicon-wrench"></span> Communication Requirements
+				<span class="glyphicon glyphicon-wrench"></span> Firewall Test Definitions
 			</h1>
 		</div>
 		<div class="panel-body">
@@ -195,8 +195,8 @@
 												</th>
 											</tr>
 											<tr>
-												<td width="15%">Name</td>
-												<td width="85%">
+												<td width="25%">Name</td>
+												<td width="75%">
 													<input type="hidden" id="edit_service_id">
 													<input id="edit_service_name" type="text" name="edit_service_name" placeholder="service name like ssh, http, https" class="form-control">
 												</td>
@@ -295,8 +295,6 @@
 	</div>
 </div>
 
-
-
 <script language="javascript">
 	(function($) {
 
@@ -312,6 +310,7 @@
 		var serviceMap = null;
 		var requirements = null;
 		var requirementMap = null;
+
 		var editRequirementsTable = null;
 		var editConnectionsTable = null;
 		var editProtocolsTable = null;
@@ -788,7 +787,7 @@
 					editConnectionsTable.fnAddData([
 						createAlignedCheckboxElement('edit_connection_check').outerHTML + createHiddenElement('edit_connection_id', connection.id).outerHTML,
 						createSelectElement('edit_connection_protocol_id', 'width:335px', createConnectionProtocolOptionList(), connection.protocol.id).outerHTML,
-						createTextElement('edit_connection_port_number', 'width:335px', 'value like 0xdad1c001', connection.port_number).outerHTML,
+						createTextElement('edit_connection_port_number', 'width:335px', 'value like 80', connection.port_number).outerHTML,
 					]);
 				}
 
