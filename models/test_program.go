@@ -7,6 +7,7 @@ import (
 
 type TestProgram struct {
 	ID                     int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
+	Name                   string               `json:"name" gorm:"not null;unique"`
 	ServiceID              int                  `json:"service_id" gorm:"not null;unique" sql:"type:integer references services(id) on delete cascade"`
 	Service                *Service             `json:"service"`
 	ServerScriptTemplateID int                  `json:"server_script_template_id"`

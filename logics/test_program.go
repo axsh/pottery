@@ -1,17 +1,16 @@
 package logics
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayLogics "github.com/qb0C80aE/clay/logics"
 	clayModels "github.com/qb0C80aE/clay/models"
-	"github.com/qb0C80aE/clay/utils/mapstruct"
 	loamModels "github.com/qb0C80aE/loam/models"
 	"github.com/qb0C80aE/pottery/models"
 	"strconv"
-	"bytes"
 )
 
 type testProgramLogic struct {
@@ -149,15 +148,16 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestProgram,
 
 	result := []*models.TestProgram{}
 
-	testCase := &models.TestCase{}
-	if err := db.Preload("TestPatterns").
-		Preload("TestPatterns.TestProgram").First(&testCase, id).Error; err != nil {
-		return "", result, err
+	testPrograms := []*models.TestProgram{}
+	if err := db.Preload("Service").
+		Preload("ServerScriptTemplate").
+		Preload("ClientScriptTemplate").Select("*").Find(&testPrograms).Error; err != nil {
+		return result, err
 	}
 
-	testProgramMap := make(map[string]*models.TestProgram)
-	for _, testPattern := range testCase.TestPatterns {
-		testProgramMap[testPattern.TestProgram.ServiceName] = testPattern.TestProgram
+	testProgramMap := make(map[string]*models.TestProgram, len(testPrograms))
+	for _, testProgram := range testPrograms {
+		testProgramMap[testProgram.Service.Name] = testProgram
 	}
 
 	requirements := []*models.Requirement{}
@@ -167,7 +167,7 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestProgram,
 		Preload("SourcePort.Node").
 		Preload("DestinationPort").
 		Preload("DestinationPort.Node").Select("*").Find(&requirements).Error; err != nil {
-		return "", result, err
+		return result, err
 	}
 
 	internetNode := &loamModels.Node{
@@ -205,27 +205,31 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestProgram,
 		}
 
 		testProgram := testProgramMap[requirement.Service.Name]
-		script, err := clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testProgram.ServerScriptTemplateID))
+		templateParameterMap := map[interface{}]interface{}{
+			"SourcePort":      requirement.SourcePort,
+			"DestinationPort": requirement.DestinationPort,
+		}
+		script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ServerScriptTemplateID), templateParameterMap)
 		if err != nil {
-			return "", nil, err
+			return nil, err
 		}
 		serverScriptTemplate := script.(*clayModels.Template)
 
-		script, err = clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testProgram.ClientScriptTemplateID))
+		script, err = clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ClientScriptTemplateID), templateParameterMap)
 		if err != nil {
-			return "", nil, err
+			return nil, err
 		}
 		clientScriptTemplate := script.(*clayModels.Template)
 
 		newTestProgram := &models.TestProgram{
-			ServiceName:          fmt.Sprintf("%s_to_%s_%s_%s", requirement.SourcePort.Node.Name, requirement.DestinationPort.Node.Name, requirement.Service.Name, convertAccessibility(requirement.Access)),
+			Name:                 fmt.Sprintf("%s_to_%s_%s_%s", requirement.SourcePort.Node.Name, requirement.DestinationPort.Node.Name, requirement.Service.Name, convertAccess(requirement.Access)),
 			ServerScriptTemplate: serverScriptTemplate,
 			ClientScriptTemplate: clientScriptTemplate,
 		}
 		result = append(result, newTestProgram)
 	}
 
-	return testCase.TestRunnerScriptTemplate, result, nil
+	return result, nil
 
 }
 
