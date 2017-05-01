@@ -74,8 +74,8 @@ func SharedRequirementModel() *Requirement {
 }
 
 func init() {
-	extensions.RegisterModel("Protocol", sharedProtocolModel)
-	extensions.RegisterModel("Service", sharedServiceModel)
-	extensions.RegisterModel("Connection", sharedConnectionModel)
-	extensions.RegisterModel("Requirement", sharedRequirementModel)
+	extensions.RegisterModel(sharedProtocolModel)
+	extensions.RegisterModel(sharedServiceModel)
+	extensions.RegisterModel(sharedConnectionModel)
+	extensions.RegisterModel(sharedRequirementModel)
 }

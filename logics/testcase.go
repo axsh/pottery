@@ -11,6 +11,7 @@ import (
 	"github.com/qb0C80aE/clay/utils/mapstruct"
 	loamModels "github.com/qb0C80aE/loam/models"
 	"github.com/qb0C80aE/pottery/models"
+	"net/url"
 	"strconv"
 )
 
@@ -47,7 +48,7 @@ func newTestCaseLogic() *testCaseLogic {
 	return logic
 }
 
-func (logic *testCommandLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *testCommandLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
 	testCommand := &models.TestCommand{}
 
@@ -59,7 +60,7 @@ func (logic *testCommandLogic) GetSingle(db *gorm.DB, id string, queryFields str
 
 }
 
-func (logic *testCommandLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
+func (logic *testCommandLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
 	testCommands := []*models.TestCommand{}
 
@@ -76,7 +77,7 @@ func (logic *testCommandLogic) GetMulti(db *gorm.DB, queryFields string) (interf
 
 }
 
-func (logic *testCommandLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *testCommandLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
 	testCommand := data.(*models.TestCommand)
 
@@ -87,7 +88,7 @@ func (logic *testCommandLogic) Create(db *gorm.DB, data interface{}) (interface{
 	return testCommand, nil
 }
 
-func (logic *testCommandLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *testCommandLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
 	testCommand := data.(*models.TestCommand)
 	testCommand.ID, _ = strconv.Atoi(id)
@@ -99,7 +100,7 @@ func (logic *testCommandLogic) Update(db *gorm.DB, id string, data interface{}) 
 	return testCommand, nil
 }
 
-func (logic *testCommandLogic) Delete(db *gorm.DB, id string) error {
+func (logic *testCommandLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
 	testCommand := &models.TestCommand{}
 
@@ -151,7 +152,7 @@ func (logic *testCommandLogic) GenerateTemplateParameter(db *gorm.DB) (string, i
 	return "TestCommands", testCommands, nil
 }
 
-func (logic *testPatternLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *testPatternLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
 	testPattern := &models.TestPattern{}
 
@@ -163,7 +164,7 @@ func (logic *testPatternLogic) GetSingle(db *gorm.DB, id string, queryFields str
 
 }
 
-func (logic *testPatternLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
+func (logic *testPatternLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
 	testPatterns := []*models.TestPattern{}
 
@@ -180,7 +181,7 @@ func (logic *testPatternLogic) GetMulti(db *gorm.DB, queryFields string) (interf
 
 }
 
-func (logic *testPatternLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *testPatternLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
 	testPattern := data.(*models.TestPattern)
 
@@ -191,7 +192,7 @@ func (logic *testPatternLogic) Create(db *gorm.DB, data interface{}) (interface{
 	return testPattern, nil
 }
 
-func (logic *testPatternLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *testPatternLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
 	testPattern := data.(*models.TestPattern)
 	testPattern.ID, _ = strconv.Atoi(id)
@@ -203,7 +204,7 @@ func (logic *testPatternLogic) Update(db *gorm.DB, id string, data interface{}) 
 	return testPattern, nil
 }
 
-func (logic *testPatternLogic) Delete(db *gorm.DB, id string) error {
+func (logic *testPatternLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
 	testPattern := &models.TestPattern{}
 
@@ -255,7 +256,7 @@ func (logic *testPatternLogic) GenerateTemplateParameter(db *gorm.DB) (string, i
 	return "TestPatterns", testPatterns, nil
 }
 
-func (logic *testCaseLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *testCaseLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
 	testCase := &models.TestCase{}
 
@@ -267,7 +268,7 @@ func (logic *testCaseLogic) GetSingle(db *gorm.DB, id string, queryFields string
 
 }
 
-func (logic *testCaseLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
+func (logic *testCaseLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
 	testCases := []*models.TestCase{}
 
@@ -284,7 +285,7 @@ func (logic *testCaseLogic) GetMulti(db *gorm.DB, queryFields string) (interface
 
 }
 
-func (logic *testCaseLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *testCaseLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
 	testCase := data.(*models.TestCase)
 
@@ -295,7 +296,7 @@ func (logic *testCaseLogic) Create(db *gorm.DB, data interface{}) (interface{}, 
 	return testCase, nil
 }
 
-func (logic *testCaseLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *testCaseLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
 	testCase := data.(*models.TestCase)
 	testCase.ID, _ = strconv.Atoi(id)
@@ -307,7 +308,7 @@ func (logic *testCaseLogic) Update(db *gorm.DB, id string, data interface{}) (in
 	return testCase, nil
 }
 
-func (logic *testCaseLogic) Delete(db *gorm.DB, id string) error {
+func (logic *testCaseLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
 	testCase := &models.TestCase{}
 
@@ -323,7 +324,7 @@ func (logic *testCaseLogic) Delete(db *gorm.DB, id string) error {
 
 }
 
-func (logic *testCaseLogic) Patch(db *gorm.DB, id string) (interface{}, error) {
+func (logic *testCaseLogic) Patch(db *gorm.DB, id string, _ url.Values) (interface{}, error) {
 	testRunnerScript, testCommands, err := generateTestScripts(db, id)
 	if err != nil {
 		return "", err
@@ -449,13 +450,13 @@ func generateTestScripts(db *gorm.DB, id string) (string, []*models.TestCommand,
 		}
 
 		testCommand := testCommandMap[requirement.Service.Name]
-		script, err := clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testCommand.ServerScriptTemplateID))
+		script, err := clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testCommand.ServerScriptTemplateID), url.Values{})
 		if err != nil {
 			return "", nil, err
 		}
 		serverScriptTemplate := script.(*clayModels.Template)
 
-		script, err = clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testCommand.ClientScriptTemplateID))
+		script, err = clayLogics.UniqueTemplateLogic().Patch(db, strconv.Itoa(testCommand.ClientScriptTemplateID), url.Values{})
 		if err != nil {
 			return "", nil, err
 		}

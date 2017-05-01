@@ -23,7 +23,6 @@ type testCaseController struct {
 func newTestCommandController() extensions.Controller {
 	controller := &testCommandController{
 		BaseController: clayControllers.NewBaseController(
-			"test_command",
 			models.SharedTestCommandModel(),
 			logics.UniqueTestCommandLogic(),
 		),
@@ -35,7 +34,6 @@ func newTestCommandController() extensions.Controller {
 func newTestPatternController() extensions.Controller {
 	controller := &testPatternController{
 		BaseController: clayControllers.NewBaseController(
-			"test_pattern",
 			models.SharedTestPatternModel(),
 			logics.UniqueTestPatternLogic(),
 		),
@@ -47,7 +45,6 @@ func newTestPatternController() extensions.Controller {
 func newTestCaseController() extensions.Controller {
 	controller := &testCaseController{
 		BaseController: clayControllers.NewBaseController(
-			"test_case",
 			models.SharedTestCaseModel(),
 			logics.UniqueTestCaseLogic(),
 		),
@@ -57,8 +54,8 @@ func newTestCaseController() extensions.Controller {
 }
 
 func (controller *testCommandController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
-	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {
@@ -79,8 +76,8 @@ func (controller *testCommandController) RouteMap() map[int]map[string]gin.Handl
 }
 
 func (controller *testPatternController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
-	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {
@@ -101,8 +98,8 @@ func (controller *testPatternController) RouteMap() map[int]map[string]gin.Handl
 }
 
 func (controller *testCaseController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
-	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {

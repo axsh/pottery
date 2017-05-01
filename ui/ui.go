@@ -106,7 +106,9 @@ func (routerInitializer *routerInitializer) InitializeEarly(r *gin.Engine) error
 		fmt.Sprintf("%s/%s", templateBase, "index.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "navigation_bar.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "network.tmpl"),
+		fmt.Sprintf("%s/%s", templateBase, "requirement.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "template.tmpl"),
+		fmt.Sprintf("%s/%s", templateBase, "testscript.tmpl"),
 	}
 	htmlTemplate, err := loadTemplates(templateFileNames...)
 	if err != nil {

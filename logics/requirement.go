@@ -7,6 +7,7 @@ import (
 	clayModels "github.com/qb0C80aE/clay/models"
 	"github.com/qb0C80aE/clay/utils/mapstruct"
 	"github.com/qb0C80aE/pottery/models"
+	"net/url"
 	"strconv"
 )
 
@@ -54,7 +55,7 @@ func newRequirementLogic() *requirementLogic {
 	return logic
 }
 
-func (logic *protocolLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *protocolLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
 	protocol := &models.Protocol{}
 
@@ -66,7 +67,7 @@ func (logic *protocolLogic) GetSingle(db *gorm.DB, id string, queryFields string
 
 }
 
-func (logic *protocolLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
+func (logic *protocolLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
 	protocols := []*models.Protocol{}
 
@@ -83,7 +84,7 @@ func (logic *protocolLogic) GetMulti(db *gorm.DB, queryFields string) (interface
 
 }
 
-func (logic *protocolLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *protocolLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
 	protocol := data.(*models.Protocol)
 
@@ -94,7 +95,7 @@ func (logic *protocolLogic) Create(db *gorm.DB, data interface{}) (interface{}, 
 	return protocol, nil
 }
 
-func (logic *protocolLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *protocolLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
 	protocol := data.(*models.Protocol)
 	protocol.ID, _ = strconv.Atoi(id)
@@ -106,7 +107,7 @@ func (logic *protocolLogic) Update(db *gorm.DB, id string, data interface{}) (in
 	return protocol, nil
 }
 
-func (logic *protocolLogic) Delete(db *gorm.DB, id string) error {
+func (logic *protocolLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
 	protocol := &models.Protocol{}
 
@@ -158,7 +159,7 @@ func (logic *protocolLogic) GenerateTemplateParameter(db *gorm.DB) (string, inte
 	return "Protocols", protocols, nil
 }
 
-func (logic *serviceLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *serviceLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
 	service := &models.Service{}
 
@@ -170,7 +171,7 @@ func (logic *serviceLogic) GetSingle(db *gorm.DB, id string, queryFields string)
 
 }
 
-func (logic *serviceLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
+func (logic *serviceLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
 	services := []*models.Service{}
 
@@ -187,7 +188,7 @@ func (logic *serviceLogic) GetMulti(db *gorm.DB, queryFields string) (interface{
 
 }
 
-func (logic *serviceLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *serviceLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
 	service := data.(*models.Service)
 
@@ -198,7 +199,7 @@ func (logic *serviceLogic) Create(db *gorm.DB, data interface{}) (interface{}, e
 	return service, nil
 }
 
-func (logic *serviceLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *serviceLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
 	service := data.(*models.Service)
 	service.ID, _ = strconv.Atoi(id)
@@ -210,7 +211,7 @@ func (logic *serviceLogic) Update(db *gorm.DB, id string, data interface{}) (int
 	return service, nil
 }
 
-func (logic *serviceLogic) Delete(db *gorm.DB, id string) error {
+func (logic *serviceLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
 	service := &models.Service{}
 
@@ -262,7 +263,7 @@ func (logic *serviceLogic) GenerateTemplateParameter(db *gorm.DB) (string, inter
 	return "Services", services, nil
 }
 
-func (logic *connectionLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *connectionLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
 	connection := &models.Connection{}
 
@@ -274,7 +275,7 @@ func (logic *connectionLogic) GetSingle(db *gorm.DB, id string, queryFields stri
 
 }
 
-func (logic *connectionLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
+func (logic *connectionLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
 	connections := []*models.Connection{}
 
@@ -291,7 +292,7 @@ func (logic *connectionLogic) GetMulti(db *gorm.DB, queryFields string) (interfa
 
 }
 
-func (logic *connectionLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *connectionLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
 	connection := data.(*models.Connection)
 
@@ -302,7 +303,7 @@ func (logic *connectionLogic) Create(db *gorm.DB, data interface{}) (interface{}
 	return connection, nil
 }
 
-func (logic *connectionLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *connectionLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
 	connection := data.(*models.Connection)
 	connection.ID, _ = strconv.Atoi(id)
@@ -314,7 +315,7 @@ func (logic *connectionLogic) Update(db *gorm.DB, id string, data interface{}) (
 	return connection, nil
 }
 
-func (logic *connectionLogic) Delete(db *gorm.DB, id string) error {
+func (logic *connectionLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
 	connection := &models.Connection{}
 
@@ -366,7 +367,7 @@ func (logic *connectionLogic) GenerateTemplateParameter(db *gorm.DB) (string, in
 	return "Connections", connections, nil
 }
 
-func (logic *requirementLogic) GetSingle(db *gorm.DB, id string, queryFields string) (interface{}, error) {
+func (logic *requirementLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
 	requirement := &models.Requirement{}
 
@@ -378,7 +379,7 @@ func (logic *requirementLogic) GetSingle(db *gorm.DB, id string, queryFields str
 
 }
 
-func (logic *requirementLogic) GetMulti(db *gorm.DB, queryFields string) (interface{}, error) {
+func (logic *requirementLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
 	requirements := []*models.Requirement{}
 
@@ -395,7 +396,7 @@ func (logic *requirementLogic) GetMulti(db *gorm.DB, queryFields string) (interf
 
 }
 
-func (logic *requirementLogic) Create(db *gorm.DB, data interface{}) (interface{}, error) {
+func (logic *requirementLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
 	requirement := data.(*models.Requirement)
 
@@ -406,7 +407,7 @@ func (logic *requirementLogic) Create(db *gorm.DB, data interface{}) (interface{
 	return requirement, nil
 }
 
-func (logic *requirementLogic) Update(db *gorm.DB, id string, data interface{}) (interface{}, error) {
+func (logic *requirementLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
 	requirement := data.(*models.Requirement)
 	requirement.ID, _ = strconv.Atoi(id)
@@ -418,7 +419,7 @@ func (logic *requirementLogic) Update(db *gorm.DB, id string, data interface{}) 
 	return requirement, nil
 }
 
-func (logic *requirementLogic) Delete(db *gorm.DB, id string) error {
+func (logic *requirementLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
 	requirement := &models.Requirement{}
 

@@ -27,7 +27,6 @@ type requirementController struct {
 func newProtocolController() extensions.Controller {
 	controller := &protocolController{
 		BaseController: clayControllers.NewBaseController(
-			"protocol",
 			models.SharedProtocolModel(),
 			logics.UniqueProtocolLogic(),
 		),
@@ -39,7 +38,6 @@ func newProtocolController() extensions.Controller {
 func newServiceController() extensions.Controller {
 	controller := &serviceController{
 		BaseController: clayControllers.NewBaseController(
-			"service",
 			models.SharedServiceModel(),
 			logics.UniqueServiceLogic(),
 		),
@@ -51,7 +49,6 @@ func newServiceController() extensions.Controller {
 func newConnectionController() extensions.Controller {
 	controller := &connectionController{
 		BaseController: clayControllers.NewBaseController(
-			"connection",
 			models.SharedConnectionModel(),
 			logics.UniqueConnectionLogic(),
 		),
@@ -63,7 +60,6 @@ func newConnectionController() extensions.Controller {
 func newRequirementController() extensions.Controller {
 	controller := &requirementController{
 		BaseController: clayControllers.NewBaseController(
-			"requirement",
 			models.SharedRequirementModel(),
 			logics.UniqueRequirementLogic(),
 		),
@@ -73,8 +69,8 @@ func newRequirementController() extensions.Controller {
 }
 
 func (controller *protocolController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
-	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {
@@ -95,8 +91,8 @@ func (controller *protocolController) RouteMap() map[int]map[string]gin.HandlerF
 }
 
 func (controller *serviceController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
-	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {
@@ -117,8 +113,8 @@ func (controller *serviceController) RouteMap() map[int]map[string]gin.HandlerFu
 }
 
 func (controller *connectionController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
-	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {
@@ -139,8 +135,8 @@ func (controller *connectionController) RouteMap() map[int]map[string]gin.Handle
 }
 
 func (controller *requirementController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := extensions.BuildResourceSingleURL(controller.ResourceName())
-	resourceMultiURL := extensions.BuildResourceMultiURL(controller.ResourceName())
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {
