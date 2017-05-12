@@ -128,17 +128,17 @@ func (logic *protocolLogic) ExtractFromDesign(db *gorm.DB) (string, interface{},
 	if err := db.Select("*").Find(&protocols).Error; err != nil {
 		return "", nil, err
 	}
-	return "protocols", protocols, nil
+	return extensions.RegisteredResourceName(models.SharedProtocolModel()), protocols, nil
 }
 
 func (logic *protocolLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Exec("delete from protocols;").Error
+	return db.Delete(models.SharedProtocolModel()).Error
 }
 
 func (logic *protocolLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Protocol{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content["protocols"]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedProtocolModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -149,14 +149,6 @@ func (logic *protocolLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 		}
 	}
 	return nil
-}
-
-func (logic *protocolLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
-	protocols := []*models.Protocol{}
-	if err := db.Select("*").Find(&protocols).Error; err != nil {
-		return "", nil, err
-	}
-	return "Protocols", protocols, nil
 }
 
 func (logic *serviceLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
@@ -232,17 +224,17 @@ func (logic *serviceLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, 
 	if err := db.Select("*").Find(&services).Error; err != nil {
 		return "", nil, err
 	}
-	return "services", services, nil
+	return extensions.RegisteredResourceName(models.SharedServiceModel()), services, nil
 }
 
 func (logic *serviceLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Exec("delete from services;").Error
+	return db.Delete(models.SharedServiceModel()).Error
 }
 
 func (logic *serviceLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Service{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content["services"]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedServiceModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -253,14 +245,6 @@ func (logic *serviceLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 		}
 	}
 	return nil
-}
-
-func (logic *serviceLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
-	services := []*models.Service{}
-	if err := db.Select("*").Find(&services).Error; err != nil {
-		return "", nil, err
-	}
-	return "Services", services, nil
 }
 
 func (logic *connectionLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
@@ -336,17 +320,17 @@ func (logic *connectionLogic) ExtractFromDesign(db *gorm.DB) (string, interface{
 	if err := db.Select("*").Find(&connections).Error; err != nil {
 		return "", nil, err
 	}
-	return "connections", connections, nil
+	return extensions.RegisteredResourceName(models.SharedConnectionModel()), connections, nil
 }
 
 func (logic *connectionLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Exec("delete from connections;").Error
+	return db.Delete(models.SharedConnectionModel()).Error
 }
 
 func (logic *connectionLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Connection{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content["connections"]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedConnectionModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -357,14 +341,6 @@ func (logic *connectionLogic) LoadToDesign(db *gorm.DB, data interface{}) error 
 		}
 	}
 	return nil
-}
-
-func (logic *connectionLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
-	connections := []*models.Connection{}
-	if err := db.Select("*").Find(&connections).Error; err != nil {
-		return "", nil, err
-	}
-	return "Connections", connections, nil
 }
 
 func (logic *requirementLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
@@ -440,17 +416,17 @@ func (logic *requirementLogic) ExtractFromDesign(db *gorm.DB) (string, interface
 	if err := db.Select("*").Find(&requirements).Error; err != nil {
 		return "", nil, err
 	}
-	return "requirements", requirements, nil
+	return extensions.RegisteredResourceName(models.SharedRequirementModel()), requirements, nil
 }
 
 func (logic *requirementLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Exec("delete from requirements;").Error
+	return db.Delete(models.SharedRequirementModel()).Error
 }
 
 func (logic *requirementLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.Requirement{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content["requirements"]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedRequirementModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -461,14 +437,6 @@ func (logic *requirementLogic) LoadToDesign(db *gorm.DB, data interface{}) error
 		}
 	}
 	return nil
-}
-
-func (logic *requirementLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
-	requirements := []*models.Requirement{}
-	if err := db.Select("*").Find(&requirements).Error; err != nil {
-		return "", nil, err
-	}
-	return "Requirements", requirements, nil
 }
 
 var uniqueProtocolLogic = newProtocolLogic()
@@ -497,8 +465,8 @@ func init() {
 	extensions.RegisterDesignAccessor(uniqueServiceLogic)
 	extensions.RegisterDesignAccessor(uniqueConnectionLogic)
 	extensions.RegisterDesignAccessor(uniqueRequirementLogic)
-	extensions.RegisterTemplateParameterGenerator("Protocol", uniqueProtocolLogic)
-	extensions.RegisterTemplateParameterGenerator("Service", uniqueServiceLogic)
-	extensions.RegisterTemplateParameterGenerator("Connection", uniqueConnectionLogic)
-	extensions.RegisterTemplateParameterGenerator("Requirement", uniqueRequirementLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedProtocolModel(), uniqueProtocolLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedServiceModel(), uniqueServiceLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedConnectionModel(), uniqueConnectionLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedRequirementModel(), uniqueRequirementLogic)
 }

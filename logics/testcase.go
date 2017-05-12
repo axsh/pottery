@@ -121,17 +121,17 @@ func (logic *testCommandLogic) ExtractFromDesign(db *gorm.DB) (string, interface
 	if err := db.Select("*").Find(&testCommands).Error; err != nil {
 		return "", nil, err
 	}
-	return "test_commands", testCommands, nil
+	return extensions.RegisteredResourceName(models.SharedTestCommandModel()), testCommands, nil
 }
 
 func (logic *testCommandLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Exec("delete from test_commands;").Error
+	return db.Delete(models.SharedTestCommandModel()).Error
 }
 
 func (logic *testCommandLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.TestCommand{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content["test_commands"]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedTestCommandModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -142,14 +142,6 @@ func (logic *testCommandLogic) LoadToDesign(db *gorm.DB, data interface{}) error
 		}
 	}
 	return nil
-}
-
-func (logic *testCommandLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
-	testCommands := []*models.TestCommand{}
-	if err := db.Select("*").Find(&testCommands).Error; err != nil {
-		return "", nil, err
-	}
-	return "TestCommands", testCommands, nil
 }
 
 func (logic *testPatternLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
@@ -225,17 +217,17 @@ func (logic *testPatternLogic) ExtractFromDesign(db *gorm.DB) (string, interface
 	if err := db.Select("*").Find(&testPatterns).Error; err != nil {
 		return "", nil, err
 	}
-	return "test_patterns", testPatterns, nil
+	return extensions.RegisteredResourceName(models.SharedTestPatternModel()), testPatterns, nil
 }
 
 func (logic *testPatternLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Exec("delete from test_patterns;").Error
+	return db.Delete(models.SharedTestPatternModel()).Error
 }
 
 func (logic *testPatternLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.TestPattern{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content["test_patterns"]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedTestPatternModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -246,14 +238,6 @@ func (logic *testPatternLogic) LoadToDesign(db *gorm.DB, data interface{}) error
 		}
 	}
 	return nil
-}
-
-func (logic *testPatternLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
-	testPatterns := []*models.TestPattern{}
-	if err := db.Select("*").Find(&testPatterns).Error; err != nil {
-		return "", nil, err
-	}
-	return "TestPatterns", testPatterns, nil
 }
 
 func (logic *testCaseLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
@@ -351,17 +335,17 @@ func (logic *testCaseLogic) ExtractFromDesign(db *gorm.DB) (string, interface{},
 	if err := db.Select("*").Find(&testCases).Error; err != nil {
 		return "", nil, err
 	}
-	return "test_cases", testCases, nil
+	return extensions.RegisteredResourceName(models.SharedTestCaseModel()), testCases, nil
 }
 
 func (logic *testCaseLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Exec("delete from test_cases;").Error
+	return db.Delete(models.SharedTestCaseModel()).Error
 }
 
 func (logic *testCaseLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 	container := []*models.TestCase{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content["test_cases"]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedTestCaseModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -372,14 +356,6 @@ func (logic *testCaseLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
 		}
 	}
 	return nil
-}
-
-func (logic *testCaseLogic) GenerateTemplateParameter(db *gorm.DB) (string, interface{}, error) {
-	testCases := []*models.TestCase{}
-	if err := db.Select("*").Find(&testCases).Error; err != nil {
-		return "", nil, err
-	}
-	return "TestCases", testCases, nil
 }
 
 func convertAccessibility(accessibility bool) string {
@@ -494,7 +470,7 @@ func init() {
 	extensions.RegisterDesignAccessor(uniqueTestCommandLogic)
 	extensions.RegisterDesignAccessor(uniqueTestPatternLogic)
 	extensions.RegisterDesignAccessor(uniqueTestCaseLogic)
-	extensions.RegisterTemplateParameterGenerator("TestCommand", uniqueTestCommandLogic)
-	extensions.RegisterTemplateParameterGenerator("TestPattern", uniqueTestPatternLogic)
-	extensions.RegisterTemplateParameterGenerator("TestCase", uniqueTestCaseLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedTestCommandModel(), uniqueTestCommandLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedTestPatternModel(), uniqueTestPatternLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedTestCaseModel(), uniqueTestCaseLogic)
 }
