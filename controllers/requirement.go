@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	clayControllers "github.com/qb0C80aE/clay/controllers"
 	"github.com/qb0C80aE/clay/extensions"
@@ -21,6 +22,18 @@ type connectionController struct {
 }
 
 type requirementController struct {
+	*clayControllers.BaseController
+}
+
+type testServerScriptGenerationController struct {
+	*clayControllers.BaseController
+}
+
+type testClientScriptGenerationController struct {
+	*clayControllers.BaseController
+}
+
+type testProgramController struct {
 	*clayControllers.BaseController
 }
 
@@ -62,6 +75,39 @@ func newRequirementController() extensions.Controller {
 		BaseController: clayControllers.NewBaseController(
 			models.SharedRequirementModel(),
 			logics.UniqueRequirementLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
+	return controller
+}
+
+func newTestServerScriptGenerationController() extensions.Controller {
+	controller := &testServerScriptGenerationController{
+		BaseController: clayControllers.NewBaseController(
+			models.SharedRequirementModel(),
+			logics.UniqueTestServerScriptGenerationLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
+	return controller
+}
+
+func newTestClientScriptGenerationController() extensions.Controller {
+	controller := &testClientScriptGenerationController{
+		BaseController: clayControllers.NewBaseController(
+			models.SharedRequirementModel(),
+			logics.UniqueTestClientScriptGenerationLogic(),
+		),
+	}
+	controller.SetOutputter(controller)
+	return controller
+}
+
+func newTestProgramController() extensions.Controller {
+	controller := &testProgramController{
+		BaseController: clayControllers.NewBaseController(
+			models.SharedTestProgramModel(),
+			logics.UniqueTestProgramLogic(),
 		),
 	}
 	controller.SetOutputter(controller)
@@ -156,14 +202,74 @@ func (controller *requirementController) RouteMap() map[int]map[string]gin.Handl
 	return routeMap
 }
 
+func (controller *testServerScriptGenerationController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := fmt.Sprintf("%s/%s/%s/%s", controller.ResourceSingleURL(), "generation", "script", "server")
+
+	routeMap := map[int]map[string]gin.HandlerFunc{
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+		},
+	}
+	return routeMap
+}
+
+func (controller *testServerScriptGenerationController) OutputGetSingle(c *gin.Context, code int, result interface{}, fields map[string]interface{}) {
+	text := result.(string)
+	c.String(code, text)
+}
+
+func (controller *testClientScriptGenerationController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := fmt.Sprintf("%s/%s/%s/%s", controller.ResourceSingleURL(), "generation", "script", "client")
+
+	routeMap := map[int]map[string]gin.HandlerFunc{
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+		},
+	}
+	return routeMap
+}
+
+func (controller *testClientScriptGenerationController) OutputGetSingle(c *gin.Context, code int, result interface{}, fields map[string]interface{}) {
+	text := result.(string)
+	c.String(code, text)
+}
+
+func (controller *testProgramController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := controller.ResourceSingleURL()
+	resourceMultiURL := controller.ResourceMultiURL()
+
+	routeMap := map[int]map[string]gin.HandlerFunc{
+		extensions.MethodGet: {
+			resourceSingleURL: controller.GetSingle,
+			resourceMultiURL:  controller.GetMulti,
+		},
+		extensions.MethodPost: {
+			resourceMultiURL: controller.Create,
+		},
+		extensions.MethodPut: {
+			resourceSingleURL: controller.Update,
+		},
+		extensions.MethodDelete: {
+			resourceSingleURL: controller.Delete,
+		},
+	}
+	return routeMap
+}
+
 var uniqueProtocolController = newProtocolController()
 var uniqueServiceController = newServiceController()
 var uniqueConnectionController = newConnectionController()
 var uniqueRequirementController = newRequirementController()
+var uniqueTestServerScriptGenerationController = newTestServerScriptGenerationController()
+var uniqueTestClientScriptGenerationController = newTestClientScriptGenerationController()
+var uniqueTestProgramController = newTestProgramController()
 
 func init() {
 	extensions.RegisterController(uniqueProtocolController)
 	extensions.RegisterController(uniqueServiceController)
 	extensions.RegisterController(uniqueConnectionController)
 	extensions.RegisterController(uniqueRequirementController)
+	extensions.RegisterController(uniqueTestServerScriptGenerationController)
+	extensions.RegisterController(uniqueTestClientScriptGenerationController)
+	extensions.RegisterController(uniqueTestProgramController)
 }
