@@ -80,6 +80,7 @@ func (logic *logicalDiagramLogic) GetSingle(db *gorm.DB, id string, _ url.Values
 		diagramNode := &models.DiagramNode{
 			Name: fmt.Sprintf("[%d]%s", i, segment.Cidr),
 			Icon: segmentIconPath,
+			Meta: nil,
 		}
 		diagram.Nodes = append(diagram.Nodes, diagramNode)
 

@@ -68,9 +68,13 @@ func (logic *physicalDiagramLogic) GetSingle(db *gorm.DB, id string, _ url.Value
 		} else {
 			iconPathMap = physicalNodeIconPaths
 		}
+		diagramNodeMeta := &models.DiagramNodeMeta{
+			NodeID: node.ID,
+		}
 		diagramNode := &models.DiagramNode{
 			Name: node.Name,
 			Icon: iconPathMap[node.NodeTypeID],
+			Meta: diagramNodeMeta,
 		}
 		diagram.Nodes = append(diagram.Nodes, diagramNode)
 	}

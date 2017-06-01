@@ -1,3 +1,4 @@
+<div class="page-cover"></div>
 {{template "headerpart" .}}
 <div class="panel panel-default panel-custom" id="diagram_panel">
 	<div class="panel-heading">
@@ -11,10 +12,706 @@
 	</div>
 </div>
 
+<div class="node-reg-panel">
+	<!-- Node Edit Panel -->
+	<div class="panel panel-default" id="edit_panel">
+		<!-- Edit-Node Panel -->
+		<div class="panel-heading">
+			<h3 class="panel-title">
+				<span class="glyphicon glyphicon-edit"></span>
+				<span id="register_or_update_node_panel_title"></span>
+			</h3>
+		</div>
+		<div class="panel-body">
+			<table class="table">
+				<tr>
+					<th width="20%">
+						<span class="glyphicon glyphicon-file"></span> Property
+					</th>
+					<th width="80%">
+						<span class="glyphicon glyphicon-pencil"></span> Value
+					</th>
+				</tr>
+				<tr>
+					<td width="20%">Node Name</td>
+					<td width="80%">
+						<input type="hidden" id="edit_node_id">
+						<input id="edit_node_name" type="text" name="edit_node_name" placeholder="node name like router1" class="form-control">
+					</td>
+				</tr>
+				<tr>
+					<td width="20%">Physical/Virtual</td>
+					<td width="80%">
+						<input type="hidden" id="edit_node_pv_id" value="0">
+						<select class="form-control" id="edit_node_pv"></select>
+					</td>
+				</tr>
+				<tr>
+					<td width="20%">Node Type</td>
+					<td width="80%">
+						<select class="form-control" id="edit_node_type"></select>
+					</td>
+				</tr>
+				<tr>
+					<td width="20%">Remark</td>
+					<td width="80%">
+						<input type="hidden" id="edit_node_remark_id" value="">
+						<input id="edit_node_remark" type="text" name="edit_node_remark" placeholder="remark" class="form-control">
+					</td>
+				</tr>
+			</table>
+			<!-- Port-Destination Panel -->
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h1 class="panel-title">
+						<span class="glyphicon glyphicon-list-alt"></span> Port - Destination
+					</h1>
+				</div>
+				<div class="panel-body">
+					<table class="table table-condensed table-striped" id="edit_ports_table">
+						<thead>
+							<tr>
+								<th>&nbsp;</th>
+								<th>No.</th>
+								<th>Name</th>
+								<th>Layer</th>
+								<th>Destination Node</th>
+								<th>Destination Port</th>
+								<th>MacAddress</th>
+								<th>IPv4 Address</th>
+								<th>IPv4 Prefix</th>
+								<th>Remark</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+				<div style="margin-left:10px;margin-bottom:10px;">
+					<span class="input-group-btn">
+						<button id="edit_delete_port_btn" type="button" class="btn btn-default">
+							<span class="glyphicon glyphicon-minus"></span>
+						</button>
+						<button id="edit_add_port_btn" type="button" class="btn btn-default">
+							<span class="glyphicon glyphicon-plus"></span>
+						</button>
+						<button id="register_or_update_node_btn" type="button" class="btn btn-default">
+							<span class="glyphicon glyphicon-ok"></span>
+						</button>
+						<button id="cancel_register_or_update_node_btn" type="button" class="btn btn-default">
+							<span class="glyphicon glyphicon-remove"></span>
+						</button>
+					</span>
+				</div>
+			</div><!-- /Port-Destination Panel -->
+		</div>
+	</div><!-- /Edit-Node Panel -->
+</div>
+
+<div class="context-menu" id="context-menu">
+	<ul>
+	</ul>
+</div>
+
 <script language="javascript">
 	(function($) {
 
 		{{template "functions" .}}
+
+		var nodes = null;
+		var nodeMap = null;
+		var nodeTypes = null;
+		var nodeTypeMap = null;
+		var ports = null;
+		var portMap = null;
+		var editingNode = null;
+		var editPortsTable = null;
+		var editMode = null;
+
+		var nodePvMap = {
+			physical: false,
+			virtual: true
+		};
+
+		var layerOptionList = [
+			{value: 1, text: 'Layer1'},
+			{value: 2, text: 'Layer2'},
+			{value: 3, text: 'Layer3'}
+		];
+
+		function buildNodeExtraAttributeMapByName(nodeExtraAttributes) {
+			var nodeExtraAttributeMapByName = {
+				virtual: {
+					value_bool: {
+						Valid: true,
+						Bool: false,
+					}
+				},
+				remark: {
+					value_string: {
+						Valid: true,
+						String: '',
+					}
+				},
+			};
+			for (var i = 0; i < nodeExtraAttributes.length; i = i + 1) {
+				var nodeExtraAttribute = nodeExtraAttributes[i];
+				nodeExtraAttributeMapByName[nodeExtraAttribute.name] = nodeExtraAttribute
+			}
+			return nodeExtraAttributeMapByName;
+		}
+
+		function buildPortExtraAttributeMapByName(portExtraAttributes) {
+			var portExtraAttributeMapByName = {
+				remark: {
+					value_string: {
+						Valid: true,
+						String: '',
+					}
+				}
+			};
+			for (var i = 0; i < portExtraAttributes.length; i = i + 1) {
+				var portExtraAttribute = portExtraAttributes[i];
+				portExtraAttributeMapByName[portExtraAttribute.name] = portExtraAttribute
+			}
+			return portExtraAttributeMapByName;
+		}
+
+		function extraBoolAttribute(name, extraAttributeMapByName) {
+			var attribute = extraAttributeMapByName[name];
+			if (attribute == null) {
+				return false;
+			}
+			return attribute;
+		}
+
+		function extraStringAttribute(name, extraAttributeMapByName) {
+			var attribute = extraAttributeMapByName[name];
+			if (attribute == null) {
+				return '';
+			}
+			return attribute;
+		}
+
+		function extraIntAttribute(name, extraAttributeMapByName) {
+			var attribute = extraAttributeMapByName[name];
+			if (attribute == null) {
+				return 0;
+			}
+			return attribute;
+		}
+
+		function extraFloatAttribute(name, extraAttributeMapByName) {
+			var attribute = extraAttributeMapByName[name];
+			if (attribute == null) {
+				return 0;
+			}
+			return attribute;
+		}
+
+		function createNodeModel(id, name, nodeTypeID, nodePv, virtual, remark) {
+			var nodeModel = {
+				id: id,
+				name: name,
+				node_type_id: nodeTypeID,
+				ports: [],
+				node_extra_attributes: [
+					{
+						id: 0,
+						name: 'virtual',
+						value_bool: {
+							Valid: true,
+							Bool: virtual
+						}
+					},
+					{
+						id: 0,
+						name: 'remark',
+						value_string: {
+							Valid: true,
+							String: remark
+						}
+					},
+				]
+			};
+			return nodeModel;
+		}
+
+		function createPortModel(id, name, layer, number, node_id, destinationPortID, macAddress, ipv4Address, ipv4Prefix, remark) {
+			var portModel = {
+				id: id,
+				name: name,
+				layer: layer,
+				number: number,
+				node_id: node_id,
+				destination_port_id: convertSqlNullObject(0, 'Int64', destinationPortID),
+				mac_address: convertSqlNullObject('', 'String', macAddress),
+				ipv4_address: convertSqlNullObject('', 'String', ipv4Address),
+				ipv4_prefix: convertSqlNullObject(0, 'Int64', ipv4Prefix),
+				port_extra_attributes: [
+					{
+						id: 0,
+						name: 'remark',
+						value_string: {
+							Valid: true,
+							String: remark
+						}
+					},
+				]
+			};
+			return portModel;
+		}
+
+		function createNodeModelFromPanel() {
+			var editNodeID = $('#edit_node_id').val();
+			var editNodeName = $('#edit_node_name').val();
+			var editNodeTypeID = $('#edit_node_type').val();
+			var editNodePvID = $('#edit_node_pv_id').val();
+			var editNodePv = $('#edit_node_pv').val();
+			var editNodeRemarkID = $('#edit_node_remark_id').val();
+			var editNodeRemark = $('#edit_node_remark').val();
+			var result = {
+				id: parseInt(editNodeID),
+				name: editNodeName,
+				node_type_id: parseInt(editNodeTypeID),
+				ports: createPortModelFromPanel(editNodeID),
+				node_extra_attributes: [
+					{
+							id: parseInt(editNodePvID),
+							name: 'virtual',
+							value_bool: {
+								Valid: true,
+								Bool: convertStringToBoolean(editNodePv)
+							}
+					},
+					{
+						id: parseInt(editNodeRemarkID),
+						name: 'remark',
+						value_string: {
+							Valid: true,
+							String: editNodeRemark
+						}
+					},
+				]
+			}
+			return result;
+		}
+
+		function createPortModelFromPanel(editNodeID) {
+			var result = [];
+			var rows = editPortsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				var editPortID = $(row).find('input[name=edit_port_id]').val();
+				var editPortNumber = $(row).find('input[name=edit_port_number]').val();
+				var editPortName = $(row).find('input[name=edit_port_name]').val();
+				var editPortLayer = $(row).find('select[name=edit_port_layer]').val();
+				var editPortDestinationPortID = $(row).find('select[name=edit_port_destination_port_id]').val();
+				var edirPortDestinationPort = null;
+				if (editPortDestinationPortID == -1) {
+					var editPortDestinationNodeID = $(row).find('select[name=edit_port_destination_node_id]').val();
+					edirPortDestinationPort = createPortModel(0, 'autogenerated', 1, 0, parseInt(editPortDestinationNodeID), parseInt(editPortID), '', '', 0, '');
+					editPortDestinationPortID = 0;
+				}
+				var editPortMacAddress = $(row).find('input[name=edit_port_mac_address]').val();
+				var editPortIpv4Address = $(row).find('input[name=edit_port_ipv4_address]').val();
+				var editPortIpv4Prefix = $(row).find('input[name=edit_port_ipv4_prefix]').val();
+				var editPortRemarkID = $(row).find('input[name=edit_port_remark_id]').val();
+				var editPortRemark = $(row).find('input[name=edit_port_remark]').val();
+				var editPortModel = {
+					id: parseInt(editPortID),
+					number: parseInt(editPortNumber),
+					node_id: parseInt(editNodeID),
+					name: editPortName,
+					layer: parseInt(editPortLayer),
+					destination_port_id: convertSqlNullObject(0, 'Int64', editPortDestinationPortID),
+					destination_port: edirPortDestinationPort,
+					mac_address: convertSqlNullObject('', 'String', editPortMacAddress),
+					ipv4_address: convertSqlNullObject('', 'String', editPortIpv4Address),
+					ipv4_prefix: convertSqlNullObject(0, 'Int64', editPortIpv4Prefix),
+					port_extra_attributes: [
+						{
+							id: parseInt(editPortRemarkID),
+							name: 'remark',
+							value_string: {
+								Valid: true,
+								String: editPortRemark
+							}
+						},
+					]
+				};
+				result.push(editPortModel);
+			}
+			return result;
+		}
+
+		function calculateMaximumPortNumber() {
+			var result = 0;
+			var rows = editPortsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				var portNumber = parseInt($(row).find('input[name=edit_port_number]').val(), 0);
+				if (result < portNumber) {
+					result = portNumber;
+				}
+			}
+			return result;
+		}
+
+		function getDeletedPortMap() {
+			var deletedPortMap = {};
+			var editingNodePorts = editingNode.ports;
+			for (var i = 0; i < editingNodePorts.length; i = i + 1) {
+				editingNodePort = editingNodePorts[i];
+				deletedPortMap[editingNodePort.id] = editingNodePort;
+			}
+			var rows = editPortsTable.fnGetNodes();
+			var rowCount = rows.length;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				var deletedPortId = parseInt($(row).find('input[name=edit_port_id]').val(), 0);
+				delete(deletedPortMap[deletedPortId]);
+			}
+			return deletedPortMap;
+		}
+
+		function createEditPortCheckboxElement(name) {
+			var checkBox = $('<input>').prop('name', name).prop('style', 'transform:scale(1.5);position:relative;top:7px;').prop('type', 'checkbox');
+			return checkBox[0];
+		}
+
+		function createEditPortTextElement(name, style, placeholder, value) {
+			var input = $('<input>').prop('name', name).prop('class', 'form-control').prop('type', 'text').prop('style', style).prop('placeholder', placeholder).val(value).attr('value', value)[0];
+			return input;
+		}
+
+		function createEditPortHiddenElement(name, value) {
+			var input = $('<input>').prop('name', name).prop('type', 'hidden').val(value).attr('value', value)[0];
+			return input;
+		}
+
+		function createEditPortSelectOptionsElement(options) {
+			var result = [];
+			for (var i = 0; i < options.length; i = i + 1) {
+				result.push($('<option>').val(options[i].value).text(options[i].text));
+			}
+			return result;
+		}
+
+		function createEditPortSelectElement(name, style, options, value) {
+			var select =  $('<select>').prop('name', name).prop('class', 'form-control').prop('style', style);
+			var editPortSelectOptionsElement = createEditPortSelectOptionsElement(options);
+			for (var i = 0; i < editPortSelectOptionsElement.length; i = i + 1) {
+				if (value == editPortSelectOptionsElement[i].val()) {
+					select.append(editPortSelectOptionsElement[i].attr('selected', 'selected'));
+				} else {
+					select.append(editPortSelectOptionsElement[i]);
+				}
+			}
+			return select[0];
+		}
+
+		function createDestinationNodeOptionList() {
+			var result = [{value: 0, text: 'None'}];
+			for (var i = 0; i < nodes.length; i = i + 1) {
+				var node = nodes[i];
+				result.push({value: node.id, text: node.name});
+			}
+			return result;
+		}
+
+		function createDestinationPortOptionList(destinationNodeID) {
+			var result = [{value: 0, text: 'Unplugged'}];
+			if (destinationNodeID != 0) {
+				result.push({value: -1, text: '<NewPort>'});
+				var node = nodeMap[destinationNodeID];
+				var ports = node.ports;
+				for (var i = 0; i < ports.length; i = i + 1) {
+					var port = portMap[ports[i].id];
+					result.push({value: port.id, text: port.name});
+				}
+			}
+			return result;
+		}
+
+		function loadResources() {
+			nodes = getResources('nodes', 'preloads=NodeType,Ports,NodeExtraAttributes&fields=id,name,node_type,ports.id,ports.destination_port_id,node_extra_attributes.*').resources;
+			nodeMap = buildResouceMapFromResourceArray(nodes);
+			nodeTypes = getResources('node_types', '').resources;
+			nodeTypeMap = buildResouceMapFromResourceArray(nodeTypes);
+			var nodeExtraAttributes = getResources('node_extra_attributes', '').resources;
+			for (var i = 0; i < nodes.length; i = i + 1) {
+				var node = nodes[i];
+				if (node.ports == null) {
+					node.ports = [];
+				}
+				if (node.node_extra_attributes == null) {
+					node.node_extra_attributes = [];
+				}
+				node.node_extra_attribute_map_by_name = buildNodeExtraAttributeMapByName(node.node_extra_attributes);
+			}
+			ports = getResources('ports', 'preloads=DestinationPort,PortExtraAttributes&fields=id,name,node_id,number,layer,mac_address,ipv4_address,ipv4_prefix,destination_port_id,destination_port,port_extra_attributes.*').resources;
+			portMap = buildResouceMapFromResourceArray(ports);
+			var portExtraAttributes = getResources('port_extra_attributes', '').resources;
+			for (var i = 0; i < ports.length; i = i + 1) {
+				var port = ports[i];
+				if (port.port_extra_attributes == null) {
+					port.port_extra_attributes = [];
+				}
+				port.port_extra_attribute_map_by_name = buildPortExtraAttributeMapByName(port.port_extra_attributes);
+			}
+		}
+
+		function onEditNode(nodeId) {
+			if (nodeId == null) {
+				alert('Add a node first.');
+				return;
+			}
+
+			$('.node-reg-panel').fadeOut(150, function() {
+				// Set edit mode to Update
+				editMode = 'Update';
+				$('#register_or_update_node_panel_title').children().remove();
+				$('#register_or_update_node_panel_title').append($('<span>').text('Node update'));
+
+				// Save the editing node
+				editingNode = nodeMap[nodeId];
+
+				// Initialize Node properties
+				$('#edit_node_pv').parents("tr").show();
+				$('#edit_node_pv').children().remove();
+				for (key in nodePvMap){
+				$('#edit_node_pv').append($('<option>').val(nodePvMap[key]).text(key));
+				}
+
+				$('#edit_node_type').children().remove();
+				for (var i = 0; i < nodeTypes.length; i = i + 1) {
+					$('#edit_node_type').append($('<option>').val(nodeTypes[i].id).text(nodeTypes[i].name));
+				}
+
+				$('#edit_node_id').val(editingNode.id);
+				$('#edit_node_name').val(editingNode.name);
+				var attributeVirtual = extraBoolAttribute('virtual', editingNode.node_extra_attribute_map_by_name);
+				$('#edit_node_pv_id').val(attributeVirtual.id);
+				$('#edit_node_pv').val(convertBooleanToString(attributeVirtual.value_bool.Bool));
+				$('#edit_node_type').val(editingNode.node_type.id);
+				var attributeRemark = extraStringAttribute('remark', editingNode.node_extra_attribute_map_by_name);
+				$('#edit_node_remark_id').val(attributeRemark.id);
+				$('#edit_node_remark').val(attributeRemark.value_string.String);
+
+				// Initialize Ports properties
+				var rows = editPortsTable.fnGetNodes();
+				var rowCount = rows.length;
+				for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+					editPortsTable.fnDeleteRow(i, null, false);
+				}
+
+				for (var i = 0; i < editingNode.ports.length; i = i + 1) {
+					var port = portMap[editingNode.ports[i].id];
+
+					var destinationNodeID = 0;
+					var destinationPortID = 0;
+					if (port.destination_port_id.Valid) {
+						destinationNodeID = port.destination_port.node_id;
+						destinationPortID = port.destination_port_id.Int64;
+					}
+
+					editPortsTable.fnAddData([
+						createEditPortCheckboxElement('edit_port_check').outerHTML + createEditPortHiddenElement('edit_port_id', port.id).outerHTML,
+						createEditPortTextElement('edit_port_number', 'width:45px', '#', port.number).outerHTML,
+						createEditPortTextElement('edit_port_name', 'width:200px', 'port name like eth0', port.name).outerHTML,
+						createEditPortSelectElement('edit_port_layer', 'width:90px', layerOptionList, port.layer).outerHTML,
+						createEditPortSelectElement('edit_port_destination_node_id', 'width:200px', createDestinationNodeOptionList(), destinationNodeID).outerHTML,
+						createEditPortSelectElement('edit_port_destination_port_id', 'width:200px', createDestinationPortOptionList(destinationNodeID), destinationPortID).outerHTML,
+						createEditPortTextElement('edit_port_mac_address', 'width:240px', 'mac address like 10:54:ff:00:00:01', port.mac_address.String).outerHTML,
+						createEditPortTextElement('edit_port_ipv4_address', 'width:210px', 'ipv4 address like 192.168.0.1', port.ipv4_address.String).outerHTML,
+						createEditPortTextElement('edit_port_ipv4_prefix', 'width:110px', 'prefix like 24', port.ipv4_prefix.Int64).outerHTML,
+						createEditPortHiddenElement('edit_port_remark_id', port.port_extra_attribute_map_by_name['remark'].id).outerHTML + createEditPortTextElement('edit_port_remark', 'width:200px', 'remark', port.port_extra_attribute_map_by_name['remark'].value_string.String).outerHTML,
+					]);
+	 			}
+
+				$('.node-reg-panel').fadeIn(150, function() {
+					editPortsTable.fnDraw(true);
+				});
+			});
+		}
+
+		function onNewNode(nodeType) {
+			$('.node-reg-panel').fadeOut(150, function() {
+				// Set edit mode to Update
+				editMode = 'Register';
+				$('#register_or_update_node_panel_title').children().remove();
+				$('#register_or_update_node_panel_title').append($('<span>').text('Node registration ('+ nodeType +')'));
+
+				// Clear the editing node
+				editingNode = createNodeModel(null, '', 1, false, '', false, '');
+
+				// Initialize Node properties
+				$('#edit_node_pv').children().remove();
+
+  				$('#edit_node_pv').append($('<option>').attr('selected', true).val(nodePvMap[nodeType]).text(nodeType));
+				$('#edit_node_pv').parents("tr").hide();
+
+				$('#edit_node_type').children().remove();
+	 			for (var i = 0; i < nodeTypes.length; i = i + 1) {
+	 				$('#edit_node_type').append($('<option>').val(nodeTypes[i].id).text(nodeTypes[i].name));
+	 			}
+
+	 			$('#edit_node_id').val('');
+	 			$('#edit_node_name').val('');
+	 			$('#edit_node_pv_id').val(0);
+				$('#edit_node_remark_id').val(0);
+				$('#edit_node_remark').val('');
+
+				// Clear Ports properties
+				var rows = editPortsTable.fnGetNodes();
+				var rowCount = rows.length;
+				for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+					editPortsTable.fnDeleteRow(i, null, false);
+				}
+				$('.node-reg-panel').fadeIn(150, function() {
+					editPortsTable.fnDraw(true);
+				});
+			});
+		}
+
+		function onAddPort() {
+			editPortsTable.fnAddData([
+				createEditPortCheckboxElement('edit_port_check').outerHTML + createEditPortHiddenElement('edit_port_id', 0).outerHTML,
+				createEditPortTextElement('edit_port_number', 'width:45px', '#', calculateMaximumPortNumber() + 1).outerHTML,
+				createEditPortTextElement('edit_port_name', 'width:200px', 'port name like eth0', '').outerHTML,
+				createEditPortSelectElement('edit_port_layer', 'width:90px', layerOptionList, 1).outerHTML,
+				createEditPortSelectElement('edit_port_destination_node_id', 'width:200px', createDestinationNodeOptionList(), 0).outerHTML,
+				createEditPortSelectElement('edit_port_destination_port_id', 'width:200px', createDestinationPortOptionList(0), 0).outerHTML,
+				createEditPortTextElement('edit_port_mac_address', 'width:240px', 'mac address like 10:54:ff:00:00:01', '').outerHTML,
+				createEditPortTextElement('edit_port_ipv4_address', 'width:210px', 'ipv4 address like 192.168.0.1', '').outerHTML,
+				createEditPortTextElement('edit_port_ipv4_prefix', 'width:110px', '', 0).outerHTML,
+				createEditPortHiddenElement('edit_port_remark_id', 0).outerHTML + createEditPortTextElement('edit_port_remark', 'width:200px', 'remark', '').outerHTML,
+			]);
+			editPortsTable.fnDraw();
+		}
+
+		function onDeletePort() {
+			var rows = editPortsTable.fnGetNodes();
+			var rowCount = rows.length;
+
+			var selectedRowCount = 0;
+			for (var i = 0; i < rowCount; i = i + 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_port_check]').prop('checked')) {
+					selectedRowCount = selectedRowCount + 1;
+				}
+			}
+
+			if (selectedRowCount == 0) {
+				alert('Check the nodes what you want to delete first');
+				return;
+			}
+
+			if (!confirm('Are you sure to delete selected ports?')) {
+				return;
+			}
+
+			for (var i = rowCount - 1; 0 <= i; i = i - 1) {
+				var row = rows[i];
+				if ($(row).find('input[name=edit_port_check]').prop('checked')) {
+					editPortsTable.fnDeleteRow(row, null, false);
+				}
+			}
+			editPortsTable.fnDraw();
+		}
+
+		function onEditPortNodeChanged(selector) {
+			var editPortDestinationPortNodeID = $(selector.currentTarget).val();
+			var editPortDestinationPortIDElement = $(selector.currentTarget.parentNode.parentNode).find('select[name=edit_port_destination_port_id]');
+
+			editPortDestinationPortIDElement.children().remove();
+
+			var editPortSelectOptionsElement = createEditPortSelectOptionsElement(createDestinationPortOptionList(editPortDestinationPortNodeID));
+			for (var i = 0; i < editPortSelectOptionsElement.length; i = i + 1) {
+				editPortDestinationPortIDElement.append(editPortSelectOptionsElement[i]);
+			}
+		}
+
+		function onRegisterOrUpdateNode() {
+			if (editMode == 'Register') {
+				if (!confirm('Are you sure to register?')) {
+					return;
+				}
+			} else {
+				if (!confirm('Are you sure to update?')) {
+					return;
+				}
+			}
+
+			var portMapForDeletion = getDeletedPortMap();
+			var nodeForRegistrationOrUpdate = createNodeModelFromPanel();
+
+			for (key in portMapForDeletion){
+				var result = deleteResource('ports', key);
+				if (!onNodeModified(result, 204, null, true)) {
+					return;
+				}
+			}
+
+			if (editMode == 'Register') {
+				var result = postResource('nodes', nodeForRegistrationOrUpdate);
+				onNodeModified(result, 201, 'The node has been registered successfully', false);
+			} else {
+				var result = putResource('nodes', nodeForRegistrationOrUpdate.id, nodeForRegistrationOrUpdate);
+				onNodeModified(result, 200, 'The node has been updated successfully', false);
+			}
+		}
+
+		function onDeleteNode(nodeId) {
+			if (nodeId == null) {
+				alert('Add a node first.');
+				return;
+			}
+
+			if (!confirm('Are you sure to delete?')) {
+				return;
+			}
+
+			var result = deleteResource('nodes', nodeId);
+			onNodeModified(result, 204, 'The node was deleted successfully', false);
+
+			loadResources();
+			onUpdateNetworkDiagram();
+		}
+
+		function onCancelRegisterOrUpdate(panelClass) {
+			if(!panelClass.is(":visible")) return;
+			if (!confirm('Are you sure to cancel?')) {
+				return false;
+			}
+
+			$('html,body').animate({scrollTop:0},'slow');
+			$(panelClass).fadeOut(150);
+			$('.page-cover').fadeOut(150);
+		}
+
+		function onNodeModified(result, successCode, successMessage, ignoreSuccess) {
+			if (result.status == successCode) {
+				if (!ignoreSuccess) {
+					$('html,body').animate({scrollTop:0},'slow');
+					$('#information_message').text(successMessage);
+					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+
+					$('.page-cover').fadeOut(150);
+					$('.node-reg-panel').fadeOut(150);
+					loadResources();
+					onUpdateNetworkDiagram();
+				}
+				return true;
+			} else {
+				$('html,body').animate({scrollTop:0},'slow');
+				$('#error_message').text(result.resource.error);
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+				return false;
+			}
+		}
 
 		var diagramType = getUrlVars()['diagram_type'];
 		var diagramProperties = {
@@ -32,6 +729,74 @@
 			}
 		};
 
+		var menuItems = {
+			diagram: [
+				{ label: "Add physical node", action: "add_node", type: "physical" },
+				{ label: "Add virtual node", action: "add_node", type: "virtual" }
+			],
+			node: [
+				{ label: "Edit node", action: "edit_node" },
+				{ label: "Delete node", action: "delete_node" }
+			]
+		};
+
+		// recursive check because the "text" field of the node is one lever deeper in the xml tree and will not respond to the event otherwise
+		function getContextOfTarget (target, targetValue) {
+			if(target.nodeName == "svg") {
+				return false;
+			}
+			if(target.className.baseVal.split(" ").indexOf(targetValue) > -1) {
+				return { type: targetValue, meta: target.__data__ };
+			}
+			return getContextOfTarget(target.parentNode, targetValue);
+		}
+
+		function createContextMenu(context) {
+			for(var idx in menuItems[context.type]) {
+				item = menuItems[context.type][idx];
+
+				if(item.label == null) {
+					var liElement = $('<li>').prop('class', 'divider');
+				} else {
+					var liElement = $('<li>').data('action', item.action).append(
+								$('<span>').prop('class', 'item glyphicon')
+							).append(item.label);
+
+					if(context.meta != null) {
+						for(var key in context.meta) {
+							liElement.data(key, context.meta[key]);
+						}
+					}
+					if(item.type != null) {
+						liElement.prop('id', item.type)
+					}
+				}
+				$('.context-menu ul').append(liElement);
+			}
+		}
+
+		function onUpdateContextMenu() {
+			if(diagramType == "logical") return;
+
+			$("#diagram").ready(function() {
+				d3.select('#diagram').on("contextmenu", function(data) {
+					if($('.node-reg-panel').is(":visible")) return;
+
+					var menuElement = $('.context-menu');
+					$('.context-menu ul').empty();
+
+					d3.event.preventDefault();
+					var x = d3.event.pageX;
+					var y = d3.event.pageY;
+					var context = getContextOfTarget(d3.event.target, "node") || { type: "diagram", meta: null }
+					createContextMenu(context);
+
+					menuElement.css({left: x, top: y - 40});
+					menuElement.fadeIn(150);
+				});
+			});
+		}
+
 		function onUpdateNetworkDiagram() {
 			$('#diagram_panel').fadeOut(150, function() {
 				$('#diagram_title').text(diagramProperties[diagramType].title);
@@ -42,14 +807,47 @@
 						pop: /^([^\s-]+)-/,
 						distance: diagramProperties[diagramType].distance,
 						width: $('#diagram_canvas').width(),
-						height: 900
+						height: ($(window).height() - 180)
 					});
-					diagramInstance.init('interface');
+					diagramInstance.init('interface', 'node_id');
+					onUpdateContextMenu()
 				});
 			});
 		}
 
 		function onLoad() {
+			$.fn.dataTable.ext.order['dom-text'] = function  ( settings, col )
+			{
+					return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+							return $('input', td).val();
+					} );
+			}
+			$.fn.dataTable.ext.order['dom-select'] = function  ( settings, col )
+			{
+					return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
+							return $('select', td).val();
+					} );
+			}
+
+			editPortsTable = $('#edit_ports_table').dataTable({
+				scrollX: true,
+				scrollY: 250,
+				searching: false,
+				columns: [
+					null,
+					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-select' },
+					{ orderDataType: 'dom-select' },
+					{ orderDataType: 'dom-select' },
+					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-text', type: 'string' },
+				]
+			});
+
+			loadResources();
 			onUpdateNetworkDiagram();
 		}
 
@@ -61,6 +859,61 @@
 		    timer = setTimeout(function() {
 		        onUpdateNetworkDiagram();
 		    }, 200);
+		});
+
+		$(document).on("keydown" ,function(event) {
+			if(!$('.node-reg-panel').is(":visible")) return;
+
+			if (event.keyCode == 27) {
+				event.preventDefault();
+				onCancelRegisterOrUpdate($('.node-reg-panel'));
+			}
+			if (event.keyCode == 13) {
+				event.preventDefault();
+				onRegisterOrUpdateNode();
+			}
+		});
+
+		$("body").on("click", function(event) {
+			$('.context-menu').fadeOut(150);
+		});
+
+		// context menu options
+		$('#context-menu').on('click', function(event) {
+			switch($(event.target).data("action")) {
+			case "add_node":
+				$('.page-cover').fadeIn(150);
+				onNewNode(event.target.id);
+				break;
+			case "edit_node":
+				$('.page-cover').fadeIn(150);
+				onEditNode($(event.target).data("meta")[0].value);
+				break;
+			case "delete_node":
+				onDeleteNode($(event.target).data("meta")[0].value);
+				break;
+			}
+		});
+
+		// ports
+		$('#edit_add_port_btn').on('click', function() {
+			onAddPort();
+		});
+
+		$('#edit_delete_port_btn').on('click', function() {
+			onDeletePort();
+		});
+
+		$('#edit_ports_table').on('change', 'select[name=edit_port_destination_node_id]', function(selector) {
+			onEditPortNodeChanged(selector);
+		});
+
+		$('#register_or_update_node_btn').on('click', function() {
+			onRegisterOrUpdateNode();
+		});
+
+		$('#cancel_register_or_update_node_btn').on('click', function() {
+			onCancelRegisterOrUpdate($('.node-reg-panel'));
 		});
 
 		onLoad();

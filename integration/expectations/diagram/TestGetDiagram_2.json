@@ -2,27 +2,33 @@
   "nodes": [
     {
       "name": "router1",
-      "icon": "/ui/files/images/diagram/router.png"
+      "icon": "/ui/files/images/diagram/router.png",
+      "meta": null
     },
     {
       "name": "firewall1",
-      "icon": "/ui/files/images/diagram/firewall.png"
+      "icon": "/ui/files/images/diagram/firewall.png",
+      "meta": null
     },
     {
       "name": "server1",
-      "icon": "/ui/files/images/diagram/server_v.png"
+      "icon": "/ui/files/images/diagram/server_v.png",
+      "meta": null
     },
     {
       "name": "server2",
-      "icon": "/ui/files/images/diagram/server_v.png"
+      "icon": "/ui/files/images/diagram/server_v.png",
+      "meta": null
     },
     {
       "name": "[0]192.168.0.0/24",
-      "icon": "/ui/files/images/diagram/segment.png"
+      "icon": "/ui/files/images/diagram/segment.png",
+      "meta": null
     },
     {
       "name": "[1]192.168.1.0/24",
-      "icon": "/ui/files/images/diagram/segment.png"
+      "icon": "/ui/files/images/diagram/segment.png",
+      "meta": null
     }
   ],
   "links": [
