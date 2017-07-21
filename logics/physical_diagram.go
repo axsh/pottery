@@ -5,7 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayLogics "github.com/qb0C80aE/clay/logics"
-	"github.com/qb0C80aE/clay/utils/mapstruct"
+	loamLogics "github.com/qb0C80aE/loam/logics"
 	loamModels "github.com/qb0C80aE/loam/models"
 	"github.com/qb0C80aE/pottery/models"
 	"net/url"
@@ -36,7 +36,11 @@ func (logic *physicalDiagramLogic) GetSingle(db *gorm.DB, id string, _ url.Value
 	diagram := &models.Diagram{}
 
 	nodes := []*loamModels.Node{}
-	if err := db.Preload("NodeExtraAttributes").Preload("Ports").Select(queryFields).Find(&nodes).Error; err != nil {
+	if err := db.Preload("NodeExtraAttributes").
+		Preload("NodeExtraAttributes.NodeExtraAttributeField").
+		Preload("NodeExtraAttributes.ValueNodeExtraAttributeOption").
+		Preload("Ports").
+		Select(queryFields).Find(&nodes).Error; err != nil {
 		return nil, err
 	}
 
@@ -56,13 +60,13 @@ func (logic *physicalDiagramLogic) GetSingle(db *gorm.DB, id string, _ url.Value
 	}
 
 	for _, node := range nodes {
-		nodeExtraAttributesMap, err := mapstruct.SliceToInterfaceSliceMap(node.NodeExtraAttributes, "Name")
+		nodeExtraAttributesMap, err := loamLogics.CreateNodeAttributeMap(node)
 		if err != nil {
 			return nil, err
 		}
 		var iconPathMap map[int]string
 		attributes, exists := nodeExtraAttributesMap["virtual"]
-		attribute := attributes[0].(*loamModels.NodeExtraAttribute)
+		attribute := attributes[0]
 		if exists && attribute.ValueBool.Valid && attribute.ValueBool.Bool {
 			iconPathMap = virtualNodeIconPaths
 		} else {
