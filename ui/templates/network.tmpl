@@ -181,8 +181,14 @@
 		var nodeMap = null;
 		var nodeTypes = null;
 		var nodeTypeMap = null;
+		var nodeExtraAttributeFields = null;
+		var nodeExtraAttributeFieldMap = null;
+		var nodeExtraAttributeFieldMapByName = null;
 		var ports = null;
 		var portMap = null;
+		var portExtraAttributeFields = null;
+		var portExtraAttributeFieldMap = null;
+		var portExtraAttributeFieldMapByName = null;
 		var editingNode = null;
 		var editPortsTable = null;
 		var editMode = null;
@@ -198,15 +204,25 @@
 			{value: 3, text: 'Layer3'}
 		];
 
+		function buildMapByName(source) {
+			var result = {};
+			for (key in source) {
+				result[source[key].name] = source[key];
+			}
+			return result;
+		}
+
 		function buildNodeExtraAttributeMapByName(nodeExtraAttributes) {
 			var nodeExtraAttributeMapByName = {
 				virtual: {
+					node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['virtual'].id,
 					value_bool: {
 						Valid: true,
 						Bool: false,
 					}
 				},
 				remark: {
+					node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['remark'].id,
 					value_string: {
 						Valid: true,
 						String: '',
@@ -215,7 +231,8 @@
 			};
 			for (var i = 0; i < nodeExtraAttributes.length; i = i + 1) {
 				var nodeExtraAttribute = nodeExtraAttributes[i];
-				nodeExtraAttributeMapByName[nodeExtraAttribute.name] = nodeExtraAttribute
+				var nodeExtraAttributeField = nodeExtraAttributeFieldMap[nodeExtraAttribute.node_extra_attribute_field_id];
+				nodeExtraAttributeMapByName[nodeExtraAttributeField.name] = nodeExtraAttribute;
 			}
 			return nodeExtraAttributeMapByName;
 		}
@@ -223,6 +240,7 @@
 		function buildPortExtraAttributeMapByName(portExtraAttributes) {
 			var portExtraAttributeMapByName = {
 				remark: {
+					port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
 					value_string: {
 						Valid: true,
 						String: '',
@@ -231,7 +249,8 @@
 			};
 			for (var i = 0; i < portExtraAttributes.length; i = i + 1) {
 				var portExtraAttribute = portExtraAttributes[i];
-				portExtraAttributeMapByName[portExtraAttribute.name] = portExtraAttribute
+				var portExtraAttributeField = portExtraAttributeFieldMap[portExtraAttribute.port_extra_attribute_field_id];
+				portExtraAttributeMapByName[portExtraAttributeField.name] = portExtraAttribute;
 			}
 			return portExtraAttributeMapByName;
 		}
@@ -277,7 +296,7 @@
 				node_extra_attributes: [
 					{
 						id: 0,
-						name: 'virtual',
+						node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['virtual'].id,
 						value_bool: {
 							Valid: true,
 							Bool: virtual
@@ -285,7 +304,7 @@
 					},
 					{
 						id: 0,
-						name: 'remark',
+						node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['remark'].id,
 						value_string: {
 							Valid: true,
 							String: remark
@@ -310,7 +329,7 @@
 				port_extra_attributes: [
 					{
 						id: 0,
-						name: 'remark',
+						port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
 						value_string: {
 							Valid: true,
 							String: remark
@@ -337,7 +356,7 @@
 				node_extra_attributes: [
 					{
 							id: parseInt(editNodePvID),
-							name: 'virtual',
+							node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['virtual'].id,
 							value_bool: {
 								Valid: true,
 								Bool: convertStringToBoolean(editNodePv)
@@ -345,7 +364,7 @@
 					},
 					{
 						id: parseInt(editNodeRemarkID),
-						name: 'remark',
+						node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['remark'].id,
 						value_string: {
 							Valid: true,
 							String: editNodeRemark
@@ -392,7 +411,7 @@
 					port_extra_attributes: [
 						{
 							id: parseInt(editPortRemarkID),
-							name: 'remark',
+							port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
 							value_string: {
 								Valid: true,
 								String: editPortRemark
@@ -453,7 +472,6 @@
 			if (node != null) {
 				$('#node_name').append(node.name);
 				var nodePv = 'physical';
-				console.log(node.node_extra_attribute_map_by_name)
 				if (node.node_extra_attribute_map_by_name['virtual'].value_bool.Bool) {
 					nodePv = 'virtual';
 				}
@@ -620,7 +638,10 @@
 			nodeMap = buildResouceMapFromResourceArray(nodes);
 			nodeTypes = getResources('node_types', '').resources;
 			nodeTypeMap = buildResouceMapFromResourceArray(nodeTypes);
-			var nodeExtraAttributes = getResources('node_extra_attributes', '').resources;
+			nodeExtraAttributeFields = getResources('node_extra_attribute_fields', '').resources;
+			nodeExtraAttributeFieldMap = buildResouceMapFromResourceArray(nodeExtraAttributeFields);
+			nodeExtraAttributeFieldMapByName = buildMapByName(nodeExtraAttributeFieldMap);
+			var nodeExtraAttributes = getResources('node_extra_attributes', 'preloads=NodeExtraAttributeField,ValueNodeExtraAttributeOption').resources;
 			for (var i = 0; i < nodes.length; i = i + 1) {
 				var node = nodes[i];
 				if (node.ports == null) {
@@ -633,7 +654,10 @@
 			}
 			ports = getResources('ports', 'preloads=DestinationPort,PortExtraAttributes&fields=id,name,node_id,number,layer,mac_address,ipv4_address,ipv4_prefix,destination_port_id,destination_port,port_extra_attributes.*').resources;
 			portMap = buildResouceMapFromResourceArray(ports);
-			var portExtraAttributes = getResources('port_extra_attributes', '').resources;
+			portExtraAttributeFields = getResources('port_extra_attribute_fields', '').resources;
+			portExtraAttributeFieldMap = buildResouceMapFromResourceArray(portExtraAttributeFields);
+			portExtraAttributeFieldMapByName = buildMapByName(portExtraAttributeFieldMap);
+			var portExtraAttributes = getResources('port_extra_attributes', 'preloads=PortExtraAttributeField,ValuePortExtraAttributeOption').resources;
 			for (var i = 0; i < ports.length; i = i + 1) {
 				var port = ports[i];
 				if (port.port_extra_attributes == null) {

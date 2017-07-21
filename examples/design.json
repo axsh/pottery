@@ -1,10 +1,30 @@
 {
   "content": {
+    "node_extra_attribute_fields": [
+      {
+        "id": 1,
+        "name": "virtual",
+        "node_extra_attribute_options": null
+      },
+      {
+        "id": 2,
+        "name": "remark",
+        "node_extra_attribute_options": null
+      }
+    ],
+    "node_extra_attribute_options": [],
     "node_extra_attributes": [
       {
         "id": 1,
         "node_id": 1,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -25,7 +45,14 @@
       {
         "id": 2,
         "node_id": 1,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -46,7 +73,14 @@
       {
         "id": 3,
         "node_id": 2,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -67,7 +101,14 @@
       {
         "id": 4,
         "node_id": 2,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -88,7 +129,14 @@
       {
         "id": 5,
         "node_id": 3,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -109,7 +157,14 @@
       {
         "id": 6,
         "node_id": 3,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -130,7 +185,14 @@
       {
         "id": 7,
         "node_id": 4,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -151,7 +213,14 @@
       {
         "id": 8,
         "node_id": 4,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -172,7 +241,14 @@
       {
         "id": 9,
         "node_id": 5,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -193,7 +269,14 @@
       {
         "id": 10,
         "node_id": 5,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -214,7 +297,14 @@
       {
         "id": 11,
         "node_id": 6,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -235,7 +325,14 @@
       {
         "id": 12,
         "node_id": 6,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -256,7 +353,14 @@
       {
         "id": 13,
         "node_id": 7,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -277,7 +381,14 @@
       {
         "id": 14,
         "node_id": 7,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -298,7 +409,14 @@
       {
         "id": 15,
         "node_id": 8,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -319,7 +437,14 @@
       {
         "id": 16,
         "node_id": 8,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -340,7 +465,14 @@
       {
         "id": 17,
         "node_id": 9,
-        "name": "virtual",
+        "node": null,
+        "node_extra_attribute_field_id": 1,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -361,7 +493,14 @@
       {
         "id": 18,
         "node_id": 9,
-        "name": "remark",
+        "node": null,
+        "node_extra_attribute_field_id": 2,
+        "node_extra_attribute_field": null,
+        "value_node_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_node_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -495,11 +634,31 @@
         "node_groups": null
       }
     ],
+    "port_extra_attribute_fields": [
+      {
+        "id": 1,
+        "name": "route",
+        "port_extra_attribute_options": null
+      },
+      {
+        "id": 2,
+        "name": "remark",
+        "port_extra_attribute_options": null
+      }
+    ],
+    "port_extra_attribute_options": [],
     "port_extra_attributes": [
       {
         "id": 1,
         "port_id": 1,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -520,7 +679,14 @@
       {
         "id": 2,
         "port_id": 2,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -541,7 +707,14 @@
       {
         "id": 3,
         "port_id": 3,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -562,7 +735,14 @@
       {
         "id": 4,
         "port_id": 4,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -583,7 +763,14 @@
       {
         "id": 5,
         "port_id": 5,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -604,7 +791,14 @@
       {
         "id": 6,
         "port_id": 6,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -625,7 +819,14 @@
       {
         "id": 7,
         "port_id": 7,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -646,7 +847,14 @@
       {
         "id": 8,
         "port_id": 8,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -667,7 +875,14 @@
       {
         "id": 9,
         "port_id": 9,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -688,7 +903,14 @@
       {
         "id": 10,
         "port_id": 10,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -709,7 +931,14 @@
       {
         "id": 11,
         "port_id": 11,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -730,7 +959,14 @@
       {
         "id": 12,
         "port_id": 12,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -751,7 +987,14 @@
       {
         "id": 13,
         "port_id": 13,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -772,7 +1015,14 @@
       {
         "id": 14,
         "port_id": 14,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -793,7 +1043,14 @@
       {
         "id": 15,
         "port_id": 15,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false
@@ -814,7 +1071,14 @@
       {
         "id": 16,
         "port_id": 16,
-        "name": "remark",
+        "port": null,
+        "port_extra_attribute_field_id": 2,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
         "value_int": {
           "Int64": 0,
           "Valid": false

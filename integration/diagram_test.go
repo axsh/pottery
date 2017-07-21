@@ -77,13 +77,19 @@ func TestGetDiagram(t *testing.T) {
 	Execute(t, http.MethodPost, GenerateMultiResourceURL(server, "node_types", nil), nodeType6)
 	Execute(t, http.MethodPost, GenerateMultiResourceURL(server, "node_types", nil), nodeType7)
 
+	nodeExtraAttributeField1 := &loamModels.NodeExtraAttributeField{
+		ID:   1,
+		Name: "virtual",
+	}
+	Execute(t, http.MethodPost, GenerateMultiResourceURL(server, "node_extra_attribute_fields", nil), nodeExtraAttributeField1)
+
 	router1 := &loamModels.Node{
 		ID:         1,
 		Name:       "router1",
 		NodeTypeID: 4,
 		NodeExtraAttributes: []*loamModels.NodeExtraAttribute{
 			{
-				Name: "virtual",
+				NodeExtraAttributeFieldID: nodeExtraAttributeField1.ID,
 				ValueBool: sql.NullBool{
 					Valid: true,
 					Bool:  false,
@@ -97,7 +103,7 @@ func TestGetDiagram(t *testing.T) {
 		NodeTypeID: 3,
 		NodeExtraAttributes: []*loamModels.NodeExtraAttribute{
 			{
-				Name: "virtual",
+				NodeExtraAttributeFieldID: nodeExtraAttributeField1.ID,
 				ValueBool: sql.NullBool{
 					Valid: true,
 					Bool:  false,
@@ -111,7 +117,7 @@ func TestGetDiagram(t *testing.T) {
 		NodeTypeID: 1,
 		NodeExtraAttributes: []*loamModels.NodeExtraAttribute{
 			{
-				Name: "virtual",
+				NodeExtraAttributeFieldID: nodeExtraAttributeField1.ID,
 				ValueBool: sql.NullBool{
 					Valid: true,
 					Bool:  true,
@@ -125,7 +131,7 @@ func TestGetDiagram(t *testing.T) {
 		NodeTypeID: 6,
 		NodeExtraAttributes: []*loamModels.NodeExtraAttribute{
 			{
-				Name: "virtual",
+				NodeExtraAttributeFieldID: nodeExtraAttributeField1.ID,
 				ValueBool: sql.NullBool{
 					Valid: true,
 					Bool:  true,
@@ -139,7 +145,7 @@ func TestGetDiagram(t *testing.T) {
 		NodeTypeID: 6,
 		NodeExtraAttributes: []*loamModels.NodeExtraAttribute{
 			{
-				Name: "virtual",
+				NodeExtraAttributeFieldID: nodeExtraAttributeField1.ID,
 				ValueBool: sql.NullBool{
 					Valid: true,
 					Bool:  true,
