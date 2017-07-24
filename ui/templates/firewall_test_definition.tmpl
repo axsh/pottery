@@ -4,7 +4,7 @@
 	<div class="panel panel-default panel-custom" id="communication_requirement_panel">
 		<div class="panel-heading">
 			<h1 class="panel-title">
-				<span class="glyphicon glyphicon-wrench"></span> Communication Requirements
+				<span class="glyphicon glyphicon-wrench"></span> Firewall Test Definitions
 			</h1>
 		</div>
 		<div class="panel-body">
@@ -158,18 +158,6 @@
 													<span id="service_name"></span>
 												</td>
 											</tr>
-											<tr>
-												<td>Server TestScript Name</td>
-												<td>
-													<span id="service_test_script_name"></span>
-												</td>
-											</tr>
-											<tr>
-												<td>Client TestScript Name</td>
-												<td>
-													<span id="client_test_script_name"></span>
-												</td>
-											</tr>
 										</table><!-- /Service Properties -->
 										<!-- Service Connection Panel -->
 										<div class="panel panel-default">
@@ -211,18 +199,6 @@
 												<td width="75%">
 													<input type="hidden" id="edit_service_id">
 													<input id="edit_service_name" type="text" name="edit_service_name" placeholder="service name like ssh, http, https" class="form-control">
-												</td>
-											</tr>
-											<tr>
-												<td width="25%">Server TestScript</td>
-												<td width="75%">
-													<select class="form-control" id="edit_server_test_script_id" name="edit_server_test_script_id"></select>
-												</td>
-											</tr>
-											<tr>
-												<td width="25%">Client TestScript</td>
-												<td width="75%">
-													<select class="form-control" id="edit_client_test_script_id" name="edit_client_test_script_id"></select>
 												</td>
 											</tr>
 										</table>
@@ -334,10 +310,6 @@
 		var serviceMap = null;
 		var requirements = null;
 		var requirementMap = null;
-		var testPrograms = null;
-		var testProgramMap = null;
-		var templates = null;
-		var templateMap = null;
 
 		var editRequirementsTable = null;
 		var editConnectionsTable = null;
@@ -378,13 +350,9 @@
 			}
 			protocols = getResources('protocols', '').resources;
 			protocolMap = buildResouceMapFromResourceArray(protocols);
-			services = getResources('services', 'preloads=Connections,Connections.Protocol,TestProgram').resources;
+			services = getResources('services', 'preloads=Connections,Connections.Protocol').resources;
 			serviceMap = buildResouceMapFromResourceArray(services);
 			requirements = getResources('requirements', '').resources;
-			testPrograms = getResources('test_programs', '').resources;
-			testProgramMap = buildResouceMapFromResourceArray(testPrograms);
-			templates = getResources('templates', 'fields=id,name').resources;
-			templateMap = buildResouceMapFromResourceArray(templates);
 		}
 
 		function convertAccess(access) {
@@ -446,15 +414,6 @@
 			for (var i = 0; i < protocols.length; i = i + 1) {
 				var protocol = protocols[i];
 				result.push({value: protocol.id, text: protocol.name});
-			}
-			return result;
-		}
-
-		function createTemplateOptionList() {
-			var result = [];
-			for (var i = 0; i < templates.length; i = i + 1) {
-				var template = templates[i];
-				result.push({value: template.id, text: template.name});
 			}
 			return result;
 		}
@@ -816,15 +775,6 @@
 				$('#edit_service_id').val(editingService.id);
 				$('#edit_service_name').val(editingService.name);
 
-				$('#edit_server_test_script_id').children().remove();
-				$('#edit_client_test_script_id').children().remove();
-				var templateOptionList1 = createSelectOptionsElement(createTemplateOptionList());
-				var templateOptionList2 = createSelectOptionsElement(createTemplateOptionList());
-				for (var i = 0; i < templateOptionList1.length; i = i + 1) {
-					$('#edit_server_test_script_id').append(templateOptionList1[i]);
-					$('#edit_client_test_script_id').append(templateOptionList2[i]);
-				}
-
 				// Initialize connections properties
 				var rows = editConnectionsTable.fnGetNodes();
 				var rowCount = rows.length;
@@ -837,7 +787,7 @@
 					editConnectionsTable.fnAddData([
 						createAlignedCheckboxElement('edit_connection_check').outerHTML + createHiddenElement('edit_connection_id', connection.id).outerHTML,
 						createSelectElement('edit_connection_protocol_id', 'width:335px', createConnectionProtocolOptionList(), connection.protocol.id).outerHTML,
-						createTextElement('edit_connection_port_number', 'width:335px', 'value like 0xdad1c001', connection.port_number).outerHTML,
+						createTextElement('edit_connection_port_number', 'width:335px', 'value like 80', connection.port_number).outerHTML,
 					]);
 				}
 
