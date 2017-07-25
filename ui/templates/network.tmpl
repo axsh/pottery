@@ -145,6 +145,7 @@
 								<th>MacAddress</th>
 								<th>IPv4 Address</th>
 								<th>IPv4 Prefix</th>
+								<th>Gateway</th>
 								<th>Remark</th>
 							</tr>
 						</thead>
@@ -239,6 +240,13 @@
 
 		function buildPortExtraAttributeMapByName(portExtraAttributes) {
 			var portExtraAttributeMapByName = {
+				gateway: {
+					port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
+					value_string: {
+						Valid: true,
+						String: '',
+					}
+				},
 				remark: {
 					port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
 					value_string: {
@@ -329,6 +337,14 @@
 				port_extra_attributes: [
 					{
 						id: 0,
+						port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
+						value_string: {
+							Valid: true,
+							String: gateway
+						}
+					},
+					{
+						id: 0,
 						port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
 						value_string: {
 							Valid: true,
@@ -395,6 +411,8 @@
 				var editPortMacAddress = $(row).find('input[name=edit_port_mac_address]').val();
 				var editPortIpv4Address = $(row).find('input[name=edit_port_ipv4_address]').val();
 				var editPortIpv4Prefix = $(row).find('input[name=edit_port_ipv4_prefix]').val();
+				var editPortGatewayID = $(row).find('input[name=edit_port_gateway_id]').val();
+				var editPortGateway = $(row).find('input[name=edit_port_gateway]').val();
 				var editPortRemarkID = $(row).find('input[name=edit_port_remark_id]').val();
 				var editPortRemark = $(row).find('input[name=edit_port_remark]').val();
 				var editPortModel = {
@@ -409,6 +427,14 @@
 					ipv4_address: convertSqlNullObject('', 'String', editPortIpv4Address),
 					ipv4_prefix: convertSqlNullObject(0, 'Int64', editPortIpv4Prefix),
 					port_extra_attributes: [
+						{
+							id: parseInt(editPortGatewayID),
+							port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
+							value_string: {
+								Valid: true,
+								String: editPortGateway
+							}
+						},
 						{
 							id: parseInt(editPortRemarkID),
 							port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
@@ -549,6 +575,18 @@
 									).append(
 										$('<td>').prop('width', '50%').append(
 											port.ipv4_address.String + '/' + port.ipv4_prefix.Int64
+										)
+									)
+								).append(
+									$('<tr>').append(
+										$('<th>').prop('colspan', '2').prop('width', '100%').append(
+											'Gateway'
+										)
+									)
+								).append(
+									$('<tr>').append(
+										$('<td>').prop('colspan', '2').prop('width', '100%').append(
+											port.port_extra_attribute_map_by_name['gateway'].value_string.String
 										)
 									)
 								).append(
@@ -695,6 +733,7 @@
 					{ orderDataType: 'dom-text', type: 'string' },
 					{ orderDataType: 'dom-text', type: 'string' },
 					{ orderDataType: 'dom-text', type: 'string' },
+					{ orderDataType: 'dom-text', type: 'string' },
 				]
 			});
 
@@ -770,6 +809,7 @@
 						createEditPortTextElement('edit_port_mac_address', 'width:240px', 'mac address like 10:54:ff:00:00:01', port.mac_address.String).outerHTML,
 						createEditPortTextElement('edit_port_ipv4_address', 'width:210px', 'ipv4 address like 192.168.0.1', port.ipv4_address.String).outerHTML,
 						createEditPortTextElement('edit_port_ipv4_prefix', 'width:110px', 'prefix like 24', port.ipv4_prefix.Int64).outerHTML,
+						createEditPortHiddenElement('edit_port_gateway_id', port.port_extra_attribute_map_by_name['gateway'].id).outerHTML + createEditPortTextElement('edit_port_gateway', 'width:200px', 'ipv4 address like 192.168.0.1', port.port_extra_attribute_map_by_name['gateway'].value_string.String).outerHTML,
 						createEditPortHiddenElement('edit_port_remark_id', port.port_extra_attribute_map_by_name['remark'].id).outerHTML + createEditPortTextElement('edit_port_remark', 'width:200px', 'remark', port.port_extra_attribute_map_by_name['remark'].value_string.String).outerHTML,
 					]);
 	 			}
@@ -833,6 +873,7 @@
 				createEditPortTextElement('edit_port_mac_address', 'width:240px', 'mac address like 10:54:ff:00:00:01', '').outerHTML,
 				createEditPortTextElement('edit_port_ipv4_address', 'width:210px', 'ipv4 address like 192.168.0.1', '').outerHTML,
 				createEditPortTextElement('edit_port_ipv4_prefix', 'width:110px', '', 0).outerHTML,
+				createEditPortHiddenElement('edit_port_gateway_id', 0).outerHTML + createEditPortTextElement('edit_port_gateway', 'width:200px', 'ipv4 address like 192.168.0.1', '').outerHTML,
 				createEditPortHiddenElement('edit_port_remark_id', 0).outerHTML + createEditPortTextElement('edit_port_remark', 'width:200px', 'remark', '').outerHTML,
 			]);
 			editPortsTable.fnDraw();
