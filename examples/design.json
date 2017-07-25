@@ -637,7 +637,7 @@
     "port_extra_attribute_fields": [
       {
         "id": 1,
-        "name": "route",
+        "name": "gateway",
         "port_extra_attribute_options": null
       },
       {
@@ -1093,6 +1093,118 @@
         },
         "value_string": {
           "String": "to l2sw2",
+          "Valid": true
+        }
+      },
+      {
+        "id": 17,
+        "port_id": 13,
+        "port": null,
+        "port_extra_attribute_field_id": 1,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
+        "value_int": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_float": {
+          "Float64": 0,
+          "Valid": false
+        },
+        "value_bool": {
+          "Bool": false,
+          "Valid": false
+        },
+        "value_string": {
+          "String": "192.168.0.1",
+          "Valid": true
+        }
+      },
+      {
+        "id": 18,
+        "port_id": 14,
+        "port": null,
+        "port_extra_attribute_field_id": 1,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
+        "value_int": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_float": {
+          "Float64": 0,
+          "Valid": false
+        },
+        "value_bool": {
+          "Bool": false,
+          "Valid": false
+        },
+        "value_string": {
+          "String": "192.168.0.1",
+          "Valid": true
+        }
+      },
+      {
+        "id": 19,
+        "port_id": 15,
+        "port": null,
+        "port_extra_attribute_field_id": 1,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
+        "value_int": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_float": {
+          "Float64": 0,
+          "Valid": false
+        },
+        "value_bool": {
+          "Bool": false,
+          "Valid": false
+        },
+        "value_string": {
+          "String": "192.168.1.1",
+          "Valid": true
+        }
+      },
+      {
+        "id": 20,
+        "port_id": 16,
+        "port": null,
+        "port_extra_attribute_field_id": 1,
+        "port_extra_attribute_field": null,
+        "value_port_extra_attribute_option_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_port_extra_attribute_option": null,
+        "value_int": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "value_float": {
+          "Float64": 0,
+          "Valid": false
+        },
+        "value_bool": {
+          "Bool": false,
+          "Valid": false
+        },
+        "value_string": {
+          "String": "192.168.1.1",
           "Valid": true
         }
       }
