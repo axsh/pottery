@@ -1,0 +1,292 @@
+{{template "headerpart" .}}
+<!-- Center Column -->
+<div class="col-sm-12">
+
+	<div class="panel panel-default panel-custom" id="environment_panel">
+		<div class="panel-heading">
+			<h1 class="panel-title"><span class="glyphicon glyphicon-wrench"></span> Environment </h1>
+		</div>
+		<div class="panel-body">
+
+			<div class="row">
+				<div class="col-xs-9">
+					<ul class="nav nav-pills">
+						<li class="active">
+			        <a href="#repository_configuration_tab" data-toggle="tab">Repository</a>
+						</li>
+						<li>
+			        <a href="#template_configuration_tab" data-toggle="tab">Template</a>
+						</li>
+						<li>
+							<a href="#test_program_configuratin_tab" data-toggle="tab">Test Program</a>
+						</li>
+						<li>
+							<a href="#test_node_configuration" data-toggle="tab">Test Node</a>
+						</li>
+						<li>
+							<a href="#device_configuration" data-toggle="tab">Test Device</a>
+						</li>
+					</ul>
+				</div>
+				<div class="col-xs-3">
+					<span style="float: right">
+						<button class="btn btn-default" id="update_btn" type="button"><span class="glyphicon glyphicon-save"></span> Update </button>
+						<button class="btn btn-default" id="apply_btn" type="button"><span class="glyphicon glyphicon-saved"></span> Update and Commit </button>
+					</span>
+				</div>
+			</div>
+
+			<div class="tab-content clearfix">
+
+			  <div class="tab-pane active" id="repository_configuration_tab">
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Git repository
+						</div>
+						<div class="col-xs-10">
+						    <input id="git_repository_uri" type="text" name="git_repository_uri" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Git Username
+						</div>
+						<div class="col-xs-10">
+						    <input id="git_user_name" type="text" name="git_user_name" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Git User E-Mail
+						</div>
+						<div class="col-xs-10">
+						    <input id="git_user_email" type="text" name="git_user_email" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Design filename
+						</div>
+						<div class="col-xs-10">
+						    <input id="design_file_name" type="text" name="design_file_name" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+				</div>
+
+				<div class="tab-pane" id="template_configuration_tab">
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Template filename
+						</div>
+						<div class="col-xs-10">
+						    <input id="template_file_name" type="text" name="template_file_name" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Template
+						</div>
+						<div class="col-xs-10">
+							<input id="template_name" type="hidden" name="template_name">
+							<textarea id="template_content" name="template_content" rows="20" class="form-control"></textarea>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+				</div>
+
+				<div class="tab-pane" id="test_program_configuratin_tab">
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    TestCase directory name
+						</div>
+						<div class="col-xs-10">
+						    <input id="test_case_directory_name" type="text" name="test_case_directory_name" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    TestRunner script template
+						</div>
+						<div class="col-xs-10">
+						    <textarea id="test_runner_script_template" name="test_runner_script_template" rows="20" class="form-control"></textarea>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+				</div>
+
+				<div class="tab-pane" id="node_configuration_tab">
+					<div class="row">
+						<div class="col-xs-12">
+								&nbsp;
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div><!--/Center Column-->
+
+<script language="javascript">
+	(function($) {
+
+    {{template "functions" .}}
+		const target = "present";
+
+		var environment = null;
+
+		function updateEnvironment() {
+			environment.git_repository_uri = $("#git_repository_uri").val();
+			environment.git_user_name = $("#git_user_name").val();
+			environment.git_user_email = $("#git_user_email").val();
+			environment.design_file_name = $("#design_file_name").val();
+			environment.template_file_name = $("#template_file_name").val();
+			environment.test_case_directory_name = $("#test_case_directory_name").val();
+			environment.template.name = $("#template_name").val();
+			environment.template.template_content = $("#template_content").val();
+			environment.test_case.test_runner_script_template = $("#test_runner_script_template").val();
+			for (var i = 0; i < environment.test_case.test_patterns.length; i = i + 1) {
+				var serviceName = environment.test_case.test_patterns[i].test_command.service_name
+				environment.test_case.test_patterns[i].test_command.server_script_template = $("#test_script_" + serviceName + "_server").val();
+				environment.test_case.test_patterns[i].test_command.client_script_template = $("#test_script_" + serviceName + "_client").val();
+			}
+			for (var i = 0; i < environment.node_configs.length; i = i + 1) {
+				environment.node_configs[i].firmware_version = $("#node_config_" + environment.node_configs[i].node.id + "_firmware_version").val();
+				environment.node_configs[i].initialize_config = $("#node_config_" + environment.node_configs[i].node.id + "_initialize_config").val();
+				environment.node_configs[i].config = $("#node_config_" + environment.node_configs[i].node.id + "_config").val();
+			}
+			return $.ajax({
+				type: 'PUT',
+				url: API_PREFIX + '/environments/' + target,
+				dataType: 'json',
+				contentType: 'application/json',
+				data: JSON.stringify(environment),
+				async: false
+			});
+		}
+
+		function applyEnvironment() {
+			return $.ajax({
+				type: 'PATCH',
+				url: API_PREFIX + '/environments/' + target,
+				dataType: 'text',
+				contentType: 'text/plain; charset=utf-8',
+				data: "",
+				async: false
+			});
+		}
+
+		function onLoad() {
+			/*
+			loadEnvironment();
+			$("#git_repository_uri").val(environment.git_repository_uri);
+			$("#git_user_name").val(environment.git_user_name);
+			$("#git_user_email").val(environment.git_user_email);
+			$("#design_file_name").val(environment.design_file_name);
+			$("#template_file_name").val(environment.template_file_name);
+			$("#test_case_directory_name").val(environment.test_case_directory_name);
+			$("#template_name").val(environment.template.name);
+			$("#template_content").val(environment.template.template_content);
+			$("#test_runner_script_template").val(environment.test_case.test_runner_script_template);
+			*/
+			$('#environment_panel').fadeIn(150);
+		}
+
+		$('#update_btn').on('click', function() {
+			if (!confirm("Are you sure to update?")) {
+				return;
+			}
+
+			response = updateEnvironment();
+
+			if (response.status == 200) {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#information_message").text("The environment has been updated successfully.")
+				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+			} else {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#error_message").text($.parseJSON(response.responseText).error)
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+			}
+		});
+
+		$('#apply_btn').on('click', function() {
+			if (!confirm("Are you sure to apply?")) {
+				return;
+			}
+
+			response = applyEnvironment();
+
+			if (response.status == 200) {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#information_message").text("The model has been committed to the git repository successfully.")
+				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+			} else {
+				$("html,body").animate({scrollTop:0},'slow');
+				$("#error_message").text($.parseJSON(response.responseText).error)
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+			}
+		});
+
+    $('.alert .close').on('click', function() {
+        $(this).parents('.alert').hide();
+    });
+
+		onLoad();
+
+	})(jQuery);
+</script>
+{{template "footerpart" .}}

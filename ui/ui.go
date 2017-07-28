@@ -110,6 +110,7 @@ func (routerInitializer *routerInitializer) InitializeEarly(r *gin.Engine) error
 		fmt.Sprintf("%s/%s", templateBase, "template.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "firewall_test_definition.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "firewall_test_program.tmpl"),
+		fmt.Sprintf("%s/%s", templateBase, "environment.tmpl"),
 	}
 	htmlTemplate, err := loadTemplates(templateFileNames...)
 	if err != nil {
@@ -141,6 +142,9 @@ func (routerInitializer *routerInitializer) InitializeEarly(r *gin.Engine) error
 		})
 		ui.GET("/firewall_test_program", func(c *gin.Context) {
 			c.HTML(http.StatusOK, "firewall_test_program.tmpl", gin.H{"env": envMap, "category": "process"})
+		})
+		ui.GET("/environment", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "environment.tmpl", gin.H{"env": envMap, "category": "process"})
 		})
 	}
 

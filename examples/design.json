@@ -1,5 +1,43 @@
 {
   "content": {
+    "connections": [
+      {
+        "id": 1,
+        "service_id": 1,
+        "protocol_id": 2,
+        "protocol": null,
+        "port_number": 80
+      },
+      {
+        "id": 2,
+        "service_id": 2,
+        "protocol_id": 2,
+        "protocol": null,
+        "port_number": 443
+      },
+      {
+        "id": 3,
+        "service_id": 3,
+        "protocol_id": 2,
+        "protocol": null,
+        "port_number": 22
+      }
+    ],
+    "environments": [
+      {
+        "id": 1,
+        "template_id": 1,
+        "template": null,
+        "test_runner_script_id": 1,
+        "test_runner_script": null,
+        "git_repository_uri": "/tmp/clay_generated_conf",
+        "git_user_name": "clay",
+        "git_user_email": "clay@example.com",
+        "design_file_name": "design.json",
+        "template_file_name": "terraform.tf",
+        "test_case_directory_name": "testcase"
+      }
+    ],
     "node_extra_attribute_fields": [
       {
         "id": 1,
@@ -1627,7 +1665,160 @@
         "port_extra_attributes": null
       }
     ],
+    "protocols": [
+      {
+        "id": 1,
+        "name": "icmp"
+      },
+      {
+        "id": 2,
+        "name": "tcp"
+      },
+      {
+        "id": 3,
+        "name": "udp"
+      }
+    ],
+    "requirements": [
+      {
+        "id": 1,
+        "source_port_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "source_port": null,
+        "destination_port_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "destination_port": null,
+        "service_id": 1,
+        "service": null,
+        "access": true
+      },
+      {
+        "id": 2,
+        "source_port_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "source_port": null,
+        "destination_port_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "destination_port": null,
+        "service_id": 2,
+        "service": null,
+        "access": true
+      },
+      {
+        "id": 3,
+        "source_port_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "source_port": null,
+        "destination_port_id": {
+          "Int64": 0,
+          "Valid": false
+        },
+        "destination_port": null,
+        "service_id": 3,
+        "service": null,
+        "access": true
+      }
+    ],
+    "services": [
+      {
+        "id": 1,
+        "name": "http",
+        "connections": null,
+        "test_program": null
+      },
+      {
+        "id": 2,
+        "name": "https",
+        "connections": null,
+        "test_program": null
+      },
+      {
+        "id": 3,
+        "name": "ssh",
+        "connections": null,
+        "test_program": null
+      }
+    ],
     "template_persistent_parameters": [],
-    "templates": []
+    "templates": [
+      {
+        "id": 1,
+        "name": "http Server TestProgram",
+        "template_content": "http test server",
+        "template_persistent_parameters": null
+      },
+      {
+        "id": 2,
+        "name": "http Client TestProgram",
+        "template_content": "http test client",
+        "template_persistent_parameters": null
+      },
+      {
+        "id": 3,
+        "name": "https Server TestProgram",
+        "template_content": "https test server",
+        "template_persistent_parameters": null
+      },
+      {
+        "id": 4,
+        "name": "https Client TestProgram",
+        "template_content": "https test client",
+        "template_persistent_parameters": null
+      },
+      {
+        "id": 5,
+        "name": "ssh Server TestProgram",
+        "template_content": "ssh test server",
+        "template_persistent_parameters": null
+      },
+      {
+        "id": 6,
+        "name": "ssh Client TestProgram",
+        "template_content": "ssh test client",
+        "template_persistent_parameters": null
+      }
+    ],
+    "test_programs": [
+      {
+        "id": 1,
+        "name": "http TestProgram",
+        "service_id": 1,
+        "service": null,
+        "server_script_template_id": 1,
+        "server_script_template": null,
+        "client_script_template_id": 2,
+        "client_script_template": null
+      },
+      {
+        "id": 2,
+        "name": "https TestProgram",
+        "service_id": 2,
+        "service": null,
+        "server_script_template_id": 3,
+        "server_script_template": null,
+        "client_script_template_id": 4,
+        "client_script_template": null
+      },
+      {
+        "id": 3,
+        "name": "ssh TestProgram",
+        "service_id": 3,
+        "service": null,
+        "server_script_template_id": 5,
+        "server_script_template": null,
+        "client_script_template_id": 6,
+        "client_script_template": null
+      }
+    ]
   }
 }
