@@ -1,6 +1,10 @@
 package models
 
-import "github.com/qb0C80aE/clay/extensions"
+import (
+	"github.com/jinzhu/gorm"
+	"github.com/qb0C80aE/clay/extensions"
+	loamModels "github.com/qb0C80aE/loam/models"
+)
 
 // Diagram is the model class what represents physical and logical diagrams
 type Diagram struct {
@@ -95,6 +99,45 @@ func SharedDiagramLinkModel() *DiagramLink {
 	return sharedDiagramLinkModel
 }
 
+func (diagram *Diagram) SetupInitialData(db *gorm.DB) error {
+	nodeTypes := []*loamModels.NodeType{
+		{ID: 1, Name: "L2Switch"},
+		{ID: 2, Name: "L3Switch"},
+		{ID: 3, Name: "Firewall"},
+		{ID: 4, Name: "Router"},
+		{ID: 5, Name: "LoadBalancer"},
+		{ID: 6, Name: "Server"},
+		{ID: 7, Name: "Network"},
+	}
+	nodeExtraAttributeFields := []*loamModels.NodeExtraAttributeField{
+		{ID: 1, Name: "virtual"},
+		{ID: 2, Name: "remark"},
+	}
+	portExtraAttributeFields := []*loamModels.PortExtraAttributeField{
+		{ID: 1, Name: "gateway"},
+		{ID: 2, Name: "remark"},
+	}
+
+	for _, nodeType := range nodeTypes {
+		if err := db.Save(nodeType).Error; err != nil {
+			return err
+		}
+	}
+	for _, nodeExtraAttributeField := range nodeExtraAttributeFields {
+		if err := db.Save(nodeExtraAttributeField).Error; err != nil {
+			return err
+		}
+	}
+	for _, portExtraAttributeField := range portExtraAttributeFields {
+		if err := db.Save(portExtraAttributeField).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func init() {
-	extensions.RegisterModel(&Diagram{})
+	diagram := &Diagram{}
+	extensions.RegisterInitialDataLoader(diagram)
+	extensions.RegisterModel(diagram)
 }
