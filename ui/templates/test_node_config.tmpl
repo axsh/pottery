@@ -1,0 +1,321 @@
+{{template "headerpart" .}}
+
+<div class="col-sm-12">
+	<div class="panel panel-default panel-custom" id="test_node_configuration_panel">
+		<div class="panel-heading">
+			<h1 class="panel-title">
+				<span class="glyphicon glyphicon-wrench"></span> Test Node Configuration
+			</h1>
+		</div>
+		<div class="panel-body">
+			<div class="col-sm-4">
+				<div class="panel panel-default" id="edit_test_node_configuration_panel">
+					<div class="panel-heading">
+						<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Server Types </h1>
+					</div>
+					<div class="panel-body">
+						<div class="input-group text-left">
+							<select class="form-control" id="server_types"></select>
+							<span class="input-group-btn">
+								<button class="btn btn-default" id="edit_server_type_btn" type="button">
+									<span class="glyphicon glyphicon-edit"></span>
+								</button>
+								<button class="btn btn-default" id="new_server_type_btn" type="button">
+									<span class="glyphicon glyphicon-plus"></span>
+								</button>
+								<button class="btn btn-default" id="delete_server_type_btn" type="button">
+									<span class="glyphicon glyphicon-minus"></span>
+								</button>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-8">
+				<div class="panel panel-default panel-custom" id="edit_server_type_panel">
+					<div class="panel-heading">
+						<h1 class="panel-title"><span class="glyphicon glyphicon-file"></span> Server Type</h1>
+					</div>
+					<div class="panel-body">
+						<div class="panel-body">
+							<table class="table">
+								<tr>
+									<th width="15%">
+										<span class="glyphicon glyphicon-file"></span> Property
+									</th>
+									<th width="85%">
+										<span class="glyphicon glyphicon-pencil"></span> Value
+									</th>
+								</tr>
+								<tr>
+									<td width="15%">Name</td>
+									<td width="85%">
+										<input type="hidden" id="edit_server_type_id">
+										<input id="edit_server_type_name" type="text" name="edit_server_type_name" placeholder="server type name like client, tftp" class="form-control">
+									</td>
+								</tr>
+								<tr>
+									<td width="15%">Template</td>
+									<td width="85%">
+										<input id="edit_server_type_template" type="text" name="edit_server_type_template" placeholder="server type template like centos/7/lxc" class="form-control">
+									</td>
+								</tr>
+								<tr>
+									<td colspan=2>Server Initial Configuration</td>
+								</tr>
+								<tr>
+									<td colspan=2>
+										<textarea id="edit_server_initial_configuration" name="edit_server_initial_configuration" class="form-control" rows="15"></textarea>
+									</td>
+								</tr>
+							</table>
+						</div>
+						<span style="float: left"><button class="btn btn-default" id="register_or_update_server_type_btn" type="button"><span class="glyphicon glyphicon-ok"></span> <span id="register_or_update_server_type_btn_label"></span></button></span>
+						<span style="float: left">&nbsp;</span>
+						<span style="float: left"><button class="btn btn-default" id="cancel_register_or_update_server_type_btn" type="button"><span class="glyphicon glyphicon-remove"></span> Cancel</button></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script language="javascript">
+	(function($) {
+
+		{{template "functions" .}}
+
+		const SERVER_TYPE_FIELD_ID = 3;
+
+		var serverTypes = null;
+		var serverTypeMap = null;
+
+		var editingMode = null;
+		var editingServerType = null;
+		var editingInitialServerScript = null;
+
+		function loadResources() {
+			var nodeExtraAttributeField = getResource('node_extra_attribute_fields', SERVER_TYPE_FIELD_ID, 'preloads=NodeExtraAttributeOptions').resource;
+			if (nodeExtraAttributeField.node_extra_attribute_options.length == 0) {
+				serverTypes = [];
+			} else {
+				serverTypes = nodeExtraAttributeField.node_extra_attribute_options;
+				for (var i = 0; i < serverTypes.length; i = i + 1) {
+					var serverType = serverTypes[i];
+					var initialServerScript = getResource('templates', serverType.value_int.Int64, '');
+					if (initialServerScript.status != 200) {
+						serverTypes[i].initial_server_script = {
+							name: "",
+							template_content: ""
+						}
+					} else {
+						serverTypes[i].initial_server_script = initialServerScript.resource;
+					}
+				}
+			}
+			serverTypeMap = buildResouceMapFromResourceArray(serverTypes);
+		}
+
+		function createSelectElement(name, style, options, value) {
+			var select =  $('<select>').prop('name', name).prop('class', 'form-control').prop('style', style);
+			var editSelectOptionsElement = createSelectOptionsElement(options);
+			for (var i = 0; i < editSelectOptionsElement.length; i = i + 1) {
+				if ((value == null) && (i == 0)) {
+						select.append(editSelectOptionsElement[i].attr('selected', 'selected'));
+				} else {
+					if (value == editSelectOptionsElement[i].val()) {
+						select.append(editSelectOptionsElement[i].attr('selected', 'selected'));
+					} else {
+						select.append(editSelectOptionsElement[i]);
+					}
+				}
+			}
+			return select[0];
+		}
+
+		function createSelectOptionsElement(options) {
+			var result = [];
+			for (var i = 0; i < options.length; i = i + 1) {
+				result.push($('<option>').val(options[i].value).text(options[i].text));
+			}
+			return result;
+		}
+
+		function showServerTypes() {
+			$("#server_types").children().remove();
+			for (var i = 0; i < serverTypes.length; i = i + 1) {
+				var serverType = serverTypes[i]
+				$("#server_types").append($('<option>').val(serverType.id).text(serverType.name));
+			}
+		}
+
+		function onEditServerType() {
+			if ($('#server_types').val() == null) {
+				alert('Add a server type first.');
+				return;
+			}
+
+			editingMode = "update";
+
+			editingServerType = serverTypeMap[$('#server_types').val()];
+
+			$('#edit_server_type_panel').fadeOut(150, function() {
+				$("#register_or_update_server_type_btn_label").text("Update");
+				$("#edit_server_type_id").val(editingServerType.id);
+				$("#edit_server_type_name").val(editingServerType.name);
+				$("#edit_server_type_template").val(editingServerType.value_string.String);
+				$("#edit_server_initial_configuration").val(editingServerType.initial_server_script.template_content);
+				$('#edit_server_type_panel').fadeIn(150, function() {
+				});
+			});
+		}
+
+		function onNewServerType() {
+			editingMode = "new";
+			editingServerType = {
+				name: "",
+				node_extra_attribute_field_id: SERVER_TYPE_FIELD_ID,
+				value_string: {
+					Valid: true,
+					String: ""
+				},
+				value_int: {
+					Valid: true,
+					Int64: 0
+				},
+				initial_server_script: {
+					name: "",
+					template_content: ""
+				}
+			}
+
+			$('#edit_server_type_panel').fadeOut(150, function() {
+				$("#register_or_update_server_type_btn_label").text("Register");
+				$("#edit_server_type_id").val(null);
+				$("#edit_server_type_name").val("");
+				$("#edit_server_type_template").val("");
+				$("#edit_server_initial_configuration").val("");
+				$('#edit_server_type_panel').fadeIn(150, function() {
+				});
+			});
+		}
+
+		function onServerTypeModified(result, successCode, successMessage, ignoreSuccess) {
+			if (result.status == successCode) {
+				if (!ignoreSuccess) {
+					$('html,body').animate({
+						scrollTop: 0
+					}, 'slow');
+					$('#information_message').text(successMessage);
+					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+					$('#edit_server_type_panel').fadeOut(150);
+					loadResources();
+					showServerTypes();
+				}
+				return true;
+			}
+			else {
+				$('html,body').animate({
+					scrollTop: 0
+				}, 'slow');
+				$('#error_message').text(result.resource.error);
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+				return false;
+			}
+		}
+
+		function onRegisterOrUpdateServerType() {
+			if (editingMode == "new") {
+				if (!confirm('Are you sure to register?')) {
+					return;
+				}
+			} else {
+				if (!confirm('Are you sure to update?')) {
+					return;
+				}
+			}
+
+			if (editingMode == "new") {
+				editingServerType.initial_server_script.name = $("#edit_server_type_name").val() + "_initial_server_script";
+				editingServerType.initial_server_script.template_content = $("#edit_server_initial_configuration").val();
+				var result = postResource('templates', editingServerType.initial_server_script);
+				if (!onServerTypeModified(result, 201, '', true)) {
+					return;
+				}
+				editingServerType.name = $("#edit_server_type_name").val();
+				editingServerType.value_string.String = $("#edit_server_type_template").val();
+				editingServerType.value_string.Valid = true;
+				editingServerType.value_int.Valid = true;
+				editingServerType.value_int.Int64 = result.resource.id;
+				result = postResource('node_extra_attribute_options', editingServerType);
+				onServerTypeModified(result, 201, 'The server type has been registered successfully', false);
+			} else {
+				editingServerType.initial_server_script.id = editingServerType.value_int.Int64;
+				editingServerType.initial_server_script.name = $("#edit_server_type_name").val() + "_initial_server_script";
+				editingServerType.initial_server_script.template_content = $("#edit_server_initial_configuration").val();
+				var result = putResource('templates', editingServerType.initial_server_script.id, editingServerType.initial_server_script);
+				if (!onServerTypeModified(result, 200, '', true)) {
+					return;
+				}
+				editingServerType.name = $("#edit_server_type_name").val();
+				editingServerType.value_string.String = $("#edit_server_type_template").val();
+				editingServerType.value_string.Valid = true;
+				editingServerType.value_int.Valid = true;
+				result = putResource('node_extra_attribute_options', editingServerType.id, editingServerType);
+				onServerTypeModified(result, 200, 'The server type has been updated successfully', false);
+			}
+		}
+
+		function onCancelRegisterOrUpdateServerType() {
+			if (!confirm('Are you sure to cancel?')) {
+				return;
+			}
+
+			$('html,body').animate({scrollTop:0},'slow');
+			$('#edit_server_type_panel').fadeOut(150);
+		}
+
+		function onDeleteServerType() {
+			if ($('#server_types').val() == null) {
+				alert('Add a server type first.');
+				return;
+			}
+
+			if (!confirm('Are you sure to delete?')) {
+				return;
+			}
+
+			var result = deleteResource('node_extra_attribute_options', $('#server_types').val());
+			onServerTypeModified(result, 204, 'The server type has been deleted successfully', false);
+		}
+
+		$('#edit_server_type_btn').on('click', function() {
+			onEditServerType();
+		});
+
+		$('#new_server_type_btn').on('click', function() {
+			onNewServerType();
+		});
+
+		$('#delete_server_type_btn').on('click', function() {
+			onDeleteServerType();
+		});
+
+		function onLoad() {
+			loadResources();
+			$('#test_node_configuration_panel').fadeIn(150);
+			showServerTypes();
+		}
+
+		$('#register_or_update_server_type_btn').on('click', function() {
+			onRegisterOrUpdateServerType();
+		});
+
+		$('#cancel_register_or_update_server_type_btn').on('click', function() {
+			onCancelRegisterOrUpdateServerType();
+		});
+		onLoad();
+
+	})(jQuery);
+</script>
+{{template "footerpart" .}}
