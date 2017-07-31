@@ -7,6 +7,13 @@ import (
 	loamModels "github.com/qb0C80aE/loam/models"
 )
 
+const (
+	PresentEnvironmentID                               = 1
+	NodeExtraAttributeField_ServerType                 = 3
+	NodeExtraAttributeField_DeviceInitializationConfig = 4
+	NodeExtraAttributeField_DeviceConfig               = 5
+)
+
 type Environment struct {
 	ID                        int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
 	TemplateID                int                  `json:"template_id" gorm:"index" sql:"type:integer references templates(id) on delete set null"`
@@ -35,10 +42,9 @@ func SharedEnvironmentModel() *Environment {
 
 func (environment *Environment) SetupInitialData(db *gorm.DB) error {
 	nodeExtraAttributeFields := []*loamModels.NodeExtraAttributeField{
-		{ID: 3, Name: "server_type"},
-		{ID: 4, Name: "initialization"},
-		{ID: 5, Name: "device_initialization_config"},
-		{ID: 6, Name: "device_config"},
+		{ID: NodeExtraAttributeField_ServerType, Name: "server_type"},
+		{ID: NodeExtraAttributeField_DeviceInitializationConfig, Name: "device_initialization_config"},
+		{ID: NodeExtraAttributeField_DeviceConfig, Name: "device_config"},
 	}
 
 	for _, nodeExtraAttributeField := range nodeExtraAttributeFields {
