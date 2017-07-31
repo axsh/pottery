@@ -80,6 +80,7 @@
 								<th>MacAddress</th>
 								<th>IPv4 Address</th>
 								<th>IPv4 Prefix</th>
+								<th>Gateway</th>
 								<th>Remark</th>
 							</tr>
 						</thead>
@@ -255,7 +256,7 @@
 			return nodeModel;
 		}
 
-		function createPortModel(id, name, layer, number, node_id, destinationPortID, macAddress, ipv4Address, ipv4Prefix, remark) {
+		function createPortModel(id, name, layer, number, node_id, destinationPortID, macAddress, ipv4Address, ipv4Prefix, gateway, remark) {
 			var portModel = {
 				id: id,
 				name: name,
@@ -267,6 +268,14 @@
 				ipv4_address: convertSqlNullObject('', 'String', ipv4Address),
 				ipv4_prefix: convertSqlNullObject(0, 'Int64', ipv4Prefix),
 				port_extra_attributes: [
+					{
+						id: 0,
+						port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
+						value_string: {
+							Valid: true,
+							String: gateway
+						}
+					},
 					{
 						id: 0,
 						port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
@@ -335,6 +344,8 @@
 				var editPortMacAddress = $(row).find('input[name=edit_port_mac_address]').val();
 				var editPortIpv4Address = $(row).find('input[name=edit_port_ipv4_address]').val();
 				var editPortIpv4Prefix = $(row).find('input[name=edit_port_ipv4_prefix]').val();
+				var editPortGatewayID = $(row).find('input[name=edit_port_gateway_id]').val();
+				var editPortGateway = $(row).find('input[name=edit_port_gateway]').val();
 				var editPortRemarkID = $(row).find('input[name=edit_port_remark_id]').val();
 				var editPortRemark = $(row).find('input[name=edit_port_remark]').val();
 				var editPortModel = {
@@ -349,6 +360,14 @@
 					ipv4_address: convertSqlNullObject('', 'String', editPortIpv4Address),
 					ipv4_prefix: convertSqlNullObject(0, 'Int64', editPortIpv4Prefix),
 					port_extra_attributes: [
+						{
+							id: parseInt(editPortGatewayID),
+							port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
+							value_string: {
+								Valid: true,
+								String: editPortGateway
+							}
+						},
 						{
 							id: parseInt(editPortRemarkID),
 							port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
@@ -504,10 +523,9 @@
 				editingNode = nodeMap[nodeId];
 
 				// Initialize Node properties
-				$('#edit_node_pv').parents("tr").show();
 				$('#edit_node_pv').children().remove();
 				for (key in nodePvMap){
-				$('#edit_node_pv').append($('<option>').val(nodePvMap[key]).text(key));
+					$('#edit_node_pv').append($('<option>').val(nodePvMap[key]).text(key));
 				}
 
 				$('#edit_node_type').children().remove();
@@ -552,6 +570,7 @@
 						createEditPortTextElement('edit_port_mac_address', 'width:240px', 'mac address like 10:54:ff:00:00:01', port.mac_address.String).outerHTML,
 						createEditPortTextElement('edit_port_ipv4_address', 'width:210px', 'ipv4 address like 192.168.0.1', port.ipv4_address.String).outerHTML,
 						createEditPortTextElement('edit_port_ipv4_prefix', 'width:110px', 'prefix like 24', port.ipv4_prefix.Int64).outerHTML,
+						createEditPortHiddenElement('edit_port_gateway_id', port.port_extra_attribute_map_by_name['gateway'].id).outerHTML + createEditPortTextElement('edit_port_gateway', 'width:200px', 'ipv4 address like 192.168.0.1', port.port_extra_attribute_map_by_name['gateway'].value_string.String).outerHTML,
 						createEditPortHiddenElement('edit_port_remark_id', port.port_extra_attribute_map_by_name['remark'].id).outerHTML + createEditPortTextElement('edit_port_remark', 'width:200px', 'remark', port.port_extra_attribute_map_by_name['remark'].value_string.String).outerHTML,
 					]);
 	 			}
@@ -562,30 +581,32 @@
 			});
 		}
 
-		function onNewNode(nodeType) {
+		function onNewNode() {
 			$('.node-reg-panel').fadeOut(150, function() {
 				// Set edit mode to Update
 				editMode = 'Register';
 				$('#register_or_update_node_panel_title').children().remove();
-				$('#register_or_update_node_panel_title').append($('<span>').text('Node registration ('+ nodeType +')'));
+				$('#register_or_update_node_panel_title').append($('<span>').text('Node registration'));
 
 				// Clear the editing node
 				editingNode = createNodeModel(null, '', 1, false, '', false, '');
 
 				// Initialize Node properties
 				$('#edit_node_pv').children().remove();
-
-  				$('#edit_node_pv').append($('<option>').attr('selected', true).val(nodePvMap[nodeType]).text(nodeType));
-				$('#edit_node_pv').parents("tr").hide();
+				for (key in nodePvMap){
+					$('#edit_node_pv').append($('<option>').val(nodePvMap[key]).text(key));
+				}
 
 				$('#edit_node_type').children().remove();
 	 			for (var i = 0; i < nodeTypes.length; i = i + 1) {
 	 				$('#edit_node_type').append($('<option>').val(nodeTypes[i].id).text(nodeTypes[i].name));
 	 			}
 
-	 			$('#edit_node_id').val('');
+				$('#edit_node_id').val('');
 	 			$('#edit_node_name').val('');
 	 			$('#edit_node_pv_id').val(0);
+				$('#edit_node_pv').val(convertBooleanToString(false));
+	 			$('#edit_node_type').val(1);
 				$('#edit_node_remark_id').val(0);
 				$('#edit_node_remark').val('');
 
@@ -612,6 +633,7 @@
 				createEditPortTextElement('edit_port_mac_address', 'width:240px', 'mac address like 10:54:ff:00:00:01', '').outerHTML,
 				createEditPortTextElement('edit_port_ipv4_address', 'width:210px', 'ipv4 address like 192.168.0.1', '').outerHTML,
 				createEditPortTextElement('edit_port_ipv4_prefix', 'width:110px', '', 0).outerHTML,
+				createEditPortHiddenElement('edit_port_gateway_id', 0).outerHTML + createEditPortTextElement('edit_port_gateway', 'width:200px', 'ipv4 address like 192.168.0.1', '').outerHTML,
 				createEditPortHiddenElement('edit_port_remark_id', 0).outerHTML + createEditPortTextElement('edit_port_remark', 'width:200px', 'remark', '').outerHTML,
 			]);
 			editPortsTable.fnDraw();
@@ -756,8 +778,7 @@
 
 		var menuItems = {
 			diagram: [
-				{ label: "Add physical node", action: "add_node", type: "physical" },
-				{ label: "Add virtual node", action: "add_node", type: "virtual" }
+				{ label: "Add node", action: "add_node" },
 			],
 			node: [
 				{ label: "Edit node", action: "edit_node" },
@@ -840,7 +861,7 @@
 			});
 		}
 
-		function onLoad() {			
+		function onLoad() {
 			$.fn.dataTable.ext.order['dom-text'] = function  ( settings, col )
 			{
 					return this.api().column( col, {order:'index'} ).nodes().map( function ( td, i ) {
@@ -865,6 +886,7 @@
 					{ orderDataType: 'dom-select' },
 					{ orderDataType: 'dom-select' },
 					{ orderDataType: 'dom-select' },
+					{ orderDataType: 'dom-text', type: 'string' },
 					{ orderDataType: 'dom-text', type: 'string' },
 					{ orderDataType: 'dom-text', type: 'string' },
 					{ orderDataType: 'dom-text', type: 'string' },
@@ -908,7 +930,7 @@
 			switch($(event.target).data("action")) {
 			case "add_node":
 				$('.page-cover').fadeIn(150);
-				onNewNode(event.target.id);
+				onNewNode();
 				break;
 			case "edit_node":
 				$('.page-cover').fadeIn(150);
