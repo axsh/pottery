@@ -241,22 +241,6 @@ func (logic *serviceLogic) Update(db *gorm.DB, id string, _ url.Values, data int
 
 func (logic *serviceLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
-	testProgram := &models.TestProgram{}
-
-	// Template cannot be deleted as cascade mode, it has to be handled manually.
-	if err := db.First(&testProgram, "service_id = ?", id).Error; err == nil {
-		if testProgram.ClientScriptTemplateID != 0 {
-			if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ClientScriptTemplateID), nil); err != nil {
-				return err
-			}
-		}
-		if testProgram.ServerScriptTemplateID != 0 {
-			if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ServerScriptTemplateID), nil); err != nil {
-				return err
-			}
-		}
-	}
-
 	service := &models.Service{}
 
 	if err := db.First(&service, id).Error; err != nil {
@@ -675,18 +659,6 @@ func (logic *testProgramLogic) Delete(db *gorm.DB, id string, _ url.Values) erro
 
 	if err := db.Delete(&testProgram).Error; err != nil {
 		return err
-	}
-
-	// Template cannot be deleted as cascade mode, it has to be handled manually.
-	if testProgram.ClientScriptTemplateID != 0 {
-		if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ClientScriptTemplateID), nil); err != nil {
-			return err
-		}
-	}
-	if testProgram.ServerScriptTemplateID != 0 {
-		if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ServerScriptTemplateID), nil); err != nil {
-			return err
-		}
 	}
 
 	return nil

@@ -149,9 +149,9 @@
 			}
 
 			$('#edit_test_program_panel').fadeOut(150, function() {
+				$("#edit_test_program_client").val(editingTestProgram.client_script_template.template_content);
+				$("#edit_test_program_server").val(editingTestProgram.server_script_template.template_content);
 				$('#edit_test_program_panel').fadeIn(150, function() {
-					$("#edit_test_program_client").val(editingTestProgram.client_script_template.template_content);
-					$("#edit_test_program_server").val(editingTestProgram.server_script_template.template_content);
 				});
 			});
 		}

@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayModels "github.com/qb0C80aE/clay/models"
 	loamModels "github.com/qb0C80aE/loam/models"
@@ -95,7 +96,20 @@ func SharedTestProgramModel() *TestProgram {
 	return sharedTestProgramModel
 }
 
+func (testProgram *TestProgram) SetupInitialData(db *gorm.DB) error {
+	db.Exec(`
+		create trigger if not exists DeleteTestProgramTemplate delete on test_programs
+		begin
+			delete from templates where id = old.client_script_template_id;
+			delete from templates where id = old.server_script_template_id;
+		end;
+	`)
+
+	return nil
+}
+
 func init() {
+	extensions.RegisterInitialDataLoader(sharedTestProgramModel)
 	extensions.RegisterModel(sharedProtocolModel)
 	extensions.RegisterModel(sharedServiceModel)
 	extensions.RegisterModel(sharedConnectionModel)
