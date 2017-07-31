@@ -26,7 +26,7 @@ func (logic *environmentLogic) GetSingle(db *gorm.DB, id string, _ url.Values, q
 	environment := &models.Environment{}
 
 	if err := db.Select(queryFields).First(environment, 1).Error; err != nil {
-		environment.ID = 1
+		return nil, err
 	}
 
 	return environment, nil
