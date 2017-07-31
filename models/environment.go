@@ -37,6 +37,7 @@ func (environment *Environment) SetupInitialData(db *gorm.DB) error {
 		{ID: 4, Name: "initialization"},
 		{ID: 5, Name: "server_initialization_config"},
 		{ID: 6, Name: "device_initialization_config"},
+		{ID: 7, Name: "device_config"},
 	}
 
 	for _, nodeExtraAttributeField := range nodeExtraAttributeFields {
