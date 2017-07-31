@@ -25,7 +25,7 @@ function getResource(target, id, query) {
   }
   var response = $.ajax({
     type: 'GET',
-    url: '/' + target + '/' + id,
+    url: '/' + target + '/' + id + query,
     dataType: 'json',
     contentType: 'application/json',
     async: false
@@ -44,7 +44,7 @@ function getResourceAsText(target, id, query) {
   }
   var response = $.ajax({
     type: 'GET',
-    url: '/' + target + '/' + id,
+    url: '/' + target + '/' + id + query,
     dataType: 'json',
     contentType: 'application/json',
     async: false
