@@ -1,8 +1,10 @@
 package models
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayModels "github.com/qb0C80aE/clay/models"
+	loamModels "github.com/qb0C80aE/loam/models"
 )
 
 type Environment struct {
@@ -29,6 +31,31 @@ func SharedEnvironmentModel() *Environment {
 	return sharedEnvironmentModel
 }
 
+func (environment *Environment) SetupInitialData(db *gorm.DB) error {
+	nodeExtraAttributeFields := []*loamModels.NodeExtraAttributeField{
+		{ID: 3, Name: "server_type"},
+		{ID: 4, Name: "initialization"},
+		{ID: 5, Name: "server_initialization_config"},
+		{ID: 6, Name: "device_initialization_config"},
+	}
+
+	for _, nodeExtraAttributeField := range nodeExtraAttributeFields {
+		if err := db.Save(nodeExtraAttributeField).Error; err != nil {
+			return err
+		}
+	}
+
+	db.Exec(`
+		create trigger if not exists DeleteServerInitializationConfigTemplate delete on node_extra_attribute_options when old.node_extra_attribute_field_id = 3
+		begin
+		 	delete from templates where id = old.value_int;
+		end;
+	`)
+
+	return nil
+}
+
 func init() {
+	extensions.RegisterInitialDataLoader(sharedEnvironmentModel)
 	extensions.RegisterModel(sharedEnvironmentModel)
 }
