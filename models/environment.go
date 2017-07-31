@@ -8,17 +8,19 @@ import (
 )
 
 type Environment struct {
-	ID                    int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
-	TemplateID            int                  `json:"template_id" gorm:"index" sql:"type:integer references templates(id) on delete set null"`
-	Template              *clayModels.Template `json:"template"`
-	TestRunnerScriptID    int                  `json:"test_runner_script_id" gorm:"index" sql:"type:integer references templates(id) on delete set null"`
-	TestRunnerScript      *clayModels.Template `json:"test_runner_script"`
-	GitRepositoryURI      string               `json:"git_repository_uri" gorm:"not null"`
-	GitUserName           string               `json:"git_user_name" gorm:"not null"`
-	GitUserEmail          string               `json:"git_user_email" gorm:"not null"`
-	DesignFileName        string               `json:"design_file_name" gorm:"not null"`
-	TemplateFileName      string               `json:"template_file_name" gorm:"not null"`
-	TestCaseDirectoryName string               `json:"test_case_directory_name" gorm:"not null"`
+	ID                        int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
+	TemplateID                int                  `json:"template_id" gorm:"index" sql:"type:integer references templates(id) on delete set null"`
+	Template                  *clayModels.Template `json:"template"`
+	TestRunnerScriptID        int                  `json:"test_runner_script_id" gorm:"index" sql:"type:integer references templates(id) on delete set null"`
+	TestRunnerScript          *clayModels.Template `json:"test_runner_script"`
+	GitRepositoryURI          string               `json:"git_repository_uri" gorm:"not null"`
+	GitUserName               string               `json:"git_user_name" gorm:"not null"`
+	GitUserEmail              string               `json:"git_user_email" gorm:"not null"`
+	DesignFileName            string               `json:"design_file_name" gorm:"not null"`
+	TemplateFileName          string               `json:"template_file_name" gorm:"not null"`
+	TestCaseDirectoryName     string               `json:"test_case_directory_name" gorm:"not null"`
+	ServerConfigDirectoryName string               `json:"server_config_directory_name" gorm:"not null"`
+	DeviceConfigDirectoryName string               `json:"device_config_directory_name" gorm:"not null"`
 }
 
 func NewEnvironmentModel() *Environment {
@@ -35,9 +37,8 @@ func (environment *Environment) SetupInitialData(db *gorm.DB) error {
 	nodeExtraAttributeFields := []*loamModels.NodeExtraAttributeField{
 		{ID: 3, Name: "server_type"},
 		{ID: 4, Name: "initialization"},
-		{ID: 5, Name: "server_initialization_config"},
-		{ID: 6, Name: "device_initialization_config"},
-		{ID: 7, Name: "device_config"},
+		{ID: 5, Name: "device_initialization_config"},
+		{ID: 6, Name: "device_config"},
 	}
 
 	for _, nodeExtraAttributeField := range nodeExtraAttributeFields {

@@ -7,11 +7,13 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayLogics "github.com/qb0C80aE/clay/logics"
+	loamModels "github.com/qb0C80aE/loam/models"
 	"github.com/qb0C80aE/pottery/models"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 )
 
@@ -156,6 +158,97 @@ func updateTestCaseFile(db *gorm.DB, environment *models.Environment) error {
 	return nil
 }
 
+func updateServerConfigFiles(db *gorm.DB, environment *models.Environment) error {
+	cmd := exec.Command("rm", "-rf", environment.ServerConfigDirectoryName)
+	cmd.Dir = environment.GitRepositoryURI
+	cmdMessage, err := cmd.CombinedOutput()
+	if err != nil {
+		return errors.New(string(cmdMessage))
+	}
+
+	cmd = exec.Command("mkdir", environment.ServerConfigDirectoryName)
+	cmd.Dir = environment.GitRepositoryURI
+	cmdMessage, err = cmd.CombinedOutput()
+	if err != nil {
+		return errors.New(string(cmdMessage))
+	}
+
+	nodeExtraAttributes := []*loamModels.NodeExtraAttribute{}
+	if err := db.Preload("Node").
+		Preload("ValueNodeExtraAttributeOption").
+		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", 3).Error; err != nil {
+		return err
+	}
+
+	for _, nodeExtraAttribute := range nodeExtraAttributes {
+		templateID := nodeExtraAttribute.ValueNodeExtraAttributeOption.ValueInt.Int64
+		template, err := clayLogics.GenerateTemplate(db, strconv.Itoa((int)(templateID)), nil)
+		if err != nil {
+			return err
+		}
+		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_initialize.txt",
+			environment.GitRepositoryURI,
+			environment.ServerConfigDirectoryName,
+			nodeExtraAttribute.Node.Name),
+			([]byte)(template.(string)),
+			os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func updateDeviceConfigFiles(db *gorm.DB, environment *models.Environment) error {
+	cmd := exec.Command("rm", "-rf", environment.DeviceConfigDirectoryName)
+	cmd.Dir = environment.GitRepositoryURI
+	cmdMessage, err := cmd.CombinedOutput()
+	if err != nil {
+		return errors.New(string(cmdMessage))
+	}
+
+	cmd = exec.Command("mkdir", environment.DeviceConfigDirectoryName)
+	cmd.Dir = environment.GitRepositoryURI
+	cmdMessage, err = cmd.CombinedOutput()
+	if err != nil {
+		return errors.New(string(cmdMessage))
+	}
+
+	nodeExtraAttributes := []*loamModels.NodeExtraAttribute{}
+	if err := db.Preload("Node").
+		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", 5).Error; err != nil {
+		return err
+	}
+
+	for _, nodeExtraAttribute := range nodeExtraAttributes {
+		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_initialize.txt",
+			environment.GitRepositoryURI,
+			environment.DeviceConfigDirectoryName,
+			nodeExtraAttribute.Node.Name),
+			([]byte)(nodeExtraAttribute.ValueString.String),
+			os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	if err := db.Preload("Node").
+		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", 6).Error; err != nil {
+		return err
+	}
+
+	for _, nodeExtraAttribute := range nodeExtraAttributes {
+		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_config.txt",
+			environment.GitRepositoryURI,
+			environment.DeviceConfigDirectoryName,
+			nodeExtraAttribute.Node.Name),
+			([]byte)(nodeExtraAttribute.ValueString.String),
+			os.ModePerm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 /*
 func updateNodeConfigFiles(_ *gorm.DB, environment *models.Environment) error {
 	for _, config := range environment.NodeConfigs {
@@ -231,15 +324,16 @@ func (logic *environmentCommitmentLogic) Update(db *gorm.DB, _ string, _ url.Val
 	if err := updateTestCaseFile(db, environment); err != nil {
 		return "", err
 	}
-	/*
-		if err := updateNodeConfigFiles(db, environment); err != nil {
-			return "", err
-		}
-	*/
+	if err := updateServerConfigFiles(db, environment); err != nil {
+		return "", err
+	}
+	if err := updateDeviceConfigFiles(db, environment); err != nil {
+		return "", err
+	}
 	if err := commit(environment, message); err != nil {
 		return "", err
 	}
-	return "", nil
+	return "{}", nil
 }
 
 var uniqueEnvironmentCommitmentLogic = newEnvironmentCommitmentLogic()
