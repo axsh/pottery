@@ -18,14 +18,17 @@
 			        <a href="#template_configuration_tab" data-toggle="tab">Template</a>
 						</li>
 						<li>
-							<a href="#test_program_configuratin_tab" data-toggle="tab">Test Program</a>
+							<a href="#test_program_configuration_tab" data-toggle="tab">Test Program</a>
+						</li>
+						<li>
+							<a href="#node_configuration_tab" data-toggle="tab">Node Configuration</a>
 						</li>
 					</ul>
 				</div>
 				<div class="col-xs-3">
 					<span style="float: right">
 						<button class="btn btn-default" id="update_btn" type="button"><span class="glyphicon glyphicon-save"></span> Update </button>
-						<button class="btn btn-default" id="apply_btn" type="button"><span class="glyphicon glyphicon-saved"></span> Update and Commit </button>
+						<button class="btn btn-default" id="commit_btn" type="button"><span class="glyphicon glyphicon-saved"></span> Update and Commit </button>
 					</span>
 				</div>
 			</div>
@@ -116,7 +119,6 @@
 						    Template
 						</div>
 						<div class="col-xs-10">
-							<input id="template_name" type="hidden" name="template_name">
 							<textarea id="template_content" name="template_content" rows="20" class="form-control"></textarea>
 						</div>
 					</div>
@@ -127,7 +129,7 @@
 					</div>
 				</div>
 
-				<div class="tab-pane" id="test_program_configuratin_tab">
+				<div class="tab-pane" id="test_program_configuration_tab">
 					<div class="row">
 						<div class="col-xs-12">
 						    &nbsp;
@@ -164,7 +166,33 @@
 				<div class="tab-pane" id="node_configuration_tab">
 					<div class="row">
 						<div class="col-xs-12">
-								&nbsp;
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Server config directory
+						</div>
+						<div class="col-xs-10">
+						    <input id="server_config_directory_name" type="text" name="server_config_directory_name" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
+						    Device config directory
+						</div>
+						<div class="col-xs-10">
+						    <input id="device_config_directory_name" type="text" name="device_config_directory_name" class="form-control">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
 						</div>
 					</div>
 				</div>
@@ -178,106 +206,136 @@
 	(function($) {
 
     {{template "functions" .}}
+
 		const target = "present";
 
 		var environment = null;
 
-		function updateEnvironment() {
+		function onEnvironmentModified(result, successCode, successMessage, ignoreSuccess) {
+			if (result.status == successCode) {
+				if (!ignoreSuccess) {
+					$('html,body').animate({scrollTop:0},'slow');
+					$('#information_message').text(successMessage);
+					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+					$('#edit_panel').fadeOut(150);
+					loadResources();
+				}
+				return true;
+			} else {
+				$('html,body').animate({scrollTop:0},'slow');
+				$('#error_message').text(result.resource.error);
+				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+				return false;
+			}
+		}
+
+		function onUpdateEnvironment() {
+			if (!confirm("Are you sure to update?")) {
+				return;
+			}
+
 			environment.git_repository_uri = $("#git_repository_uri").val();
 			environment.git_user_name = $("#git_user_name").val();
 			environment.git_user_email = $("#git_user_email").val();
 			environment.design_file_name = $("#design_file_name").val();
 			environment.template_file_name = $("#template_file_name").val();
 			environment.test_case_directory_name = $("#test_case_directory_name").val();
-			environment.template.name = $("#template_name").val();
 			environment.template.template_content = $("#template_content").val();
-			environment.test_case.test_runner_script_template = $("#test_runner_script_template").val();
-			for (var i = 0; i < environment.test_case.test_patterns.length; i = i + 1) {
-				var serviceName = environment.test_case.test_patterns[i].test_command.service_name
-				environment.test_case.test_patterns[i].test_command.server_script_template = $("#test_script_" + serviceName + "_server").val();
-				environment.test_case.test_patterns[i].test_command.client_script_template = $("#test_script_" + serviceName + "_client").val();
+			environment.test_runner_script.template_content = $("#test_runner_script_template").val();
+			environment.server_config_directory_name = $("#server_config_directory_name").val();
+			environment.device_config_directory_name = $("#device_config_directory_name").val();
+
+			if (environment.id == null) {
+				environment.id = 1;
 			}
-			for (var i = 0; i < environment.node_configs.length; i = i + 1) {
-				environment.node_configs[i].firmware_version = $("#node_config_" + environment.node_configs[i].node.id + "_firmware_version").val();
-				environment.node_configs[i].initialize_config = $("#node_config_" + environment.node_configs[i].node.id + "_initialize_config").val();
-				environment.node_configs[i].config = $("#node_config_" + environment.node_configs[i].node.id + "_config").val();
-			}
-			return $.ajax({
-				type: 'PUT',
-				url: API_PREFIX + '/environments/' + target,
-				dataType: 'json',
-				contentType: 'application/json',
-				data: JSON.stringify(environment),
-				async: false
-			});
+			var result = putResource('environments', target, environment);
+			onEnvironmentModified(result, 200, 'The environment has been registered successfully', false);
 		}
 
-		function applyEnvironment() {
-			return $.ajax({
-				type: 'PATCH',
-				url: API_PREFIX + '/environments/' + target,
-				dataType: 'text',
-				contentType: 'text/plain; charset=utf-8',
-				data: "",
-				async: false
-			});
+		function onCommitEnvironment() {
+			if (!confirm("Are you sure to update and commit?")) {
+				return;
+			}
+
+			environment.git_repository_uri = $("#git_repository_uri").val();
+			environment.git_user_name = $("#git_user_name").val();
+			environment.git_user_email = $("#git_user_email").val();
+			environment.design_file_name = $("#design_file_name").val();
+			environment.template_file_name = $("#template_file_name").val();
+			environment.test_case_directory_name = $("#test_case_directory_name").val();
+			environment.template.template_content = $("#template_content").val();
+			environment.test_runner_script.template_content = $("#test_runner_script_template").val();
+			environment.server_config_directory_name = $("#server_config_directory_name").val();
+			environment.device_config_directory_name = $("#device_config_directory_name").val();
+
+			if (environment.id == null) {
+				environment.id = 1;
+				var result = postResource('environments', environment);
+				if (!onEnvironmentModified(result, 201, 'The environment has been updated successfully', true)) {
+					return;
+				}
+			} else {
+				var result = putResource('environments', target, environment);
+				if (!onEnvironmentModified(result, 200, 'The environment has been updated successfully', true)) {
+					return;
+				}
+			}
+			var result = putResource('environments', target + '/commitment', {});
+			onEnvironmentModified(result, 200, 'The environment has been updated and commited successfully', false)
 		}
 
-		function onLoad() {
-			/*
-			loadEnvironment();
+		function loadResources() {
+			var result = getResource('environments', target, 'preloads=Template,TestRunnerScript');
+			if (result.status != 200) {
+				environment = {
+				  design_file_name: "design.json",
+				  git_repository_uri: "/tmp/clay_generated_conf",
+				  git_user_email: "clay@example.com",
+				  git_user_name: "clay",
+				  template: {
+						name: "environment_template",
+						template_content: ""
+					},
+				  template_file_name: "terraform.tf",
+				  test_case_directory_name: "testcase",
+				  test_runner_script: {
+						name: "environment_test_runner_script",
+						template_content: ""
+					},
+					server_config_directory_name: "server_config",
+					device_config_directory_name: "device_config",
+				}
+			} else {
+				environment = result.resource;
+			}
+		}
+
+		function showEnvironment() {
 			$("#git_repository_uri").val(environment.git_repository_uri);
 			$("#git_user_name").val(environment.git_user_name);
 			$("#git_user_email").val(environment.git_user_email);
 			$("#design_file_name").val(environment.design_file_name);
 			$("#template_file_name").val(environment.template_file_name);
 			$("#test_case_directory_name").val(environment.test_case_directory_name);
-			$("#template_name").val(environment.template.name);
 			$("#template_content").val(environment.template.template_content);
-			$("#test_runner_script_template").val(environment.test_case.test_runner_script_template);
-			*/
+			$("#test_runner_script_template").val(environment.test_runner_script.template_content);
+			$("#server_config_directory_name").val(environment.server_config_directory_name);
+			$("#device_config_directory_name").val(environment.device_config_directory_name);
+		}
+
+		function onLoad() {
+			loadResources();
 			$('#environment_panel').fadeIn(150);
+			showEnvironment();
 		}
 
 		$('#update_btn').on('click', function() {
-			if (!confirm("Are you sure to update?")) {
-				return;
-			}
-
-			response = updateEnvironment();
-
-			if (response.status == 200) {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#information_message").text("The environment has been updated successfully.")
-				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-			} else {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#error_message").text($.parseJSON(response.responseText).error)
-				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
-			}
+			onUpdateEnvironment();
 		});
 
-		$('#apply_btn').on('click', function() {
-			if (!confirm("Are you sure to apply?")) {
-				return;
-			}
-
-			response = applyEnvironment();
-
-			if (response.status == 200) {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#information_message").text("The model has been committed to the git repository successfully.")
-				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-			} else {
-				$("html,body").animate({scrollTop:0},'slow');
-				$("#error_message").text($.parseJSON(response.responseText).error)
-				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
-			}
+		$('#commit_btn').on('click', function() {
+			onCommitEnvironment();
 		});
-
-    $('.alert .close').on('click', function() {
-        $(this).parents('.alert').hide();
-    });
 
 		onLoad();
 

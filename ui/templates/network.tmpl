@@ -240,7 +240,7 @@
 				},
 				server_type: {
 					node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['server_type'].id,
-					value_int: {
+					value_node_extra_attribute_option_id: {
 						Valid: true,
 						Int64: 0,
 					}
@@ -336,7 +336,7 @@
 					{
 						id: 0,
 						node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['server_type'].id,
-						value_int: {
+						value_node_extra_attribute_option_id: {
 							Valid: true,
 							Int64: serverType
 						}
@@ -414,7 +414,7 @@
 					{
 							id: parseInt(editNodeServerTypeID),
 							node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['server_type'].id,
-							value_int: {
+							value_node_extra_attribute_option_id: {
 								Valid: parseInt(editNodeServerType) == 0 ? false : true,
 								Int64: parseInt(editNodeServerType)
 							}
@@ -545,7 +545,7 @@
 				}
 				$('#node_pv').append(nodePv);
 				$('#node_type').append(node.node_type.name);
-				var serverType = serverTypeMap[node.node_extra_attribute_map_by_name['server_type'].value_int.Int64].name;
+				var serverType = serverTypeMap[node.node_extra_attribute_map_by_name['server_type'].value_node_extra_attribute_option_id.Int64].name;
 				$('#node_server_type').append(serverType);
 				$('#node_remark').append(node.node_extra_attribute_map_by_name['remark'].value_string.String);
 
@@ -835,7 +835,7 @@
 	 			$('#edit_node_type').val(editingNode.node_type.id);
 				var attributeServerType = extraIntAttribute('server_type', editingNode.node_extra_attribute_map_by_name);
 				$('#edit_node_server_type_id').val(attributeServerType.id);
-				$('#edit_node_server_type').val(attributeServerType.value_int.Int64);
+				$('#edit_node_server_type').val(attributeServerType.value_node_extra_attribute_option_id.Int64);
 				var attributeRemark = extraStringAttribute('remark', editingNode.node_extra_attribute_map_by_name);
 				$('#edit_node_remark_id').val(attributeRemark.id);
 				$('#edit_node_remark').val(attributeRemark.value_string.String);
@@ -899,6 +899,11 @@
 	 				$('#edit_node_type').append($('<option>').val(nodeTypes[i].id).text(nodeTypes[i].name));
 	 			}
 
+				$('#edit_node_server_type').children().remove();
+				for (key in serverTypeMap){
+  				$('#edit_node_server_type').append($('<option>').val(key).text(serverTypeMap[key].name));
+				}
+				
 	 			$('#edit_node_id').val('');
 	 			$('#edit_node_name').val('');
 	 			$('#edit_node_pv_id').val(0);
