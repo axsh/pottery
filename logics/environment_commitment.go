@@ -175,18 +175,30 @@ func updateServerConfigFiles(db *gorm.DB, environment *models.Environment) error
 
 	nodeExtraAttributes := []*loamModels.NodeExtraAttribute{}
 	if err := db.Preload("Node").
+		Preload("Node.Ports").
+		Preload("Node.Ports.DestinationPort").
+		Preload("Node.Ports.PortExtraAttributes").
+		Preload("Node.Ports.PortExtraAttributes.PortExtraAttributeField").
+		Preload("Node.Ports.PortExtraAttributes.ValuePortExtraAttributeOption").
 		Preload("ValueNodeExtraAttributeOption").
-		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", 3).Error; err != nil {
+		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", models.NodeExtraAttributeField_ServerType).Error; err != nil {
 		return err
 	}
 
 	for _, nodeExtraAttribute := range nodeExtraAttributes {
+		cmd = exec.Command("mkdir", "-p", nodeExtraAttribute.Node.Name)
+		cmd.Dir = fmt.Sprintf("%s/%s", environment.GitRepositoryURI, environment.ServerConfigDirectoryName)
+		cmdMessage, err = cmd.CombinedOutput()
+		if err != nil {
+			return errors.New(string(cmdMessage))
+		}
 		templateID := nodeExtraAttribute.ValueNodeExtraAttributeOption.ValueInt.Int64
-		template, err := clayLogics.GenerateTemplate(db, strconv.Itoa((int)(templateID)), nil)
+		parameterMap := map[string]interface{}{"Node": nodeExtraAttribute.Node}
+		template, err := clayLogics.GenerateTemplate(db, strconv.Itoa((int)(templateID)), parameterMap)
 		if err != nil {
 			return err
 		}
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_initialize.txt",
+		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s/initialize.txt",
 			environment.GitRepositoryURI,
 			environment.ServerConfigDirectoryName,
 			nodeExtraAttribute.Node.Name),
@@ -199,7 +211,7 @@ func updateServerConfigFiles(db *gorm.DB, environment *models.Environment) error
 	return nil
 }
 
-func updateDeviceConfigFiles(db *gorm.DB, environment *models.Environment) error {
+func updateDeviceConfigFiles(db *gorm.DB, environment *models.Environment, init string) error {
 	cmd := exec.Command("rm", "-rf", environment.DeviceConfigDirectoryName)
 	cmd.Dir = environment.GitRepositoryURI
 	cmdMessage, err := cmd.CombinedOutput()
@@ -216,28 +228,42 @@ func updateDeviceConfigFiles(db *gorm.DB, environment *models.Environment) error
 
 	nodeExtraAttributes := []*loamModels.NodeExtraAttribute{}
 	if err := db.Preload("Node").
-		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", 5).Error; err != nil {
+		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", models.NodeExtraAttributeField_DeviceInitializationConfig).Error; err != nil {
 		return err
 	}
 
 	for _, nodeExtraAttribute := range nodeExtraAttributes {
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_initialize.txt",
-			environment.GitRepositoryURI,
-			environment.DeviceConfigDirectoryName,
-			nodeExtraAttribute.Node.Name),
-			([]byte)(nodeExtraAttribute.ValueString.String),
-			os.ModePerm); err != nil {
-			return err
+		cmd = exec.Command("mkdir", "-p", nodeExtraAttribute.Node.Name)
+		cmd.Dir = fmt.Sprintf("%s/%s", environment.GitRepositoryURI, environment.DeviceConfigDirectoryName)
+		cmdMessage, err = cmd.CombinedOutput()
+		if err != nil {
+			return errors.New(string(cmdMessage))
+		}
+		if init == "true" {
+			if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s/initialize.txt",
+				environment.GitRepositoryURI,
+				environment.DeviceConfigDirectoryName,
+				nodeExtraAttribute.Node.Name),
+				([]byte)(nodeExtraAttribute.ValueString.String),
+				os.ModePerm); err != nil {
+				return err
+			}
 		}
 	}
 
 	if err := db.Preload("Node").
-		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", 6).Error; err != nil {
+		Select("*").Find(&nodeExtraAttributes, "node_extra_attribute_field_id = ?", models.NodeExtraAttributeField_DeviceConfig).Error; err != nil {
 		return err
 	}
 
 	for _, nodeExtraAttribute := range nodeExtraAttributes {
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_config.txt",
+		cmd = exec.Command("mkdir", "-p", nodeExtraAttribute.Node.Name)
+		cmd.Dir = fmt.Sprintf("%s/%s", environment.GitRepositoryURI, environment.DeviceConfigDirectoryName)
+		cmdMessage, err = cmd.CombinedOutput()
+		if err != nil {
+			return errors.New(string(cmdMessage))
+		}
+		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s/config.txt",
 			environment.GitRepositoryURI,
 			environment.DeviceConfigDirectoryName,
 			nodeExtraAttribute.Node.Name),
@@ -248,44 +274,6 @@ func updateDeviceConfigFiles(db *gorm.DB, environment *models.Environment) error
 	}
 	return nil
 }
-
-/*
-func updateNodeConfigFiles(_ *gorm.DB, environment *models.Environment) error {
-	for _, config := range environment.NodeConfigs {
-		cmd := exec.Command("mkdir", "-p", fmt.Sprintf("%s/%s/%s", environment.GitRepositoryURI, "config", config.Node.Name))
-		cmdMessage, err := cmd.CombinedOutput()
-		if err != nil {
-			return errors.New(string(cmdMessage))
-		}
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s/initialize.txt",
-			environment.GitRepositoryURI,
-			"config",
-			config.Node.Name),
-			([]byte)(config.InitializeConfig),
-			os.ModePerm); err != nil {
-			return err
-		}
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s/config.txt",
-			environment.GitRepositoryURI,
-			"config",
-			config.Node.Name),
-			([]byte)(config.Config),
-			os.ModePerm); err != nil {
-			return err
-		}
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s/firmware_version.txt",
-			environment.GitRepositoryURI,
-			"config",
-			config.Node.Name),
-			([]byte)(config.FirmwareVersion),
-			os.ModePerm); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-*/
 
 func commit(environment *models.Environment, message string) error {
 	cmd := exec.Command("git", "add", ".")
@@ -303,16 +291,18 @@ func commit(environment *models.Environment, message string) error {
 	return nil
 }
 
-func (logic *environmentCommitmentLogic) Update(db *gorm.DB, _ string, _ url.Values, _ interface{}) (interface{}, error) {
+func (logic *environmentCommitmentLogic) Update(db *gorm.DB, _ string, urlValues url.Values, _ interface{}) (interface{}, error) {
 	environment := &models.Environment{}
 
-	if err := db.Select("*").First(environment, "1").Error; err != nil {
+	if err := db.Select("*").First(environment, models.PresentEnvironmentID).Error; err != nil {
 		return nil, err
 	}
 
 	if err := initGitRepository(environment); err != nil {
 		return "", err
 	}
+
+	init := urlValues.Get("init")
 
 	message := fmt.Sprintf("Automatic commit at %s", time.Now().String())
 	if err := updateDesignFile(db, environment); err != nil {
@@ -327,7 +317,7 @@ func (logic *environmentCommitmentLogic) Update(db *gorm.DB, _ string, _ url.Val
 	if err := updateServerConfigFiles(db, environment); err != nil {
 		return "", err
 	}
-	if err := updateDeviceConfigFiles(db, environment); err != nil {
+	if err := updateDeviceConfigFiles(db, environment, init); err != nil {
 		return "", err
 	}
 	if err := commit(environment, message); err != nil {

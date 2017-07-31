@@ -35,7 +35,7 @@ func (logic *environmentLogic) GetSingle(db *gorm.DB, id string, _ url.Values, q
 func (logic *environmentLogic) Update(db *gorm.DB, _ string, _ url.Values, data interface{}) (interface{}, error) {
 
 	environment := data.(*models.Environment)
-	environment.ID = 1
+	environment.ID = models.PresentEnvironmentID
 
 	if err := db.Save(&environment).Error; err != nil {
 		return nil, err
