@@ -180,6 +180,13 @@
 
 		function buildPortExtraAttributeMapByName(portExtraAttributes) {
 			var portExtraAttributeMapByName = {
+				gateway: {
+					port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
+					value_string: {
+						Valid: true,
+						String: '',
+					}
+				},
 				remark: {
 					port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
 					value_string: {

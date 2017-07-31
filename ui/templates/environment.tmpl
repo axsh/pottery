@@ -171,6 +171,19 @@
 					</div>
 					<div class="row">
 						<div class="col-xs-2">
+						    Device initialization
+						</div>
+						<div class="col-xs-10">
+						    <input id="device_initialization" type="checkbox" data-toggle="toggle">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+						    &nbsp;
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-2">
 						    Server config directory
 						</div>
 						<div class="col-xs-10">
@@ -257,6 +270,8 @@
 				return;
 			}
 
+			var deviceInitialization = $("#device_initialization").prop('checked');
+
 			environment.git_repository_uri = $("#git_repository_uri").val();
 			environment.git_user_name = $("#git_user_name").val();
 			environment.git_user_email = $("#git_user_email").val();
@@ -280,7 +295,7 @@
 					return;
 				}
 			}
-			var result = putResource('environments', target + '/commitment', {});
+			var result = putResource('environments', target + '/commitment?init=' + deviceInitialization, {});
 			onEnvironmentModified(result, 200, 'The environment has been updated and commited successfully', false)
 		}
 
@@ -289,7 +304,7 @@
 			if (result.status != 200) {
 				environment = {
 				  design_file_name: "design.json",
-				  git_repository_uri: "/tmp/clay_generated_conf",
+				  git_repository_uri: "/data/clay_generated_conf",
 				  git_user_email: "clay@example.com",
 				  git_user_name: "clay",
 				  template: {
