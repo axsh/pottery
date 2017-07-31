@@ -303,22 +303,22 @@
 			var result = getResource('environments', target, 'preloads=Template,TestRunnerScript');
 			if (result.status != 200) {
 				environment = {
-				  design_file_name: "design.json",
-				  git_repository_uri: "/data/clay_generated_conf",
-				  git_user_email: "clay@example.com",
-				  git_user_name: "clay",
+				  design_file_name: "",
+				  git_repository_uri: "",
+				  git_user_email: "",
+				  git_user_name: "",
 				  template: {
-						name: "environment_template",
+						name: "",
 						template_content: ""
 					},
-				  template_file_name: "terraform.tf",
-				  test_case_directory_name: "testcase",
+				  template_file_name: "",
+				  test_case_directory_name: "",
 				  test_runner_script: {
-						name: "environment_test_runner_script",
+						name: "",
 						template_content: ""
 					},
-					server_config_directory_name: "server_config",
-					device_config_directory_name: "device_config",
+					server_config_directory_name: "",
+					device_config_directory_name: "",
 				}
 			} else {
 				environment = result.resource;
