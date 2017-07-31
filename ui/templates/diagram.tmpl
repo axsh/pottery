@@ -53,6 +53,13 @@
 					</td>
 				</tr>
 				<tr>
+					<td width="20%">Server Type</td>
+					<td width="80%">
+						<input type="hidden" id="edit_node_server_type_id" value="">
+						<select class="form-control" id="edit_node_server_type"></select>
+					</td>
+				</tr>
+				<tr>
 					<td width="20%">Remark</td>
 					<td width="80%">
 						<input type="hidden" id="edit_node_remark_id" value="">
@@ -131,13 +138,15 @@
 		var portExtraAttributeFields = null;
 		var portExtraAttributeFieldMap = null;
 		var portExtraAttributeFieldMapByName = null;
+		var serverTypes = null;
+		var serverTypeMap = null;
 		var editingNode = null;
 		var editPortsTable = null;
 		var editMode = null;
 
 		var diagramInstance = null;
 
-		function createNodeModel(id, name, nodeTypeID, nodePv, virtual, remark) {
+		function createNodeModel(id, name, nodeTypeID, nodePv, virtual, serverType, remark) {
 			var nodeModel = {
 				id: id,
 				name: name,
@@ -150,6 +159,14 @@
 						value_bool: {
 							Valid: true,
 							Bool: virtual
+						}
+					},
+					{
+						id: 0,
+						node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['server_type'].id,
+						value_node_extra_attribute_option_id: {
+							Valid: true,
+							Int64: serverType
 						}
 					},
 					{
@@ -204,6 +221,8 @@
 			var editNodeTypeID = $('#edit_node_type').val();
 			var editNodePvID = $('#edit_node_pv_id').val();
 			var editNodePv = $('#edit_node_pv').val();
+			var editNodeServerTypeID = $('#edit_node_server_type_id').val();
+			var editNodeServerType = $('#edit_node_server_type').val();
 			var editNodeRemarkID = $('#edit_node_remark_id').val();
 			var editNodeRemark = $('#edit_node_remark').val();
 			var result = {
@@ -218,6 +237,14 @@
 							value_bool: {
 								Valid: true,
 								Bool: convertStringToBoolean(editNodePv)
+							}
+					},
+					{
+							id: parseInt(editNodeServerTypeID),
+							node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['server_type'].id,
+							value_node_extra_attribute_option_id: {
+								Valid: parseInt(editNodeServerType) == 0 ? false : true,
+								Int64: parseInt(editNodeServerType)
 							}
 					},
 					{
@@ -365,6 +392,12 @@
 				}
 				node.node_extra_attribute_map_by_name = buildNodeExtraAttributeMapByName(node.node_extra_attributes);
 			}
+			serverTypes = getResources('node_extra_attribute_options', 'q\[node_extra_attribute_field_id\]=3').resources;
+			serverTypes.unshift({
+				id: 0,
+				name: "None"
+			});
+			serverTypeMap = buildResouceMapFromResourceArray(serverTypes);
 			ports = getResources('ports', 'preloads=DestinationPort,PortExtraAttributes&fields=id,name,node_id,number,layer,mac_address,ipv4_address,ipv4_prefix,destination_port_id,destination_port,port_extra_attributes.*').resources;
 			portMap = buildResouceMapFromResourceArray(ports);
 			portExtraAttributeFields = getResources('port_extra_attribute_fields', '').resources;
@@ -406,12 +439,20 @@
 					$('#edit_node_type').append($('<option>').val(nodeTypes[i].id).text(nodeTypes[i].name));
 				}
 
+				$('#edit_node_server_type').children().remove();
+				for (key in serverTypeMap){
+  				$('#edit_node_server_type').append($('<option>').val(key).text(serverTypeMap[key].name));
+				}
+
 				$('#edit_node_id').val(editingNode.id);
 				$('#edit_node_name').val(editingNode.name);
 				var attributeVirtual = extraBoolAttribute('virtual', editingNode.node_extra_attribute_map_by_name);
 				$('#edit_node_pv_id').val(attributeVirtual.id);
 				$('#edit_node_pv').val(convertBooleanToString(attributeVirtual.value_bool.Bool));
 				$('#edit_node_type').val(editingNode.node_type.id);
+				var attributeServerType = extraIntAttribute('server_type', editingNode.node_extra_attribute_map_by_name);
+				$('#edit_node_server_type_id').val(attributeServerType.id);
+				$('#edit_node_server_type').val(attributeServerType.value_node_extra_attribute_option_id.Int64);
 				var attributeRemark = extraStringAttribute('remark', editingNode.node_extra_attribute_map_by_name);
 				$('#edit_node_remark_id').val(attributeRemark.id);
 				$('#edit_node_remark').val(attributeRemark.value_string.String);
@@ -475,11 +516,18 @@
 	 				$('#edit_node_type').append($('<option>').val(nodeTypes[i].id).text(nodeTypes[i].name));
 	 			}
 
+				$('#edit_node_server_type').children().remove();
+				for (key in serverTypeMap){
+  				$('#edit_node_server_type').append($('<option>').val(key).text(serverTypeMap[key].name));
+				}
+
 				$('#edit_node_id').val('');
 	 			$('#edit_node_name').val('');
 	 			$('#edit_node_pv_id').val(0);
 				$('#edit_node_pv').val(convertBooleanToString(false));
 	 			$('#edit_node_type').val(1);
+				$('#edit_node_server_type_id').val(0);
+				$('#edit_node_server_type').val(0);
 				$('#edit_node_remark_id').val(0);
 				$('#edit_node_remark').val('');
 
