@@ -91,8 +91,11 @@ func updateTemplateFile(db *gorm.DB, environment *models.Environment) error {
 }
 
 func updateTestCaseFile(db *gorm.DB, environment *models.Environment) error {
+	parameter := map[string]interface{}{
+		"Environment": environment,
+	}
 	testRunnerScriptID := fmt.Sprintf("%d", environment.TestRunnerScriptID)
-	testRunnerScript, err := clayLogics.GenerateTemplate(db, testRunnerScriptID, nil)
+	testRunnerScript, err := clayLogics.GenerateTemplate(db, testRunnerScriptID, parameter)
 
 	if err != nil {
 		return err
@@ -186,6 +189,9 @@ func updateServerConfigFiles(db *gorm.DB, environment *models.Environment) error
 	}
 
 	for _, nodeExtraAttribute := range nodeExtraAttributes {
+		if nodeExtraAttribute.Node.NodeTypeID != 6 {
+			continue
+		}
 		cmd = exec.Command("mkdir", "-p", nodeExtraAttribute.Node.Name)
 		cmd.Dir = fmt.Sprintf("%s/%s", environment.GitRepositoryURI, environment.ServerConfigDirectoryName)
 		cmdMessage, err = cmd.CombinedOutput()
