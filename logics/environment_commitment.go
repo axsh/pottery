@@ -132,27 +132,15 @@ func updateTestCaseFile(db *gorm.DB, environment *models.Environment) error {
 	}
 
 	for _, requirement := range requirements {
-		testClientScript, testPattern, err := GenerateTestClientScript(db, requirement.ID)
+		firewallTestScript, testPattern, err := GenerateFirewallTestScript(db, requirement.ID)
 		if err != nil {
 			return err
 		}
-		testServerScript, testPattern, err := GenerateTestServerScript(db, requirement.ID)
-		if err != nil {
-			return err
-		}
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_client.sh",
+		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_firewall.sh",
 			environment.GitRepositoryURI,
 			environment.TestCaseDirectoryName,
 			testPattern),
-			([]byte)(testClientScript.(string)),
-			os.ModePerm); err != nil {
-			return err
-		}
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_server.sh",
-			environment.GitRepositoryURI,
-			environment.TestCaseDirectoryName,
-			testPattern),
-			([]byte)(testServerScript.(string)),
+			([]byte)(firewallTestScript.(string)),
 			os.ModePerm); err != nil {
 			return err
 		}
@@ -297,7 +285,7 @@ func commit(environment *models.Environment, message string) error {
 	return nil
 }
 
-func (logic *environmentCommitmentLogic) Update(db *gorm.DB, _ string, urlValues url.Values, _ interface{}) (interface{}, error) {
+func UpdateEnvironmentFiles(db *gorm.DB, urlValues url.Values) (*models.Environment, error) {
 	environment := &models.Environment{}
 
 	if err := db.Select("*").First(environment, models.PresentEnvironmentID).Error; err != nil {
@@ -305,28 +293,43 @@ func (logic *environmentCommitmentLogic) Update(db *gorm.DB, _ string, urlValues
 	}
 
 	if err := initGitRepository(environment); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	init := urlValues.Get("init")
 
-	message := fmt.Sprintf("Automatic commit at %s", time.Now().String())
 	if err := updateDesignFile(db, environment); err != nil {
-		return "", err
+		return nil, err
 	}
 	if err := updateTemplateFile(db, environment); err != nil {
-		return "", err
+		return nil, err
 	}
 	if err := updateTestCaseFile(db, environment); err != nil {
-		return "", err
+		return nil, err
 	}
 	if err := updateServerConfigFiles(db, environment); err != nil {
-		return "", err
+		return nil, err
 	}
 	if err := updateDeviceConfigFiles(db, environment, init); err != nil {
+		return nil, err
+	}
+	return environment, nil
+}
+
+func CommitEnvironmentFiles(environment *models.Environment) error {
+	message := fmt.Sprintf("Automatic commit at %s", time.Now().String())
+	if err := commit(environment, message); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (logic *environmentCommitmentLogic) Update(db *gorm.DB, _ string, urlValues url.Values, _ interface{}) (interface{}, error) {
+	environment, err := UpdateEnvironmentFiles(db, urlValues)
+	if err != nil {
 		return "", err
 	}
-	if err := commit(environment, message); err != nil {
+	if err := CommitEnvironmentFiles(environment); err != nil {
 		return "", err
 	}
 	return "{}", nil
