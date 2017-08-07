@@ -40,14 +40,12 @@ type Requirement struct {
 }
 
 type FirewallTestProgram struct {
-	ID                     int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
-	Name                   string               `json:"name" gorm:"not null;unique"`
-	ServiceID              int                  `json:"service_id" gorm:"not null;unique" sql:"type:integer references services(id) on delete cascade"`
-	Service                *Service             `json:"service"`
-	ServerScriptTemplateID int                  `json:"server_script_template_id" gorm:"not null;unique" sql:"type:integer references templates(id) on delete cascade"`
-	ServerScriptTemplate   *clayModels.Template `json:"server_script_template"`
-	ClientScriptTemplateID int                  `json:"client_script_template_id" gorm:"not null;unique" sql:"type:integer references templates(id) on delete cascade"`
-	ClientScriptTemplate   *clayModels.Template `json:"client_script_template"`
+	ID                   int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
+	Name                 string               `json:"name" gorm:"not null;unique"`
+	ServiceID            int                  `json:"service_id" gorm:"not null;unique" sql:"type:integer references services(id) on delete cascade"`
+	Service              *Service             `json:"service"`
+	TestScriptTemplateID int                  `json:"test_script_template_id" gorm:"not null;unique" sql:"type:integer references templates(id) on delete cascade"`
+	TestScriptTemplate   *clayModels.Template `json:"test_script_template"`
 }
 
 func NewProtocolModel() *Protocol {
@@ -100,8 +98,7 @@ func (testProgram *FirewallTestProgram) SetupInitialData(db *gorm.DB) error {
 	db.Exec(`
 		create trigger if not exists DeleteTestProgramTemplate delete on firewall_test_programs
 		begin
-			delete from templates where id = old.client_script_template_id;
-			delete from templates where id = old.server_script_template_id;
+			delete from templates where id = old.test_script_template_id;
 		end;
 	`)
 

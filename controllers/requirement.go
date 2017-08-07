@@ -25,15 +25,11 @@ type requirementController struct {
 	*clayControllers.BaseController
 }
 
-type testServerScriptGenerationController struct {
+type firewallTestScriptGenerationController struct {
 	*clayControllers.BaseController
 }
 
-type testClientScriptGenerationController struct {
-	*clayControllers.BaseController
-}
-
-type testFirewallProgramController struct {
+type firewallTestProgramController struct {
 	*clayControllers.BaseController
 }
 
@@ -81,22 +77,12 @@ func newRequirementController() extensions.Controller {
 	return controller
 }
 
-func newTestServerScriptGenerationController() extensions.Controller {
-	controller := &testServerScriptGenerationController{
-		BaseController: clayControllers.NewBaseController(
-			models.SharedRequirementModel(),
-			logics.UniqueTestServerScriptGenerationLogic(),
-		),
-	}
-	controller.SetOutputter(controller)
-	return controller
-}
 
-func newTestClientScriptGenerationController() extensions.Controller {
-	controller := &testClientScriptGenerationController{
+func newFirewallTestScriptGenerationController() extensions.Controller {
+	controller := &firewallTestScriptGenerationController{
 		BaseController: clayControllers.NewBaseController(
 			models.SharedRequirementModel(),
-			logics.UniqueTestClientScriptGenerationLogic(),
+			logics.UniqueFirewallTestScriptGenerationLogic(),
 		),
 	}
 	controller.SetOutputter(controller)
@@ -104,7 +90,7 @@ func newTestClientScriptGenerationController() extensions.Controller {
 }
 
 func newFirewallTestProgramController() extensions.Controller {
-	controller := &testFirewallProgramController{
+	controller := &firewallTestProgramController{
 		BaseController: clayControllers.NewBaseController(
 			models.SharedFirewallTestProgramModel(),
 			logics.UniqueFirewallTestProgramLogic(),
@@ -202,8 +188,10 @@ func (controller *requirementController) RouteMap() map[int]map[string]gin.Handl
 	return routeMap
 }
 
-func (controller *testServerScriptGenerationController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := fmt.Sprintf("%s/%s/%s/%s", controller.ResourceSingleURL(), "generation", "script", "server")
+
+
+func (controller *firewallTestScriptGenerationController) RouteMap() map[int]map[string]gin.HandlerFunc {
+	resourceSingleURL := fmt.Sprintf("%s/%s/%s", controller.ResourceSingleURL(), "generation", "script")
 
 	routeMap := map[int]map[string]gin.HandlerFunc{
 		extensions.MethodGet: {
@@ -213,28 +201,12 @@ func (controller *testServerScriptGenerationController) RouteMap() map[int]map[s
 	return routeMap
 }
 
-func (controller *testServerScriptGenerationController) OutputGetSingle(c *gin.Context, code int, result interface{}, fields map[string]interface{}) {
+func (controller *firewallTestScriptGenerationController) OutputGetSingle(c *gin.Context, code int, result interface{}, fields map[string]interface{}) {
 	text := result.(string)
 	c.String(code, text)
 }
 
-func (controller *testClientScriptGenerationController) RouteMap() map[int]map[string]gin.HandlerFunc {
-	resourceSingleURL := fmt.Sprintf("%s/%s/%s/%s", controller.ResourceSingleURL(), "generation", "script", "client")
-
-	routeMap := map[int]map[string]gin.HandlerFunc{
-		extensions.MethodGet: {
-			resourceSingleURL: controller.GetSingle,
-		},
-	}
-	return routeMap
-}
-
-func (controller *testClientScriptGenerationController) OutputGetSingle(c *gin.Context, code int, result interface{}, fields map[string]interface{}) {
-	text := result.(string)
-	c.String(code, text)
-}
-
-func (controller *testFirewallProgramController) RouteMap() map[int]map[string]gin.HandlerFunc {
+func (controller *firewallTestProgramController) RouteMap() map[int]map[string]gin.HandlerFunc {
 	resourceSingleURL := controller.ResourceSingleURL()
 	resourceMultiURL := controller.ResourceMultiURL()
 
@@ -260,8 +232,7 @@ var uniqueProtocolController = newProtocolController()
 var uniqueServiceController = newServiceController()
 var uniqueConnectionController = newConnectionController()
 var uniqueRequirementController = newRequirementController()
-var uniqueTestServerScriptGenerationController = newTestServerScriptGenerationController()
-var uniqueTestClientScriptGenerationController = newTestClientScriptGenerationController()
+var uniqueFirewallTestScriptGenerationController = newFirewallTestScriptGenerationController()
 var uniqueFirewallTestProgramController = newFirewallTestProgramController()
 
 func init() {
@@ -269,7 +240,6 @@ func init() {
 	extensions.RegisterController(uniqueServiceController)
 	extensions.RegisterController(uniqueConnectionController)
 	extensions.RegisterController(uniqueRequirementController)
-	extensions.RegisterController(uniqueTestServerScriptGenerationController)
-	extensions.RegisterController(uniqueTestClientScriptGenerationController)
+	extensions.RegisterController(uniqueFirewallTestScriptGenerationController)
 	extensions.RegisterController(uniqueFirewallTestProgramController)
 }

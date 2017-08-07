@@ -30,11 +30,7 @@ type requirementLogic struct {
 	*clayLogics.BaseLogic
 }
 
-type testServerScriptGenerationLogic struct {
-	*clayLogics.BaseLogic
-}
-
-type testClientScriptGenerationLogic struct {
+type firewallTestScriptGenerationLogic struct {
 	*clayLogics.BaseLogic
 }
 
@@ -70,15 +66,9 @@ func newRequirementLogic() *requirementLogic {
 	return logic
 }
 
-func newTestServerScriptGenerationLogic() *testServerScriptGenerationLogic {
-	logic := &testServerScriptGenerationLogic{
-		BaseLogic: &clayLogics.BaseLogic{},
-	}
-	return logic
-}
 
-func newTestClientScriptGenerationLogic() *testClientScriptGenerationLogic {
-	logic := &testClientScriptGenerationLogic{
+func newFirewallTestScriptGenerationLogic() *firewallTestScriptGenerationLogic {
+	logic := &firewallTestScriptGenerationLogic{
 		BaseLogic: &clayLogics.BaseLogic{},
 	}
 	return logic
@@ -531,8 +521,7 @@ func getTestProgram(db *gorm.DB, requirementID int) (*models.FirewallTestProgram
 
 	testProgram := &models.FirewallTestProgram{}
 	if err := db.Preload("Service").
-		Preload("ServerScriptTemplate").
-		Preload("ClientScriptTemplate").Select("*").First(testProgram, "service_id = ?", requirement.ServiceID).Error; err != nil {
+		Preload("TestScriptTemplate").Select("*").First(testProgram, "service_id = ?", requirement.ServiceID).Error; err != nil {
 		return nil, nil, "", err
 	}
 
@@ -551,13 +540,13 @@ func getTestProgram(db *gorm.DB, requirementID int) (*models.FirewallTestProgram
 	return testProgram, templateParameterMap, testPattern, nil
 }
 
-func GenerateTestServerScript(db *gorm.DB, requirementID int) (interface{}, string, error) {
+func GenerateFirewallTestScript(db *gorm.DB, requirementID int) (interface{}, string, error) {
 	testProgram, templateParameterMap, testPattern, err := getTestProgram(db, requirementID)
 	if err != nil {
 		return "", "", err
 	}
 
-	script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ServerScriptTemplateID), templateParameterMap)
+	script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.TestScriptTemplateID), templateParameterMap)
 	if err != nil {
 		return "", "", err
 	}
@@ -565,37 +554,15 @@ func GenerateTestServerScript(db *gorm.DB, requirementID int) (interface{}, stri
 	return script, testPattern, nil
 }
 
-func GenerateTestClientScript(db *gorm.DB, requirementID int) (interface{}, string, error) {
-	testProgram, templateParameterMap, testPattern, err := getTestProgram(db, requirementID)
-	if err != nil {
-		return "", "", err
-	}
-
-	script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ClientScriptTemplateID), templateParameterMap)
-	if err != nil {
-		return "", "", err
-	}
-
-	return script, testPattern, nil
-}
-
-func (logic *testClientScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
+func (logic *firewallTestScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 	requirementID, err := strconv.Atoi(id)
 	if err != nil {
 		return "", err
 	}
-	testClientTemplate, _, err := GenerateTestClientScript(db, requirementID)
-	return testClientTemplate, err
+	testTemplate, _, err := GenerateFirewallTestScript(db, requirementID)
+	return testTemplate, err
 }
 
-func (logic *testServerScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
-	requirementID, err := strconv.Atoi(id)
-	if err != nil {
-		return "", err
-	}
-	testServerTemplate, _, err := GenerateTestServerScript(db, requirementID)
-	return testServerTemplate, err
-}
 
 func (logic *firewallFirewallTestProgramLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
@@ -696,8 +663,7 @@ var uniqueProtocolLogic = newProtocolLogic()
 var uniqueServiceLogic = newServiceLogic()
 var uniqueConnectionLogic = newConnectionLogic()
 var uniqueRequirementLogic = newRequirementLogic()
-var uniqueTestServerScriptGenerationLogic = newTestServerScriptGenerationLogic()
-var uniqueTestClientScriptGenerationLogic = newTestClientScriptGenerationLogic()
+var uniqueFirewallTestScriptGenerationLogic = newFirewallTestScriptGenerationLogic()
 var uniqueFirewallTestProgramLogic = newFirewallTestProgramLogic()
 
 func UniqueProtocolLogic() extensions.Logic {
@@ -716,12 +682,9 @@ func UniqueRequirementLogic() extensions.Logic {
 	return uniqueRequirementLogic
 }
 
-func UniqueTestServerScriptGenerationLogic() extensions.Logic {
-	return uniqueTestServerScriptGenerationLogic
-}
 
-func UniqueTestClientScriptGenerationLogic() extensions.Logic {
-	return uniqueTestClientScriptGenerationLogic
+func UniqueFirewallTestScriptGenerationLogic() extensions.Logic {
+	return uniqueFirewallTestScriptGenerationLogic
 }
 
 func UniqueFirewallTestProgramLogic() extensions.Logic {
