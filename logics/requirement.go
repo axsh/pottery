@@ -38,7 +38,7 @@ type testClientScriptGenerationLogic struct {
 	*clayLogics.BaseLogic
 }
 
-type testProgramLogic struct {
+type firewallFirewallTestProgramLogic struct {
 	*clayLogics.BaseLogic
 }
 
@@ -84,8 +84,8 @@ func newTestClientScriptGenerationLogic() *testClientScriptGenerationLogic {
 	return logic
 }
 
-func newTestProgramLogic() *testProgramLogic {
-	logic := &testProgramLogic{
+func newFirewallTestProgramLogic() *firewallFirewallTestProgramLogic {
+	logic := &firewallFirewallTestProgramLogic{
 		BaseLogic: &clayLogics.BaseLogic{},
 	}
 	return logic
@@ -483,7 +483,7 @@ func convertAccessString(access bool) string {
 	}
 }
 
-func getTestProgram(db *gorm.DB, requirementID int) (*models.TestProgram, map[string]interface{}, string, error) {
+func getTestProgram(db *gorm.DB, requirementID int) (*models.FirewallTestProgram, map[string]interface{}, string, error) {
 
 	internetNode := &loamModels.Node{
 		ID:   0,
@@ -529,7 +529,7 @@ func getTestProgram(db *gorm.DB, requirementID int) (*models.TestProgram, map[st
 		requirement.DestinationPort = internetPort
 	}
 
-	testProgram := &models.TestProgram{}
+	testProgram := &models.FirewallTestProgram{}
 	if err := db.Preload("Service").
 		Preload("ServerScriptTemplate").
 		Preload("ClientScriptTemplate").Select("*").First(testProgram, "service_id = ?", requirement.ServiceID).Error; err != nil {
@@ -597,9 +597,9 @@ func (logic *testServerScriptGenerationLogic) GetSingle(db *gorm.DB, id string, 
 	return testServerTemplate, err
 }
 
-func (logic *testProgramLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
+func (logic *firewallFirewallTestProgramLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
 
-	testProgram := &models.TestProgram{}
+	testProgram := &models.FirewallTestProgram{}
 
 	if err := db.Select(queryFields).First(testProgram, id).Error; err != nil {
 		return nil, err
@@ -609,9 +609,9 @@ func (logic *testProgramLogic) GetSingle(db *gorm.DB, id string, _ url.Values, q
 
 }
 
-func (logic *testProgramLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
+func (logic *firewallFirewallTestProgramLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields string) (interface{}, error) {
 
-	testPrograms := []*models.TestProgram{}
+	testPrograms := []*models.FirewallTestProgram{}
 
 	if err := db.Select(queryFields).Find(&testPrograms).Error; err != nil {
 		return nil, err
@@ -626,9 +626,9 @@ func (logic *testProgramLogic) GetMulti(db *gorm.DB, _ url.Values, queryFields s
 
 }
 
-func (logic *testProgramLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
+func (logic *firewallFirewallTestProgramLogic) Create(db *gorm.DB, _ url.Values, data interface{}) (interface{}, error) {
 
-	testProgram := data.(*models.TestProgram)
+	testProgram := data.(*models.FirewallTestProgram)
 
 	if err := db.Create(&testProgram).Error; err != nil {
 		return nil, err
@@ -637,9 +637,9 @@ func (logic *testProgramLogic) Create(db *gorm.DB, _ url.Values, data interface{
 	return testProgram, nil
 }
 
-func (logic *testProgramLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
+func (logic *firewallFirewallTestProgramLogic) Update(db *gorm.DB, id string, _ url.Values, data interface{}) (interface{}, error) {
 
-	testProgram := data.(*models.TestProgram)
+	testProgram := data.(*models.FirewallTestProgram)
 	testProgram.ID, _ = strconv.Atoi(id)
 
 	if err := db.Save(testProgram).Error; err != nil {
@@ -649,9 +649,9 @@ func (logic *testProgramLogic) Update(db *gorm.DB, id string, _ url.Values, data
 	return testProgram, nil
 }
 
-func (logic *testProgramLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
+func (logic *firewallFirewallTestProgramLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
-	testProgram := &models.TestProgram{}
+	testProgram := &models.FirewallTestProgram{}
 
 	if err := db.First(&testProgram, id).Error; err != nil {
 		return err
@@ -664,22 +664,22 @@ func (logic *testProgramLogic) Delete(db *gorm.DB, id string, _ url.Values) erro
 	return nil
 }
 
-func (logic *testProgramLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
-	testPrograms := []*models.TestProgram{}
+func (logic *firewallFirewallTestProgramLogic) ExtractFromDesign(db *gorm.DB) (string, interface{}, error) {
+	testPrograms := []*models.FirewallTestProgram{}
 	if err := db.Select("*").Find(&testPrograms).Error; err != nil {
 		return "", nil, err
 	}
-	return extensions.RegisteredResourceName(models.SharedTestProgramModel()), testPrograms, nil
+	return extensions.RegisteredResourceName(models.SharedFirewallTestProgramModel()), testPrograms, nil
 }
 
-func (logic *testProgramLogic) DeleteFromDesign(db *gorm.DB) error {
-	return db.Delete(models.SharedTestProgramModel()).Error
+func (logic *firewallFirewallTestProgramLogic) DeleteFromDesign(db *gorm.DB) error {
+	return db.Delete(models.SharedFirewallTestProgramModel()).Error
 }
 
-func (logic *testProgramLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
-	container := []*models.TestProgram{}
+func (logic *firewallFirewallTestProgramLogic) LoadToDesign(db *gorm.DB, data interface{}) error {
+	container := []*models.FirewallTestProgram{}
 	design := data.(*clayModels.Design)
-	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedTestProgramModel())]; exists {
+	if value, exists := design.Content[extensions.RegisteredResourceName(models.SharedFirewallTestProgramModel())]; exists {
 		if err := mapstruct.MapToStruct(value.([]interface{}), &container); err != nil {
 			return err
 		}
@@ -698,7 +698,7 @@ var uniqueConnectionLogic = newConnectionLogic()
 var uniqueRequirementLogic = newRequirementLogic()
 var uniqueTestServerScriptGenerationLogic = newTestServerScriptGenerationLogic()
 var uniqueTestClientScriptGenerationLogic = newTestClientScriptGenerationLogic()
-var uniqueTestProgramLogic = newTestProgramLogic()
+var uniqueFirewallTestProgramLogic = newFirewallTestProgramLogic()
 
 func UniqueProtocolLogic() extensions.Logic {
 	return uniqueProtocolLogic
@@ -724,8 +724,8 @@ func UniqueTestClientScriptGenerationLogic() extensions.Logic {
 	return uniqueTestClientScriptGenerationLogic
 }
 
-func UniqueTestProgramLogic() extensions.Logic {
-	return uniqueTestProgramLogic
+func UniqueFirewallTestProgramLogic() extensions.Logic {
+	return uniqueFirewallTestProgramLogic
 }
 
 func init() {
@@ -733,10 +733,10 @@ func init() {
 	extensions.RegisterDesignAccessor(uniqueServiceLogic)
 	extensions.RegisterDesignAccessor(uniqueConnectionLogic)
 	extensions.RegisterDesignAccessor(uniqueRequirementLogic)
-	extensions.RegisterDesignAccessor(uniqueTestProgramLogic)
+	extensions.RegisterDesignAccessor(uniqueFirewallTestProgramLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedProtocolModel(), uniqueProtocolLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedServiceModel(), uniqueServiceLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedConnectionModel(), uniqueConnectionLogic)
 	extensions.RegisterTemplateParameterGenerator(models.SharedRequirementModel(), uniqueRequirementLogic)
-	extensions.RegisterTemplateParameterGenerator(models.SharedTestProgramModel(), uniqueTestProgramLogic)
+	extensions.RegisterTemplateParameterGenerator(models.SharedFirewallTestProgramModel(), uniqueFirewallTestProgramLogic)
 }
