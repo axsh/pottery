@@ -2,6 +2,7 @@ package logics
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayLogics "github.com/qb0C80aE/clay/logics"
@@ -240,22 +241,6 @@ func (logic *serviceLogic) Update(db *gorm.DB, id string, _ url.Values, data int
 
 func (logic *serviceLogic) Delete(db *gorm.DB, id string, _ url.Values) error {
 
-	testProgram := &models.TestProgram{}
-
-	// Template cannot be deleted as cascade mode, it has to be handled manually.
-	if err := db.First(&testProgram, "service_id = ?", id).Error; err == nil {
-		if testProgram.ClientScriptTemplateID != 0 {
-			if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ClientScriptTemplateID), nil); err != nil {
-				return err
-			}
-		}
-		if testProgram.ServerScriptTemplateID != 0 {
-			if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ServerScriptTemplateID), nil); err != nil {
-				return err
-			}
-		}
-	}
-
 	service := &models.Service{}
 
 	if err := db.First(&service, id).Error; err != nil {
@@ -490,7 +475,15 @@ func (logic *requirementLogic) LoadToDesign(db *gorm.DB, data interface{}) error
 	return nil
 }
 
-func getTestProgram(db *gorm.DB, id string) (*models.TestProgram, map[string]interface{}, error) {
+func convertAccessString(access bool) string {
+	if access {
+		return "allow"
+	} else {
+		return "deny"
+	}
+}
+
+func getTestProgram(db *gorm.DB, requirementID int) (*models.TestProgram, map[string]interface{}, string, error) {
 
 	internetNode := &loamModels.Node{
 		ID:   0,
@@ -524,8 +517,8 @@ func getTestProgram(db *gorm.DB, id string) (*models.TestProgram, map[string]int
 		Preload("SourcePort").
 		Preload("SourcePort.Node").
 		Preload("DestinationPort").
-		Preload("DestinationPort.Node").Select("*").First(requirement, id).Error; err != nil {
-		return nil, nil, err
+		Preload("DestinationPort.Node").Select("*").First(requirement, requirementID).Error; err != nil {
+		return nil, nil, "", err
 	}
 
 	if !requirement.SourcePortID.Valid {
@@ -539,52 +532,69 @@ func getTestProgram(db *gorm.DB, id string) (*models.TestProgram, map[string]int
 	testProgram := &models.TestProgram{}
 	if err := db.Preload("Service").
 		Preload("ServerScriptTemplate").
-		Preload("ClientScriptTemplate").Select("*").First(testProgram, id).Error; err != nil {
-		return nil, nil, err
+		Preload("ClientScriptTemplate").Select("*").First(testProgram, "service_id = ?", requirement.ServiceID).Error; err != nil {
+		return nil, nil, "", err
 	}
 
 	templateParameterMap := map[string]interface{}{
+		"Service":         requirement.Service,
 		"SourcePort":      requirement.SourcePort,
 		"DestinationPort": requirement.DestinationPort,
+		"Access":          requirement.Access,
 	}
 
-	return testProgram, templateParameterMap, nil
+	testPattern := fmt.Sprintf("%s_to_%s_%s_%s",
+		requirement.SourcePort.Node.Name,
+		requirement.DestinationPort.Node.Name,
+		convertAccessString(requirement.Access),
+		requirement.Service.Name)
+	return testProgram, templateParameterMap, testPattern, nil
 }
 
-func GenerateTestServerScript(db *gorm.DB, id string) (interface{}, error) {
-	testProgram, templateParameterMap, err := getTestProgram(db, id)
+func GenerateTestServerScript(db *gorm.DB, requirementID int) (interface{}, string, error) {
+	testProgram, templateParameterMap, testPattern, err := getTestProgram(db, requirementID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ServerScriptTemplateID), templateParameterMap)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return script, nil
+	return script, testPattern, nil
 }
 
-func GenerateTestClientScript(db *gorm.DB, id string) (interface{}, error) {
-	testProgram, templateParameterMap, err := getTestProgram(db, id)
+func GenerateTestClientScript(db *gorm.DB, requirementID int) (interface{}, string, error) {
+	testProgram, templateParameterMap, testPattern, err := getTestProgram(db, requirementID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	script, err := clayLogics.GenerateTemplate(db, strconv.Itoa(testProgram.ClientScriptTemplateID), templateParameterMap)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return script, nil
-}
-
-func (logic *testServerScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
-	return GenerateTestServerScript(db, id)
+	return script, testPattern, nil
 }
 
 func (logic *testClientScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
-	return GenerateTestClientScript(db, id)
+	requirementID, err := strconv.Atoi(id)
+	if err != nil {
+		return "", err
+	}
+	testClientTemplate, _, err := GenerateTestClientScript(db, requirementID)
+	return testClientTemplate, err
+}
+
+func (logic *testServerScriptGenerationLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
+	requirementID, err := strconv.Atoi(id)
+	if err != nil {
+		return "", err
+	}
+	testServerTemplate, _, err := GenerateTestServerScript(db, requirementID)
+	return testServerTemplate, err
 }
 
 func (logic *testProgramLogic) GetSingle(db *gorm.DB, id string, _ url.Values, queryFields string) (interface{}, error) {
@@ -649,18 +659,6 @@ func (logic *testProgramLogic) Delete(db *gorm.DB, id string, _ url.Values) erro
 
 	if err := db.Delete(&testProgram).Error; err != nil {
 		return err
-	}
-
-	// Template cannot be deleted as cascade mode, it has to be handled manually.
-	if testProgram.ClientScriptTemplateID != 0 {
-		if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ClientScriptTemplateID), nil); err != nil {
-			return err
-		}
-	}
-	if testProgram.ServerScriptTemplateID != 0 {
-		if err := clayLogics.UniqueTemplateLogic().Delete(db, strconv.Itoa(testProgram.ServerScriptTemplateID), nil); err != nil {
-			return err
-		}
 	}
 
 	return nil
