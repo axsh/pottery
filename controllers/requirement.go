@@ -33,7 +33,7 @@ type testClientScriptGenerationController struct {
 	*clayControllers.BaseController
 }
 
-type testProgramController struct {
+type testFirewallProgramController struct {
 	*clayControllers.BaseController
 }
 
@@ -103,11 +103,11 @@ func newTestClientScriptGenerationController() extensions.Controller {
 	return controller
 }
 
-func newTestProgramController() extensions.Controller {
-	controller := &testProgramController{
+func newFirewallTestProgramController() extensions.Controller {
+	controller := &testFirewallProgramController{
 		BaseController: clayControllers.NewBaseController(
-			models.SharedTestProgramModel(),
-			logics.UniqueTestProgramLogic(),
+			models.SharedFirewallTestProgramModel(),
+			logics.UniqueFirewallTestProgramLogic(),
 		),
 	}
 	controller.SetOutputter(controller)
@@ -234,7 +234,7 @@ func (controller *testClientScriptGenerationController) OutputGetSingle(c *gin.C
 	c.String(code, text)
 }
 
-func (controller *testProgramController) RouteMap() map[int]map[string]gin.HandlerFunc {
+func (controller *testFirewallProgramController) RouteMap() map[int]map[string]gin.HandlerFunc {
 	resourceSingleURL := controller.ResourceSingleURL()
 	resourceMultiURL := controller.ResourceMultiURL()
 
@@ -262,7 +262,7 @@ var uniqueConnectionController = newConnectionController()
 var uniqueRequirementController = newRequirementController()
 var uniqueTestServerScriptGenerationController = newTestServerScriptGenerationController()
 var uniqueTestClientScriptGenerationController = newTestClientScriptGenerationController()
-var uniqueTestProgramController = newTestProgramController()
+var uniqueFirewallTestProgramController = newFirewallTestProgramController()
 
 func init() {
 	extensions.RegisterController(uniqueProtocolController)
@@ -271,5 +271,5 @@ func init() {
 	extensions.RegisterController(uniqueRequirementController)
 	extensions.RegisterController(uniqueTestServerScriptGenerationController)
 	extensions.RegisterController(uniqueTestClientScriptGenerationController)
-	extensions.RegisterController(uniqueTestProgramController)
+	extensions.RegisterController(uniqueFirewallTestProgramController)
 }

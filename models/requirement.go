@@ -14,10 +14,10 @@ type Protocol struct {
 }
 
 type Service struct {
-	ID          int           `json:"id" gorm:"primary_key;AUTO_INCREMENT"`
-	Name        string        `json:"name" gorm:"not null;unique"`
-	Connections []*Connection `json:"connections"`
-	TestProgram *TestProgram  `json:"test_program"`
+	ID                  int                  `json:"id" gorm:"primary_key;AUTO_INCREMENT"`
+	Name                string               `json:"name" gorm:"not null;unique"`
+	Connections         []*Connection        `json:"connections"`
+	FirewallTestProgram *FirewallTestProgram `json:"firewall_test_program"`
 }
 
 type Connection struct {
@@ -39,7 +39,7 @@ type Requirement struct {
 	Access            bool             `json:"access"`
 }
 
-type TestProgram struct {
+type FirewallTestProgram struct {
 	ID                     int                  `json:"id" form:"id" gorm:"primary_key;AUTO_INCREMENT"`
 	Name                   string               `json:"name" gorm:"not null;unique"`
 	ServiceID              int                  `json:"service_id" gorm:"not null;unique" sql:"type:integer references services(id) on delete cascade"`
@@ -66,15 +66,15 @@ func NewRequirementModel() *Requirement {
 	return &Requirement{}
 }
 
-func NewTestProgramModel() *TestProgram {
-	return &TestProgram{}
+func NewFirewallTestProgramModel() *FirewallTestProgram {
+	return &FirewallTestProgram{}
 }
 
 var sharedProtocolModel = NewProtocolModel()
 var sharedServiceModel = NewServiceModel()
 var sharedConnectionModel = NewConnectionModel()
 var sharedRequirementModel = NewRequirementModel()
-var sharedTestProgramModel = NewTestProgramModel()
+var sharedFirewallTestProgramModel = NewFirewallTestProgramModel()
 
 func SharedProtocolModel() *Protocol {
 	return sharedProtocolModel
@@ -92,13 +92,13 @@ func SharedRequirementModel() *Requirement {
 	return sharedRequirementModel
 }
 
-func SharedTestProgramModel() *TestProgram {
-	return sharedTestProgramModel
+func SharedFirewallTestProgramModel() *FirewallTestProgram {
+	return sharedFirewallTestProgramModel
 }
 
-func (testProgram *TestProgram) SetupInitialData(db *gorm.DB) error {
+func (testProgram *FirewallTestProgram) SetupInitialData(db *gorm.DB) error {
 	db.Exec(`
-		create trigger if not exists DeleteTestProgramTemplate delete on test_programs
+		create trigger if not exists DeleteTestProgramTemplate delete on firewall_test_programs
 		begin
 			delete from templates where id = old.client_script_template_id;
 			delete from templates where id = old.server_script_template_id;
@@ -109,10 +109,10 @@ func (testProgram *TestProgram) SetupInitialData(db *gorm.DB) error {
 }
 
 func init() {
-	extensions.RegisterInitialDataLoader(sharedTestProgramModel)
+	extensions.RegisterInitialDataLoader(sharedFirewallTestProgramModel)
 	extensions.RegisterModel(sharedProtocolModel)
 	extensions.RegisterModel(sharedServiceModel)
 	extensions.RegisterModel(sharedConnectionModel)
 	extensions.RegisterModel(sharedRequirementModel)
-	extensions.RegisterModel(sharedTestProgramModel)
+	extensions.RegisterModel(sharedFirewallTestProgramModel)
 }
