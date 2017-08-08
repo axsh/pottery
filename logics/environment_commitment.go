@@ -131,14 +131,15 @@ func updateTestCaseFile(db *gorm.DB, environment *models.Environment) error {
 		return err
 	}
 
-	for _, requirement := range requirements {
+	for index, requirement := range requirements {
 		firewallTestScript, testPattern, err := GenerateFirewallTestScript(db, requirement.ID)
 		if err != nil {
 			return err
 		}
-		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%s_firewall.sh",
+		if ioutil.WriteFile(fmt.Sprintf("%s/%s/%09d_%s_firewall.sh",
 			environment.GitRepositoryURI,
 			environment.TestCaseDirectoryName,
+			index,
 			testPattern),
 			([]byte)(firewallTestScript.(string)),
 			os.ModePerm); err != nil {
@@ -177,7 +178,7 @@ func updateServerConfigFiles(db *gorm.DB, environment *models.Environment) error
 	}
 
 	for _, nodeExtraAttribute := range nodeExtraAttributes {
-		if nodeExtraAttribute.Node.NodeTypeID != 6 {
+		if !nodeExtraAttribute.ValueNodeExtraAttributeOptionID.Valid {
 			continue
 		}
 		cmd = exec.Command("mkdir", "-p", nodeExtraAttribute.Node.Name)

@@ -1,14 +1,12 @@
 package logics
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/qb0C80aE/clay/extensions"
 	clayLogics "github.com/qb0C80aE/clay/logics"
 	clayModels "github.com/qb0C80aE/clay/models"
 	"github.com/qb0C80aE/clay/utils/mapstruct"
-	loamModels "github.com/qb0C80aE/loam/models"
 	"github.com/qb0C80aE/pottery/models"
 	"net/url"
 	"strconv"
@@ -475,32 +473,6 @@ func convertAccessString(access bool) string {
 
 func getTestProgram(db *gorm.DB, requirementID int) (*models.FirewallTestProgram, map[string]interface{}, string, error) {
 
-	internetNode := &loamModels.Node{
-		ID:   0,
-		Name: "Internet",
-	}
-	internetPort := &loamModels.Port{
-		ID:     0,
-		Number: 0,
-		Layer:  3,
-		Name:   "Internet",
-		NodeID: internetNode.ID,
-		Node:   internetNode,
-		MacAddress: sql.NullString{
-			String: "00:00:00:00:00:00",
-			Valid:  true,
-		},
-		Ipv4Address: sql.NullString{
-			String: "0.0.0.0",
-			Valid:  true,
-		},
-		Ipv4Prefix: sql.NullInt64{
-			Int64: 0,
-			Valid: true,
-		},
-	}
-	internetNode.Ports = []*loamModels.Port{internetPort}
-
 	requirement := &models.Requirement{}
 	if err := db.Preload("Service").
 		Preload("Service.Connections").
@@ -509,14 +481,6 @@ func getTestProgram(db *gorm.DB, requirementID int) (*models.FirewallTestProgram
 		Preload("DestinationPort").
 		Preload("DestinationPort.Node").Select("*").First(requirement, requirementID).Error; err != nil {
 		return nil, nil, "", err
-	}
-
-	if !requirement.SourcePortID.Valid {
-		requirement.SourcePort = internetPort
-	}
-
-	if !requirement.DestinationPortID.Valid {
-		requirement.DestinationPort = internetPort
 	}
 
 	testProgram := &models.FirewallTestProgram{}
