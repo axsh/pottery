@@ -53,6 +53,16 @@ func (environment *Environment) SetupInitialData(db *gorm.DB) error {
 		}
 	}
 
+	portExtraAttributeFields := []*loamModels.PortExtraAttributeField{
+		{ID: 3, Name: "pass_through"},
+	}
+
+	for _, portExtraAttributeField := range portExtraAttributeFields {
+		if err := db.Save(portExtraAttributeField).Error; err != nil {
+			return err
+		}
+	}
+
 	db.Exec(`
 		create trigger if not exists DeleteServerInitializationConfigTemplate delete on node_extra_attribute_options when old.node_extra_attribute_field_id = 3
 		begin

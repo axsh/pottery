@@ -321,26 +321,8 @@
 		function loadResources() {
 			nodes = getResources('nodes', 'preloads=NodeType').resources;
 			nodeMap = buildResouceMapFromResourceArray(nodes);
-			nodeMap[0] = {id: 0, name: "Internet"};
 			ports = getResources('ports', 'preloads=Node&q[layer]=3').resources;
 			portMap = buildResouceMapFromResourceArray(ports);
-			portMap[0] = {
-				id: 0,
-				node_id: 0,
-				name: "Internet",
-				mac_address: {
-				    String: "00:00:00:00:00:00",
-				    Valid: true
-				},
-				ipv4_address: {
-				    String: "0.0.0.0",
-				    Valid: true
-				},
-				ipv4_prefix: {
-				    Int64: 0,
-				    Valid: true
-				},
-			}
 			for (var i = 0; i < ports.length; i = i + 1) {
 				var port = ports[i];
 				var node = nodeMap[port.node_id];
@@ -432,16 +414,25 @@
 			$("#edit_requirement_access").val('true');
 			editRequirementsTable.fnClearTable();
 
-			$("#edit_requirement_source_node").append($('<option>').val(0).text('Internet'));
-			$("#edit_requirement_destination_node").append($('<option>').val(0).text('Internet'));
-			$("#edit_requirement_source_port").append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
-			$("#edit_requirement_destination_port").append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
-
 			for (var i = 0; i < nodes.length; i = i + 1) {
 				var node = nodes[i];
 				if (node.ports != null) {
 					$("#edit_requirement_source_node").append($('<option>').val(node.id).text(node.name));
 					$("#edit_requirement_destination_node").append($('<option>').val(node.id).text(node.name));
+				}
+			}
+
+			if (nodes.length > 0) {
+				$('#edit_requirement_source_port').children().remove();
+				$('#edit_requirement_destination_port').children().remove();
+				var node = nodeMap[nodes[0].id];
+				var ports = node.ports;
+				for (var i = 0; i < ports.length; i = i + 1) {
+					var port = portMap[ports[i].id];
+					if (port.layer == 3) {
+						$('#edit_requirement_source_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
+						$('#edit_requirement_destination_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
+					}
 				}
 			}
 
@@ -625,16 +616,12 @@
 
 			$('#edit_requirement_source_port').children().remove();
 
-			if (editRequirementSourceNodeID == 0) {
-				$('#edit_requirement_source_port').append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
-			} else {
-				var node = nodeMap[editRequirementSourceNodeID];
-				var ports = node.ports;
-				for (var i = 0; i < ports.length; i = i + 1) {
-					var port = portMap[ports[i].id];
-					if (port.layer == 3) {
-						$('#edit_requirement_source_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
-					}
+			var node = nodeMap[editRequirementSourceNodeID];
+			var ports = node.ports;
+			for (var i = 0; i < ports.length; i = i + 1) {
+				var port = portMap[ports[i].id];
+				if (port.layer == 3) {
+					$('#edit_requirement_source_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
 				}
 			}
 		}
@@ -644,16 +631,12 @@
 
 			$('#edit_requirement_destination_port').children().remove();
 
-			if (editRequirementDestinationNodeID == 0) {
-				$('#edit_requirement_destination_port').append($('<option>').val(0).text('Internet (0.0.0.0/0)'));
-			} else {
-				var node = nodeMap[editRequirementDestinationNodeID];
-				var ports = node.ports;
-				for (var i = 0; i < ports.length; i = i + 1) {
-					var port = portMap[ports[i].id];
-					if (port.layer == 3) {
-						$('#edit_requirement_destination_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
-					}
+			var node = nodeMap[editRequirementDestinationNodeID];
+			var ports = node.ports;
+			for (var i = 0; i < ports.length; i = i + 1) {
+				var port = portMap[ports[i].id];
+				if (port.layer == 3) {
+					$('#edit_requirement_destination_port').append($('<option>').val(port.id).text(port.name + ' (' + port.ipv4_address.String + '/' + port.ipv4_prefix.Int64 + ')'));
 				}
 			}
 		}
