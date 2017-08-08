@@ -1,7 +1,7 @@
 {{template "headerpart" .}}
 
 <div class="col-sm-12">
-	<div class="panel panel-default panel-custom" id="test_program_service_panel">
+	<div class="panel panel-default panel-custom" id="firewall_test_program_service_panel">
 		<div class="panel-heading">
 			<h1 class="panel-title">
 				<span class="glyphicon glyphicon-wrench"></span> Firewall Test Programs
@@ -9,7 +9,7 @@
 		</div>
 		<div class="panel-body">
 			<div class="col-sm-4">
-				<div class="panel panel-default" id="edit_test_program_service_panel">
+				<div class="panel panel-default" id="edit_firewall_test_program_service_panel">
 					<div class="panel-heading">
 						<h1 class="panel-title"><span class="glyphicon glyphicon-transfer"></span> Services </h1>
 					</div>
@@ -21,42 +21,27 @@
 							</tr>
 							<tr style="border:none;">
 								<td style="border:none;"></td>
-								<td style="border:none;"><span style="float: right"><button class="btn btn-default" id="edit_test_program_btn" type="button"><span class="glyphicon glyphicon-edit"></span> Edit Test Program</button></span></td>
+								<td style="border:none;"><span style="float: right"><button class="btn btn-default" id="edit_firewall_test_program_btn" type="button"><span class="glyphicon glyphicon-edit"></span> Edit Test Program</button></span></td>
 							</tr>
 						</table>
 					</div>
 				</div>
 			</div>
 			<div class="col-sm-8">
-				<div class="panel panel-default panel-custom" id="edit_test_program_panel">
+				<div class="panel panel-default panel-custom" id="edit_firewall_test_program_panel">
 					<div class="panel-heading">
 						<h1 class="panel-title"><span class="glyphicon glyphicon-file"></span> Test Programs</h1>
 					</div>
 					<div class="panel-body">
-						<div id="edit_test_program_panel">
+						<div id="edit_firewall_test_program_panel">
 							<div class="row">
 							  <div class="col-xs-12">
-							    Client Test Program
+							    Test Program
 							  </div>
 							</div>
 							<div class="row">
 							  <div class="col-xs-12">
-							    <textarea id="edit_test_program_client" name="edit_test_program_client" rows="10" class="form-control"></textarea>
-							  </div>
-							</div>
-							<div class="row">
-							  <div class="col-xs-12">
-							    <hr>
-							  </div>
-							</div>
-							<div class="row">
-							  <div class="col-xs-12">
-							    Server Test Program
-							  </div>
-							</div>
-							<div class="row">
-							  <div class="col-xs-12">
-							    <textarea id="edit_test_program_server" name="edit_test_program_server" rows="10" class="form-control"></textarea>
+							    <textarea id="edit_firewall_test_program_test_script" name="edit_firewall_test_program_test_script" rows="10" class="form-control"></textarea>
 							  </div>
 							</div>
 							<div class="row">
@@ -65,9 +50,9 @@
 							  </div>
 							</div>
 						</div>
-						<span style="float: left"><button class="btn btn-default" id="update_test_program_btn" type="button"><span class="glyphicon glyphicon-ok"></span> Update</button></span>
+						<span style="float: left"><button class="btn btn-default" id="update_firewall_test_program_btn" type="button"><span class="glyphicon glyphicon-ok"></span> Update</button></span>
 						<span style="float: left">&nbsp;</span>
-						<span style="float: left"><button class="btn btn-default" id="cancel_update_test_program_btn" type="button"><span class="glyphicon glyphicon-remove"></span> Cancel</button></span>
+						<span style="float: left"><button class="btn btn-default" id="cancel_update_firewall_test_program_btn" type="button"><span class="glyphicon glyphicon-remove"></span> Cancel</button></span>
 					</div>
 				</div>
 			</div>
@@ -83,10 +68,10 @@
 		var services = null;
 		var serviceMap = null;
 
-		var editingTestProgram = null;
+		var editingFirewallTestProgram = null;
 
 		function loadResources() {
-			services = getResources('services', 'preloads=Connections,Connections.Protocol,TestProgram,TestProgram.ServerScriptTemplate,TestProgram.ClientScriptTemplate').resources;
+			services = getResources('services', 'preloads=Connections,Connections.Protocol,FirewallTestProgram,FirewallTestProgram.TestScriptTemplate').resources;
 			serviceMap = buildResouceMapFromResourceArray(services);
 		}
 
@@ -124,39 +109,34 @@
 			}
 		}
 
-		function onEditTestProgram() {
+		function onEditFirewallTestProgram() {
 			if ($('#services').val() == null) {
 				alert('Add a service first.');
 				return;
 			}
 
 			var service = serviceMap[$('#services').val()];
-			editingTestProgram = service.test_program;
+			editingFirewallTestProgram = service.firewall_test_program;
 
-			if (editingTestProgram == null) {
-				editingTestProgram = {
-					name: service.name + " TestProgram",
+			if (editingFirewallTestProgram == null) {
+				editingFirewallTestProgram = {
+					name: service.name + " FirewallTestProgram",
 					service_id: service.id,
-					client_script_template: {
-						name: service.name + " Client TestProgram",
-						template_content: ""
-					},
-					server_script_template: {
-						name: service.name + " Server TestProgram",
+					test_script_template: {
+						name: service.name + " FirewallTestProgram TestScript",
 						template_content: ""
 					}
 				}
 			}
 
-			$('#edit_test_program_panel').fadeOut(150, function() {
-				$('#edit_test_program_panel').fadeIn(150, function() {
-					$("#edit_test_program_client").val(editingTestProgram.client_script_template.template_content);
-					$("#edit_test_program_server").val(editingTestProgram.server_script_template.template_content);
+			$('#edit_firewall_test_program_panel').fadeOut(150, function() {
+				$("#edit_firewall_test_program_test_script").val(editingFirewallTestProgram.test_script_template.template_content);
+				$('#edit_firewall_test_program_panel').fadeIn(150, function() {
 				});
 			});
 		}
 
-		function onTestProgramModified(result, successCode, successMessage, ignoreSuccess) {
+		function onFirewallTestProgramModified(result, successCode, successMessage, ignoreSuccess) {
 			if (result.status == successCode) {
 				if (!ignoreSuccess) {
 					$('html,body').animate({
@@ -164,7 +144,7 @@
 					}, 'slow');
 					$('#information_message').text(successMessage);
 					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-					$('#edit_test_program_panel').fadeOut(150);
+					$('#edit_firewall_test_program_panel').fadeOut(150);
 					loadResources();
 					showServices();
 				}
@@ -180,48 +160,47 @@
 			}
 		}
 
-		function onUpdateTestProgram() {
+		function onUpdateFirewallTestProgram() {
 			if (!confirm('Are you sure to update?')) {
 				return;
 			}
 
-			editingTestProgram.client_script_template.template_content = $("#edit_test_program_client").val();
-			editingTestProgram.server_script_template.template_content = $("#edit_test_program_server").val();
+			editingFirewallTestProgram.test_script_template.template_content = $("#edit_firewall_test_program_test_script").val();
 
-			if (editingTestProgram.id == null) {
-				var result = postResource('test_programs', editingTestProgram);
-				onTestProgramModified(result, 201, 'The service has been updated successfully', false);
+			if (editingFirewallTestProgram.id == null) {
+				var result = postResource('firewall_test_programs', editingFirewallTestProgram);
+				onFirewallTestProgramModified(result, 201, 'The service has been updated successfully', false);
 			} else {
-				var result = putResource('test_programs', editingTestProgram.id, editingTestProgram);
-				onTestProgramModified(result, 200, 'The service has been updated successfully', false);
+				var result = putResource('firewall_test_programs', editingFirewallTestProgram.id, editingFirewallTestProgram);
+				onFirewallTestProgramModified(result, 200, 'The service has been updated successfully', false);
 			}
 		}
 
-		function onCancelUpdateTestProgram() {
+		function onCancelUpdateFirewallTestProgram() {
 			if (!confirm('Are you sure to cancel?')) {
 				return;
 			}
 
 			$('html,body').animate({scrollTop:0},'slow');
-			$('#edit_test_program_panel').fadeOut(150);
+			$('#edit_firewall_test_program_panel').fadeOut(150);
 		}
 
-		$('#edit_test_program_btn').on('click', function() {
-			onEditTestProgram();
+		$('#edit_firewall_test_program_btn').on('click', function() {
+			onEditFirewallTestProgram();
 		});
 
 		function onLoad() {
 			loadResources();
-			$('#test_program_service_panel').fadeIn(150);
+			$('#firewall_test_program_service_panel').fadeIn(150);
 			showServices();
 		}
 
-		$('#update_test_program_btn').on('click', function() {
-			onUpdateTestProgram();
+		$('#update_firewall_test_program_btn').on('click', function() {
+			onUpdateFirewallTestProgram();
 		});
 
-		$('#cancel_update_test_program_btn').on('click', function() {
-			onCancelUpdateTestProgram();
+		$('#cancel_update_firewall_test_program_btn').on('click', function() {
+			onCancelUpdateFirewallTestProgram();
 		});
 
 		onLoad();
