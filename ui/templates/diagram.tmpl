@@ -723,9 +723,6 @@
 
 			var result = deleteResource('nodes', nodeId);
 			onNodeModified(result, 204, 'The node was deleted successfully', false);
-
-			loadResources();
-			onUpdateNetworkDiagram();
 		}
 
 		function onCancelRegisterOrUpdate(panelClass) {
