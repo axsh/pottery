@@ -1,9 +1,9 @@
 package: github.com/qb0C80aE/pottery
 import:
 - package: github.com/qb0C80aE/clay
-  version: develop
+  version: liquidmetal
 - package: github.com/qb0C80aE/loam
-  version: develop
+  version: liquidmetal
 - package: github.com/higanworks/envmap
 - package: github.com/elazarl/go-bindata-assetfs
 - package: github.com/gin-gonic/contrib
