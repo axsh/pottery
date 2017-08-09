@@ -134,6 +134,8 @@
 		var editPortsTable = null;
 		var editMode = null;
 
+		var diagramInstance = null;
+
 		var nodePvMap = {
 			physical: false,
 			virtual: true
@@ -846,15 +848,76 @@
 				$('#diagram_canvas').children().remove();
 				$('#diagram_canvas').append($('<div>').prop('id', 'diagram'));
 				$('#diagram_panel').fadeIn(150, function() {
-					var diagramInstance = new Diagram('#diagram', '/diagrams/' + diagramType, {
-						pop: /^([^\s-]+)-/,
-						distance: diagramProperties[diagramType].distance,
-						width: $('#diagram_canvas').width(),
-						height: ($(window).height() - 180)
-					});
+					if (diagramInstance == null) {
+						diagramInstance = new Diagram('#diagram', '/diagrams/' + diagramType, {
+							pop: /^([^\s-]+)-/,
+							distance: diagramProperties[diagramType].distance,
+							width: $('#diagram_canvas').width(),
+							height: ($(window).height() - 180)
+						});
+					}
 					diagramInstance.init('interface', 'node_id');
+					restoreNodeLocation();
 					onUpdateContextMenu()
 				});
+			});
+		}
+
+		function loopSleep(_loopLimit,_interval, _mainFunc){
+		  var loopLimit = _loopLimit;
+		  var interval = _interval;
+		  var mainFunc = _mainFunc;
+		  var i = 0;
+		  var loopFunc = function () {
+		    var result = mainFunc(i);
+		    if (result === false) {
+		      return;
+		    }
+		    i = i + 1;
+		    if (i < loopLimit) {
+		      setTimeout(loopFunc, interval);
+		    }
+		  }
+		  loopFunc();
+		}
+
+		function onMouseUpOnNode(e) {
+			var node = e.target.__data__;
+			var nodeID = node.meta[0].value;
+			var x = node.x;
+			var y = node.y;
+			diagramNode = {
+				id: nodeID,
+				x: x,
+				y: y
+			}
+			putResource('diagrams/physical/diagram_nodes', nodeID, diagramNode);
+		}
+
+		function restoreNodeLocation() {
+			if(diagramType == "logical") return;
+
+			$("#diagram").ready(function() {
+				loopSleep(100, 200, function(i){
+				  n = d3.select('#diagram').selectAll('.node');
+					ns = n[0];
+					if (ns.length > 0) {
+						var diagramNodes = getResources('diagrams/physical/diagram_nodes', null).resources;
+						var diagramNodeMap = buildResouceMapFromResourceArray(diagramNodes);
+						for (var i = 0; i < ns.length; i ++) {
+							ns[i].onmouseup = onMouseUpOnNode;
+							var nodeID = ns[i].__data__.meta[0].value;
+							var diagramNode = diagramNodeMap[nodeID];
+							if (diagramNode != null) {
+								ns[i].__data__.x = diagramNode.x;
+								ns[i].__data__.y = diagramNode.y;
+							}
+						}
+						diagramInstance.cola.start();
+						return false;
+					}
+				});
+				return true;
 			});
 		}
 
