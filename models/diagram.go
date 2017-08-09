@@ -15,9 +15,12 @@ type Diagram struct {
 
 // DiagramNode is the model class what represents nodes in diagrams
 type DiagramNode struct {
+	ID   int              `json:"id" gorm:"primary_key" sql:"type:integer references nodes(id) on delete cascade"`
 	Name string           `json:"name"`
 	Icon string           `json:"icon"`
 	Meta *DiagramNodeMeta `json:"meta"`
+	X    float64          `json:"x"`
+	Y    float64          `json:"y"`
 }
 
 // DiagramNodeMeta is the model class that represents the meta information on diagram nodes
@@ -140,4 +143,7 @@ func init() {
 	diagram := &Diagram{}
 	extensions.RegisterInitialDataLoader(diagram)
 	extensions.RegisterModel(diagram)
+
+	diagramNode := &DiagramNode{}
+	extensions.RegisterModel(diagramNode)
 }
