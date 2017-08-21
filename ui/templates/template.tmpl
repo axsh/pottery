@@ -279,21 +279,6 @@
 		}
 	}
 
-	function createEditTemplatePersistentParameterCheckboxElement(name) {
-		var checkBox = $('<input>').prop('name', name).prop('style', 'transform:scale(1.5);position:relative;top:7px;').prop('type', 'checkbox');
-		return checkBox[0];
-	}
-
-	function createEditTemplatePersistentParameterTextElement(name, style, placeholder, value) {
-		var input = $('<input>').prop('name', name).prop('class', 'form-control').prop('type', 'text').prop('style', style).prop('placeholder', placeholder).val(value).attr('value', value)[0];
-		return input;
-	}
-
-	function createEditTemplatePersistentParameterHiddenElement(name, value) {
-		var input = $('<input>').prop('name', name).prop('type', 'hidden').val(value).attr('value', value)[0];
-		return input;
-	}
-
 	function loadResources() {
 		templates = getResources('templates', 'preloads=TemplatePersistentParameters').resources;
 		templateMap = buildResouceMapFromResourceArray(templates);
@@ -372,9 +357,9 @@
 				var templatePersistentParameter = templatePersistentParameterMap[editingTemplate.template_persistent_parameters[i].id];
 
 				editTemplatePersistentParametersTable.fnAddData([
-					createEditTemplatePersistentParameterCheckboxElement('edit_template_persistent_parameter_check').outerHTML + createEditTemplatePersistentParameterHiddenElement('edit_template_persistent_parameter_id', templatePersistentParameter.id).outerHTML,
-					createEditTemplatePersistentParameterTextElement('edit_template_persistent_parameter_name', 'width:200px', 'name like dpid', templatePersistentParameter.name).outerHTML,
-					createEditTemplatePersistentParameterTextElement('edit_template_persistent_parameter_value', 'width:540px', 'value like 0xdad1c001', templatePersistentParameter.value_string.String).outerHTML,
+					createCheckboxElement('edit_template_persistent_parameter_check', 'transform:scale(1.5);position:relative;top:7px;').outerHTML + createHiddenElement('edit_template_persistent_parameter_id', templatePersistentParameter.id).outerHTML,
+					createTextElement('edit_template_persistent_parameter_name', 'width:200px', 'name like dpid', templatePersistentParameter.name).outerHTML,
+					createTextElement('edit_template_persistent_parameter_value', 'width:540px', 'value like 0xdad1c001', templatePersistentParameter.value_string.String).outerHTML,
 				]);
 			}
 
@@ -418,9 +403,9 @@
 
 	function onAddTemplatePersistentParameter() {
 		editTemplatePersistentParametersTable.fnAddData([
-			createEditTemplatePersistentParameterCheckboxElement('edit_template_persistent_parameter_check').outerHTML + createEditTemplatePersistentParameterHiddenElement('edit_template_persistent_parameter_id', 0).outerHTML,
-			createEditTemplatePersistentParameterTextElement('edit_template_persistent_parameter_name', 'width:200px', 'name like dpid', '').outerHTML,
-			createEditTemplatePersistentParameterTextElement('edit_template_persistent_parameter_value', 'width:540px', 'value like 0xdad1c001', '').outerHTML,
+			createCheckboxElement('edit_template_persistent_parameter_check', 'transform:scale(1.5);position:relative;top:7px;').outerHTML + createHiddenElement('edit_template_persistent_parameter_id', 0).outerHTML,
+			createTextElement('edit_template_persistent_parameter_name', 'width:200px', 'name like dpid', '').outerHTML,
+			createTextElement('edit_template_persistent_parameter_value', 'width:540px', 'value like 0xdad1c001', '').outerHTML,
 		]);
 		editTemplatePersistentParametersTable.fnDraw();
 	}
