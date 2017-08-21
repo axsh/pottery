@@ -664,7 +664,7 @@
 					}
 
 					editPortsTable.fnAddData([
-						createCheckboxElement('edit_port_check', 'transform:scale(1.5);position:relative;top:7px;').outerHTML + createHiddenElement('edit_port_id', port.id).outerHTML,
+						createCheckboxElement('edit_port_check', 'transform:scale(1.5);position:relative;top:7px;', false).outerHTML + createHiddenElement('edit_port_id', port.id).outerHTML,
 						createTextElement('edit_port_number', 'width:45px', '#', port.number).outerHTML,
 						createTextElement('edit_port_name', 'width:200px', 'port name like eth0', port.name).outerHTML,
 						createSelectElement('edit_port_layer', 'width:90px', layerOptionList, port.layer).outerHTML,
@@ -728,7 +728,7 @@
 
 		function onAddPort() {
 			editPortsTable.fnAddData([
-				createCheckboxElement('edit_port_check', 'transform:scale(1.5);position:relative;top:7px;').outerHTML + createHiddenElement('edit_port_id', 0).outerHTML,
+				createCheckboxElement('edit_port_check', 'transform:scale(1.5);position:relative;top:7px;', false).outerHTML + createHiddenElement('edit_port_id', 0).outerHTML,
 				createTextElement('edit_port_number', 'width:45px', '#', calculateMaximumPortNumber() + 1).outerHTML,
 				createTextElement('edit_port_name', 'width:200px', 'port name like eth0', '').outerHTML,
 				createSelectElement('edit_port_layer', 'width:90px', layerOptionList, 1).outerHTML,

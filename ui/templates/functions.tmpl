@@ -189,8 +189,8 @@ function getUrlVars() {
   return vars;
 }
 
-function createCheckboxElement(name, style) {
-	var input = $('<input>').prop('name', name).prop('style', style).prop('type', 'checkbox')[0];
+function createCheckboxElement(name, style, value) {
+	var input = $('<input>').prop('name', name).prop('style', style).prop('type', 'checkbox').attr('checked', value)[0];
 	return input;
 }
 
