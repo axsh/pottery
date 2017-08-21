@@ -457,18 +457,18 @@
 
 		for (key in templatePersistentParameterMapForDeletion) {
 			var result = deleteResource('template_persistent_parameters', key);
-			if (!onTemplateModified(result, 204, null, true)) {
+			if (!showProcessResult(result, 204, null, true, onTemplateModified)) {
 				return;
 			}
 		}
 
 		if (editMode == 'Register') {
 			var result = postResource('templates', templateForRegistrationOrUpdate);
-			onTemplateModified(result, 201, 'The template has been registered successfully', false);
+			showProcessResult(result, 201, 'The template has been registered successfully', false, onTemplateModified);
 		}
 		else {
 			var result = putResource('templates', templateForRegistrationOrUpdate.id, templateForRegistrationOrUpdate);
-			onTemplateModified(result, 200, 'The template has been updated successfully', false);
+			showProcessResult(result, 200, 'The template has been updated successfully', false, onTemplateModified);
 		}
 	}
 
@@ -485,7 +485,7 @@
 		var templateId = $('#templates').val();
 
 		var result = deleteResource('templates', templateId);
-		onTemplateModified(result, 204, 'The template was deleted successfully', false);
+		showProcessResult(result, 204, 'The template has been deleted successfully', false, onTemplateModified);
 	}
 
 	function onGenerateTemplate() {
@@ -498,13 +498,13 @@
 
 		for (key in templatePersistentParameterMapForDeletion) {
 			var result = deleteResource('template_persistent_parameters', key);
-			if (!onTemplateModified(result, 204, null, true)) {
+			if (!showProcessResult(result, 204, null, true, onTemplateModified)) {
 				return;
 			}
 		}
 
 		var result = putResource('templates', templateForRegistrationOrUpdate.id, templateForRegistrationOrUpdate);
-		if (!onTemplateModified(result, 200, 'The template has been updated successfully', true)) {
+		if (!showProcessResult(result, 200, 'The template has been updated successfully', true, onTemplateModified)) {
 			return;
 		}
 
@@ -512,7 +512,7 @@
 		if (result.status != 200) {
 			result.resource = $.parseJSON(result.resource);
 		}
-		if (!onTemplateModified(result, 200, null, true)) {
+		if (!showProcessResult(result, 200, null, true, onTemplateModified)) {
 			return;
 		}
 
@@ -522,13 +522,7 @@
 		link.download = 'generated.txt';
 		link.click();
 
-		$('html,body').animate({
-			scrollTop: 0
-		}, 'slow');
-		$('#information_message').text("The template has been updated and generated successfully");
-		$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-		loadResources();
-		showTemplate(true);
+		showProcessResult(result, 200, 'The template has been updated and generated successfully', false, onTemplateModified);
 	}
 
 	function onCancelRegisterOrUpdateTemplate() {
@@ -536,34 +530,14 @@
 			return;
 		}
 
-		$('html,body').animate({
-			scrollTop: 0
-		}, 'slow');
+		$('html,body').animate({scrollTop: 0}, 'slow');
 		$('#edit_panel').fadeOut(150);
 	}
 
-	function onTemplateModified(result, successCode, successMessage, ignoreSuccess) {
-		if (result.status == successCode) {
-			if (!ignoreSuccess) {
-				$('html,body').animate({
-					scrollTop: 0
-				}, 'slow');
-				$('#information_message').text(successMessage);
-				$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-				$('#edit_panel').fadeOut(150);
-				loadResources();
-				showTemplate(true);
-			}
-			return true;
-		}
-		else {
-			$('html,body').animate({
-				scrollTop: 0
-			}, 'slow');
-			$('#error_message').text(result.resource.error);
-			$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
-			return false;
-		}
+	function onTemplateModified() {
+		$('#edit_panel').fadeOut(150);
+		loadResources();
+		showTemplate(true);
 	}
 
 	$('#templates').on('change', function() {
