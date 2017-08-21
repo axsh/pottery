@@ -57,10 +57,13 @@ function getResourceAsText(target, id, query) {
   return result;
 }
 
-function postResource(target, resource) {
+function postResource(target, resource, query) {
+  if (query != '') {
+    query = '?' + query;
+  }
   var response = $.ajax({
     type: 'POST',
-    url: '/' + target,
+    url: '/' + target + query,
     dataType: 'json',
     contentType: 'application/json',
     data: JSON.stringify(resource),
@@ -74,10 +77,13 @@ function postResource(target, resource) {
   return result;
 }
 
-function putResource(target, id, resource) {
+function putResource(target, id, resource, query) {
+  if (query != '') {
+    query = '?' + query;
+  }
   var response = $.ajax({
     type: 'PUT',
-    url: '/' + target + '/' + id,
+    url: '/' + target + '/' + id + query,
     dataType: 'json',
     contentType: 'application/json',
     data: JSON.stringify(resource),
@@ -91,10 +97,13 @@ function putResource(target, id, resource) {
   return result;
 }
 
-function deleteResource(target, id) {
+function deleteResource(target, id, query) {
+  if (query != '') {
+    query = '?' + query;
+  }
   var response = $.ajax({
     type: 'DELETE',
-    url: '/' + target + '/' + id,
+    url: '/' + target + '/' + id  + query,
     dataType: 'json',
     contentType: 'application/json',
     async: false
@@ -115,6 +124,14 @@ function buildResouceMapFromResourceArray(resources) {
   for (var i = 0; i < resources.length; i = i + 1) {
     var resource = resources[i];
     result[resource.id] = resource;
+  }
+  return result;
+}
+
+function rebuildMapByName(resourceMap) {
+  var result = {};
+  for (key in resourceMap) {
+    result[resourceMap[key].name] = resourceMap[key];
   }
   return result;
 }
@@ -159,4 +176,65 @@ function getUrlVars() {
   }
   return vars;
 }
+
+function createCheckboxElement(name, style) {
+	var input = $('<input>').prop('name', name).prop('style', style).prop('type', 'checkbox')[0];
+	return input;
+}
+
+function createTextElement(name, style, placeholder, value) {
+	var input = $('<input>').prop('name', name).prop('class', 'form-control').prop('type', 'text').prop('style', style).prop('placeholder', placeholder).val(value).attr('value', value)[0];
+	return input;
+}
+
+function createHiddenElement(name, value) {
+	var input = $('<input>').prop('name', name).prop('type', 'hidden').val(value).attr('value', value)[0];
+	return input;
+}
+
+function createSelectOptionsElement(options) {
+	var result = [];
+	for (var i = 0; i < options.length; i = i + 1) {
+		result.push($('<option>').val(options[i].value).text(options[i].text));
+	}
+	return result;
+}
+
+function createSelectElement(name, style, options, value) {
+	var select =  $('<select>').prop('name', name).prop('class', 'form-control').prop('style', style);
+	var editPortSelectOptionsElement = createSelectOptionsElement(options);
+	for (var i = 0; i < editPortSelectOptionsElement.length; i = i + 1) {
+		if (value == editPortSelectOptionsElement[i].val()) {
+			select.append(editPortSelectOptionsElement[i].attr('selected', 'selected'));
+		} else {
+			select.append(editPortSelectOptionsElement[i]);
+		}
+	}
+	return select[0];
+}
+
+function showProcessResult(result, successCode, successMessage, ignoreSuccess, customFunction) {
+  if (result.status == successCode) {
+    if (!ignoreSuccess) {
+      $('html,body').animate({
+        scrollTop: 0
+      }, 'slow');
+      $('#information_message').text(successMessage);
+      $('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
+      if (customFunction != null) {
+        customFunction();
+      }
+    }
+    return true;
+  }
+  else {
+    $('html,body').animate({
+      scrollTop: 0
+    }, 'slow');
+    $('#error_message').text(result.resource.error);
+    $('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
+    return false;
+  }
+}
+
 {{end}}

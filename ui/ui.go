@@ -102,6 +102,7 @@ func (routerInitializer *routerInitializer) InitializeEarly(r *gin.Engine) error
 		fmt.Sprintf("%s/%s", templateBase, "dialog.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "footerpart.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "functions.tmpl"),
+		fmt.Sprintf("%s/%s", templateBase, "functions_node_port.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "headerpart.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "index.tmpl"),
 		fmt.Sprintf("%s/%s", templateBase, "navigation_bar.tmpl"),
