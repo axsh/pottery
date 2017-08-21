@@ -75,31 +75,6 @@
 			serviceMap = buildResouceMapFromResourceArray(services);
 		}
 
-		function createSelectElement(name, style, options, value) {
-			var select =  $('<select>').prop('name', name).prop('class', 'form-control').prop('style', style);
-			var editSelectOptionsElement = createSelectOptionsElement(options);
-			for (var i = 0; i < editSelectOptionsElement.length; i = i + 1) {
-				if ((value == null) && (i == 0)) {
-						select.append(editSelectOptionsElement[i].attr('selected', 'selected'));
-				} else {
-					if (value == editSelectOptionsElement[i].val()) {
-						select.append(editSelectOptionsElement[i].attr('selected', 'selected'));
-					} else {
-						select.append(editSelectOptionsElement[i]);
-					}
-				}
-			}
-			return select[0];
-		}
-
-		function createSelectOptionsElement(options) {
-			var result = [];
-			for (var i = 0; i < options.length; i = i + 1) {
-				result.push($('<option>').val(options[i].value).text(options[i].text));
-			}
-			return result;
-		}
-
 		function showServices() {
 			$("#services").children().remove();
 
@@ -136,28 +111,10 @@
 			});
 		}
 
-		function onFirewallTestProgramModified(result, successCode, successMessage, ignoreSuccess) {
-			if (result.status == successCode) {
-				if (!ignoreSuccess) {
-					$('html,body').animate({
-						scrollTop: 0
-					}, 'slow');
-					$('#information_message').text(successMessage);
-					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-					$('#edit_firewall_test_program_panel').fadeOut(150);
-					loadResources();
-					showServices();
-				}
-				return true;
-			}
-			else {
-				$('html,body').animate({
-					scrollTop: 0
-				}, 'slow');
-				$('#error_message').text(result.resource.error);
-				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
-				return false;
-			}
+		function onFirewallTestProgramModified() {
+			$('#edit_firewall_test_program_panel').fadeOut(150);
+			loadResources();
+			showServices();
 		}
 
 		function onUpdateFirewallTestProgram() {
@@ -169,10 +126,10 @@
 
 			if (editingFirewallTestProgram.id == null) {
 				var result = postResource('firewall_test_programs', editingFirewallTestProgram);
-				onFirewallTestProgramModified(result, 201, 'The service has been updated successfully', false);
+				showProcessResult(result, 201, 'The service has been updated successfully', false, onFirewallTestProgramModified);
 			} else {
 				var result = putResource('firewall_test_programs', editingFirewallTestProgram.id, editingFirewallTestProgram);
-				onFirewallTestProgramModified(result, 200, 'The service has been updated successfully', false);
+				showProcessResult(result, 200, 'The service has been updated successfully', false, onFirewallTestProgramModified);
 			}
 		}
 
