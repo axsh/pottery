@@ -1,0 +1,96 @@
+{{define "functions_node_port"}}
+
+var nodePvMap = {
+	false: 'physical',
+	true: 'virtual'
+};
+
+var layerOptionList = [
+	{value: 1, text: 'Layer1'},
+	{value: 2, text: 'Layer2'},
+	{value: 3, text: 'Layer3'}
+];
+
+function buildNodeExtraAttributeMapByName(nodeExtraAttributes) {
+	var nodeExtraAttributeMapByName = {
+		virtual: {
+			node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['virtual'].id,
+			value_bool: {
+				Valid: true,
+				Bool: false,
+			}
+		},
+		remark: {
+			node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['remark'].id,
+			value_string: {
+				Valid: true,
+				String: '',
+			}
+		},
+	};
+	for (var i = 0; i < nodeExtraAttributes.length; i = i + 1) {
+		var nodeExtraAttribute = nodeExtraAttributes[i];
+		var nodeExtraAttributeField = nodeExtraAttributeFieldMap[nodeExtraAttribute.node_extra_attribute_field_id];
+		nodeExtraAttributeMapByName[nodeExtraAttributeField.name] = nodeExtraAttribute;
+	}
+	return nodeExtraAttributeMapByName;
+}
+
+function buildPortExtraAttributeMapByName(portExtraAttributes) {
+	var portExtraAttributeMapByName = {
+		gateway: {
+			port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
+			value_string: {
+				Valid: true,
+				String: '',
+			}
+		},
+		remark: {
+			port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
+			value_string: {
+				Valid: true,
+				String: '',
+			}
+		}
+	};
+	for (var i = 0; i < portExtraAttributes.length; i = i + 1) {
+		var portExtraAttribute = portExtraAttributes[i];
+		var portExtraAttributeField = portExtraAttributeFieldMap[portExtraAttribute.port_extra_attribute_field_id];
+		portExtraAttributeMapByName[portExtraAttributeField.name] = portExtraAttribute;
+	}
+	return portExtraAttributeMapByName;
+}
+
+function extraBoolAttribute(name, extraAttributeMapByName) {
+	var attribute = extraAttributeMapByName[name];
+	if (attribute == null) {
+		return false;
+	}
+	return attribute;
+}
+
+function extraStringAttribute(name, extraAttributeMapByName) {
+	var attribute = extraAttributeMapByName[name];
+	if (attribute == null) {
+		return '';
+	}
+	return attribute;
+}
+
+function extraIntAttribute(name, extraAttributeMapByName) {
+	var attribute = extraAttributeMapByName[name];
+	if (attribute == null) {
+		return 0;
+	}
+	return attribute;
+}
+
+function extraFloatAttribute(name, extraAttributeMapByName) {
+	var attribute = extraAttributeMapByName[name];
+	if (attribute == null) {
+		return 0;
+	}
+	return attribute;
+}
+
+{{end}}

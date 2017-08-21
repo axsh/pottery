@@ -177,6 +177,7 @@
 	(function($) {
 
 		{{template "functions" .}}
+		{{template "functions_node_port" .}}
 
 		var nodes = null;
 		var nodeMap = null;
@@ -193,99 +194,6 @@
 		var editingNode = null;
 		var editPortsTable = null;
 		var editMode = null;
-
-		var nodePvMap = {
-			false: 'physical',
-			true: 'virtual'
-		};
-
-		var layerOptionList = [
-			{value: 1, text: 'Layer1'},
-			{value: 2, text: 'Layer2'},
-			{value: 3, text: 'Layer3'}
-		];
-
-		function buildNodeExtraAttributeMapByName(nodeExtraAttributes) {
-			var nodeExtraAttributeMapByName = {
-				virtual: {
-					node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['virtual'].id,
-					value_bool: {
-						Valid: true,
-						Bool: false,
-					}
-				},
-				remark: {
-					node_extra_attribute_field_id: nodeExtraAttributeFieldMapByName['remark'].id,
-					value_string: {
-						Valid: true,
-						String: '',
-					}
-				},
-			};
-			for (var i = 0; i < nodeExtraAttributes.length; i = i + 1) {
-				var nodeExtraAttribute = nodeExtraAttributes[i];
-				var nodeExtraAttributeField = nodeExtraAttributeFieldMap[nodeExtraAttribute.node_extra_attribute_field_id];
-				nodeExtraAttributeMapByName[nodeExtraAttributeField.name] = nodeExtraAttribute;
-			}
-			return nodeExtraAttributeMapByName;
-		}
-
-		function buildPortExtraAttributeMapByName(portExtraAttributes) {
-			var portExtraAttributeMapByName = {
-				gateway: {
-					port_extra_attribute_field_id: portExtraAttributeFieldMapByName['gateway'].id,
-					value_string: {
-						Valid: true,
-						String: '',
-					}
-				},
-				remark: {
-					port_extra_attribute_field_id: portExtraAttributeFieldMapByName['remark'].id,
-					value_string: {
-						Valid: true,
-						String: '',
-					}
-				}
-			};
-			for (var i = 0; i < portExtraAttributes.length; i = i + 1) {
-				var portExtraAttribute = portExtraAttributes[i];
-				var portExtraAttributeField = portExtraAttributeFieldMap[portExtraAttribute.port_extra_attribute_field_id];
-				portExtraAttributeMapByName[portExtraAttributeField.name] = portExtraAttribute;
-			}
-			return portExtraAttributeMapByName;
-		}
-
-		function extraBoolAttribute(name, extraAttributeMapByName) {
-			var attribute = extraAttributeMapByName[name];
-			if (attribute == null) {
-				return false;
-			}
-			return attribute;
-		}
-
-		function extraStringAttribute(name, extraAttributeMapByName) {
-			var attribute = extraAttributeMapByName[name];
-			if (attribute == null) {
-				return '';
-			}
-			return attribute;
-		}
-
-		function extraIntAttribute(name, extraAttributeMapByName) {
-			var attribute = extraAttributeMapByName[name];
-			if (attribute == null) {
-				return 0;
-			}
-			return attribute;
-		}
-
-		function extraFloatAttribute(name, extraAttributeMapByName) {
-			var attribute = extraAttributeMapByName[name];
-			if (attribute == null) {
-				return 0;
-			}
-			return attribute;
-		}
 
 		function createNodeModel(id, name, nodeTypeID, nodePv, virtual, remark) {
 			var nodeModel = {
@@ -893,17 +801,17 @@
 
 			for (key in portMapForDeletion){
 				var result = deleteResource('ports', key);
-				if (!onNodeModified(result, 204, null, true)) {
+				if (!showProcessResult(result, 204, null, true, onNodeModified)) {
 					return;
 				}
 			}
 
 			if (editMode == 'Register') {
 				var result = postResource('nodes', nodeForRegistrationOrUpdate);
-				onNodeModified(result, 201, 'The node has been registered successfully', false);
+				showProcessResult(result, 201, 'The node has been registered successfully', false, onNodeModified);
 			} else {
 				var result = putResource('nodes', nodeForRegistrationOrUpdate.id, nodeForRegistrationOrUpdate);
-				onNodeModified(result, 200, 'The node has been updated successfully', false);
+				showProcessResult(result, 200, 'The node has been updated successfully', false, onNodeModified);
 			}
 		}
 
@@ -920,7 +828,7 @@
 			var nodeId = $('#nodes').val();
 
 			var result = deleteResource('nodes', nodeId);
-			onNodeModified(result, 204, 'The node was deleted successfully', false);
+			showProcessResult(result, 204, 'The node was deleted successfully', false, onNodeModified);
 		}
 
 		function onCancelRegisterOrUpdateNode() {
@@ -932,23 +840,10 @@
 			$('#edit_panel').fadeOut(150);
 		}
 
-		function onNodeModified(result, successCode, successMessage, ignoreSuccess) {
-			if (result.status == successCode) {
-				if (!ignoreSuccess) {
-					$('html,body').animate({scrollTop:0},'slow');
-					$('#information_message').text(successMessage);
-					$('#alert_info').fadeIn(500).delay(2000).fadeOut(1000);
-					$('#edit_panel').fadeOut(150);
-					loadResources();
-					showNode(true);
-				}
-				return true;
-			} else {
-				$('html,body').animate({scrollTop:0},'slow');
-				$('#error_message').text(result.resource.error);
-				$('#alert_error').fadeIn(500).delay(2000).fadeOut(1000);
-				return false;
-			}
+		function onNodeModified() {
+			$('#edit_panel').fadeOut(150);
+			loadResources();
+			showNode(true);
 		}
 
 		$('#nodes').on('change', function() {
