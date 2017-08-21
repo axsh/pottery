@@ -57,10 +57,13 @@ function getResourceAsText(target, id, query) {
   return result;
 }
 
-function postResource(target, resource) {
+function postResource(target, resource, query) {
+  if (query != '') {
+    query = '?' + query;
+  }
   var response = $.ajax({
     type: 'POST',
-    url: '/' + target,
+    url: '/' + target + query,
     dataType: 'json',
     contentType: 'application/json',
     data: JSON.stringify(resource),
@@ -74,10 +77,13 @@ function postResource(target, resource) {
   return result;
 }
 
-function putResource(target, id, resource) {
+function putResource(target, id, resource, query) {
+  if (query != '') {
+    query = '?' + query;
+  }
   var response = $.ajax({
     type: 'PUT',
-    url: '/' + target + '/' + id,
+    url: '/' + target + '/' + id + query,
     dataType: 'json',
     contentType: 'application/json',
     data: JSON.stringify(resource),
@@ -91,10 +97,13 @@ function putResource(target, id, resource) {
   return result;
 }
 
-function deleteResource(target, id) {
+function deleteResource(target, id, query) {
+  if (query != '') {
+    query = '?' + query;
+  }
   var response = $.ajax({
     type: 'DELETE',
-    url: '/' + target + '/' + id,
+    url: '/' + target + '/' + id  + query,
     dataType: 'json',
     contentType: 'application/json',
     async: false
