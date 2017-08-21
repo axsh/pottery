@@ -1,8 +1,10 @@
 {{define "functions"}}
 
 function getResources(target, query) {
-  if (query != '') {
+  if (query != '' && query != undefined && query != null) {
     query = '?' + query;
+  } else {
+    query = ''
   }
   var response = $.ajax({
     type: 'GET',
@@ -20,8 +22,10 @@ function getResources(target, query) {
 }
 
 function getResource(target, id, query) {
-  if (query != '') {
+  if (query != '' && query != undefined && query != null) {
     query = '?' + query;
+  } else {
+    query = ''
   }
   var response = $.ajax({
     type: 'GET',
@@ -39,8 +43,10 @@ function getResource(target, id, query) {
 }
 
 function getResourceAsText(target, id, query) {
-  if (query != '') {
+  if (query != '' && query != undefined && query != null) {
     query = '?' + query;
+  } else {
+    query = ''
   }
   var response = $.ajax({
     type: 'GET',
@@ -58,8 +64,10 @@ function getResourceAsText(target, id, query) {
 }
 
 function postResource(target, resource, query) {
-  if (query != '') {
+  if (query != '' && query != undefined && query != null) {
     query = '?' + query;
+  } else {
+    query = ''
   }
   var response = $.ajax({
     type: 'POST',
@@ -78,8 +86,10 @@ function postResource(target, resource, query) {
 }
 
 function putResource(target, id, resource, query) {
-  if (query != '') {
+  if (query != '' && query != undefined && query != null) {
     query = '?' + query;
+  } else {
+    query = ''
   }
   var response = $.ajax({
     type: 'PUT',
@@ -98,8 +108,10 @@ function putResource(target, id, resource, query) {
 }
 
 function deleteResource(target, id, query) {
-  if (query != '') {
+  if (query != '' && query != undefined && query != null) {
     query = '?' + query;
+  } else {
+    query = ''
   }
   var response = $.ajax({
     type: 'DELETE',
